@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+
+  <!-- Header -->
+  <header class="bg-black text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="logo.png" alt="Logo" class="h-8">
+        <nav class="space-x-6 hidden md:flex">
+          <a href="#" class="hover:text-yellow-500">Home</a>
+          <a href="#" class="hover:text-yellow-500">Category</a>
+          <a href="#" class="hover:text-yellow-500">About</a>
+          <a href="#" class="hover:text-yellow-500">Contact</a>
+        </nav>
+      </div>
+      <div class="flex space-x-4 items-center">
+        <input type="text" placeholder="Search" class="p-2 rounded-lg">
+        <a href="#" class="hover:text-yellow-500">❤️</a>
+        <a href="#" class="hover:text-yellow-500">🛒</a>
+        <a href="#" class="hover:text-yellow-500">LOGIN/SIGNUP</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto py-10 flex justify-center items-center">
+    <div class="bg-black text-white p-8 rounded-lg shadow-lg w-full md:w-1/2">
+      <h2 class="text-2xl font-bold mb-4 text-center">Reset Your Password</h2>
+      <p class="text-gray-400 text-center mb-6">Enter your email to reset your password</p>
+      <form id="passwordResetForm" onsubmit="handleSubmit(event)">
+        <div class="mb-4">
+          <label for="email" class="block text-sm font-semibold">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" class="w-full p-2 rounded-lg border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-yellow-500">
+          <span id="emailError" class="text-red-500 text-sm hidden">Please enter a valid email address</span>
+        </div>
+        <div class="mb-6">
+          <button type="submit" class="w-full bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 transition duration-300">Reset Password</button>
+        </div>
+      </form>
+      <p class="text-center text-gray-400">Remembered your password? <a href="#" class="text-yellow-500">Login here</a></p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white py-10 mt-10">
+    <div class="container mx-auto grid md:grid-cols-3 gap-8 text-center">
+      <div>
+        <h3 class="font-bold text-lg mb-4">Follow Us</h3>
+        <div class="flex justify-center space-x-4">
+          <a href="#" class="text-white hover:text-yellow-500"><i class="fa fa-facebook"></i></a>
+          <a href="#" class="text-white hover:text-yellow-500"><i class="fa fa-twitter"></i></a>
+          <a href="#" class="text-white hover:text-yellow-500"><i class="fa fa-instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Contact</h3>
+        <p>123 Address St, City, Country</p>
+        <p>email@domain.com</p>
+        <p>+1 234 567 890</p>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Quick Links</h3>
+        <ul>
+          <li><a href="#" class="text-white hover:text-yellow-500">Privacy Policy</a></li>
+          <li><a href="#" class="text-white hover:text-yellow-500">Terms of Use</a></li>
+          <li><a href="#" class="text-white hover:text-yellow-500">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Handle form submission and email validation
+    function handleSubmit(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const emailError = document.getElementById('emailError');
+
+      // Simple email validation
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+      if (!emailPattern.test(email)) {
+        emailError.classList.remove('hidden');
+      } else {
+        emailError.classList.add('hidden');
+        alert('Password reset link sent to ' + email);
+        document.getElementById('passwordResetForm').reset();
+      }
+    }
+  </script>
+
+</body>
+</html>

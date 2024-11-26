@@ -1,0 +1,76 @@
+<body class="bg-gray-100 flex flex-col min-h-screen">
+  <!-- Header -->
+  <header class="bg-black text-white p-4 flex justify-between items-center">
+    <div class="text-xl font-bold">Logo</div>
+  </header>
+{{#if message}}
+<div class="mb-4 text-red-500">{{message}}</div>
+{{/if}}
+  <!-- Main Content -->
+  <div class="flex-1 flex items-center justify-center">
+    <!-- Container -->
+    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md text-center">
+      <!-- Logo -->
+      <div class="flex items-center justify-center mb-4">
+        <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center text-yellow-500 font-bold text-xl">
+          T
+        </div>
+      </div>
+      <!-- Form Header -->
+      <h2 class="text-2xl font-bold mb-6">Admin Login</h2>
+      <!-- Form -->
+      <form id="admin-login-form" method="post" action="/admin/login">
+        <div class="mb-4">
+          <label for="email" class="block text-left text-gray-700 font-medium">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your Email here"
+            class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500"
+            required
+          />
+        </div>
+        <div class="mb-6">
+          <label for="password" class="block text-left text-gray-700 font-medium">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your Password here"
+            class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none"
+        >
+          Login
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white p-4 text-center">
+    <p>&copy; 2024 tickLore. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    document.getElementById('admin-login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+     if (email === "" || password === "") {
+      // SweetAlert2 alert
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "All fields are required!",
+      });
+      e.target.submit();
+      return true;
+    });
+  </script>
+</body>

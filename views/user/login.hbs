@@ -1,0 +1,95 @@
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Header -->
+  <header class="bg-black text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="/images/logo.png" alt="Logo" class="h-10">
+      </div>
+      <div class="flex space-x-4 items-center">
+         <a href="/user/login" class="hover:text-yellow-500">LOGIN</a>
+        <a href="/user/signup" class="hover:text-yellow-500">SIGNUP</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto py-10 flex flex-col md:flex-row items-center">
+   
+    <div class="w-1/2 md:w-1/2 mb-6 h-screen">
+    <img src="/images/signup.jpeg" alt="Image Description" 
+         class="w-full h-full object-cover object-center rounded-lg"
+    >
+</div>
+
+    
+
+    <!-- Form Section -->
+    <div class="md:w-1/2 p-8 bg-white rounded-lg shadow-lg">
+      <h2 class="text-2xl font-bold mb-2">Login to tickLore</h2>
+      <p class="mb-6 text-gray-600">Enter your details below</p>
+      <form method="post" action="/user/login">
+        <input type="text" id="message" value="{{{message}}}" name="message" hidden >
+       
+       <input type="email" id="email" name="email" placeholder="Email" class="w-full mb-4 p-2 border rounded-lg focus:outline-none focus:border-black transition-all duration-300">
+        
+       
+        <div class="relative mb-4">
+          <input type="password" id="password" name="password" placeholder="Password" class="w-full p-2 border rounded-lg focus:outline-none focus:border-black transition-all duration-300">
+          <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 px-3 text-gray-500">
+            <i id="eyeIcon" class="fas fa-eye"></i> 
+          </button>
+        </div>
+        
+       
+        <button type="submit" class="w-full bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Login </button>
+      </form >
+      <button class="w-full border mt-4 py-2 rounded-lg flex items-center justify-center space-x-2">
+        {{!-- <img src="images/google.png" alt="Google Icon" class="h-5"> --}}
+          <a href="/user/auth/google" class="text-center">Sign up with Google</a>
+      </button>
+      <p class="text-center mt-4 text-gray-600">New user? <a href="/user/signup" class="text-yellow-500">Signup</a></p>
+    </div>
+  </main>
+   <script>
+
+    document.getElementById('togglePassword').addEventListener('click', function () {
+      const passwordField = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+
+      // Toggle the password field type
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash'); 
+      } else {
+        passwordField.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');  
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded',function(){
+            document.querySelector('form').addEventListener('submit',formValidate);
+        });
+         const message = document.getElementById('message').value;
+         if(message){
+            swal.fire(message);
+        }
+       
+
+        function formValidate(e) {
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    if (email === "" || password === "") {
+        e.preventDefault(); 
+        Swal.fire("All fields are required");
+        return false;
+    }
+    return true; 
+}
+
+    
+      
+  </script>

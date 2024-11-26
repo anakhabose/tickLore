@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Watches</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-black text-white">
+  <!-- Header -->
+  <header class="container mx-auto px-4 py-4">
+    <nav class="flex items-center justify-between">
+      <div class="flex items-center space-x-8">
+        <img 
+          src="https://via.placeholder.com/40" 
+          alt="Logo" 
+          class="rounded-full bg-white w-10 h-10"
+        />
+        <div class="hidden md:flex space-x-6">
+          <a href="#" class="hover:text-yellow-500">Home</a>
+          <a href="#" class="hover:text-yellow-500">Shop</a>
+          <a href="#" class="hover:text-yellow-500">About</a>
+          <a href="#" class="hover:text-yellow-500">Contact</a>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="relative hidden md:block">
+          <input 
+            type="search" 
+            placeholder="Search..." 
+            class="pl-8 bg-gray-900 border-gray-800 text-white rounded-lg px-4 py-2 w-64"
+          />
+          <svg class="absolute left-2 top-2.5 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M12.9 14.32A8 8 0 1115.32 12.9l4.38 4.38a1 1 0 01-1.42 1.42l-4.38-4.38zm-1.4-1.4A6 6 0 1014 14a6 6 0 00-2.5-1.08z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M9 3v2m6-2v2m-6 12v6m6-6v6M9 17a3 3 0 006 0m6-7H3" />
+        </svg>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="container mx-auto px-4 py-12 md:py-24">
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      <div>
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">
+          Find Your <span class="text-yellow-500">Timeless</span> Companion
+        </h1>
+        <p class="text-gray-400 mb-8">
+          Discover our collection of luxury timepieces that blend elegance with precision. 
+          Each watch tells a unique story of craftsmanship and style.
+        </p>
+        <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg">
+          Shop Now
+        </button>
+      </div>
+      <div class="relative h-[300px] md:h-[500px]">
+        <img
+          src="https://via.placeholder.com/500"
+          alt="Luxury Watch"
+          class="object-cover rounded-lg w-full h-full"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Top Brands Section -->
+  <section class="container mx-auto px-4 py-12 bg-white text-black">
+    <h2 class="text-3xl font-bold mb-8 text-center">TOP BRANDS</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="group cursor-pointer">
+        <div class="relative h-48 mb-4">
+          <img
+            src="https://via.placeholder.com/300"
+            alt="Luxury Watch"
+            class="object-cover rounded-lg group-hover:scale-105 transition-transform w-full h-full"
+          />
+        </div>
+        <h3 class="font-semibold">Luxury Watch</h3>
+        <p class="text-gray-600">$1999</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white py-12">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <h4 class="font-bold mb-4">Exclusive</h4>
+          <p class="text-gray-400 mb-4">Subscribe to our newsletter</p>
+          <div class="flex space-x-2">
+            <input 
+              placeholder="Your email" 
+              class="bg-gray-900 border-gray-800 text-white px-4 py-2 rounded-lg w-48"
+            />
+            <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg">
+              Subscribe
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <p>© 2024 Luxury Watches. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
