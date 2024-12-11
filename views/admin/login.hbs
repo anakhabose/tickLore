@@ -1,7 +1,7 @@
 <body class="bg-gray-100 flex flex-col min-h-screen">
   <!-- Header -->
   <header class="bg-black text-white p-4 flex justify-between items-center">
-    <div class="text-xl font-bold">Logo</div>
+    <img src="/images/logo.png" alt="Logo" class="h-8">
   </header>
 {{#if message}}
 <div class="mb-4 text-red-500">{{message}}</div>
@@ -12,9 +12,7 @@
     <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md text-center">
       <!-- Logo -->
       <div class="flex items-center justify-center mb-4">
-        <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center text-yellow-500 font-bold text-xl">
-          T
-        </div>
+        <img src="/images/logo.png" alt="Logo" class="h-8">
       </div>
       <!-- Form Header -->
       <h2 class="text-2xl font-bold mb-6">Admin Login</h2>
@@ -58,8 +56,8 @@
   </footer>
 
   <script>
-    document.getElementById('admin-login-form').addEventListener('submit', function (e) {
-      e.preventDefault();
+    document.getElementById('admin-login-form').addEventListener('submit', function (e){
+     
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
      if (email === "" || password === "") {
@@ -69,8 +67,9 @@
         title: "Oops...",
         text: "All fields are required!",
       });
-      e.target.submit();
+      e.preventDefault();
       return true;
+    }
     });
   </script>
 </body>

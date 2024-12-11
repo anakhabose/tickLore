@@ -1,10 +1,4 @@
-const check= (req,res,next)=>{
-    if(req.session.user){
-        next();
-    }else{
-        res.redirect('/user/signup')
-    }
-}
+
 const checkSession = (req,res,next)=>{
     if(req.session.user){
         next();
@@ -21,4 +15,4 @@ const isLogin = (req,res,next)=>{
     }
 }
 
-module.exports = {checkSession,isLogin,check};
+module.exports = {checkSession,isLogin};

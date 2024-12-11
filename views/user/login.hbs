@@ -46,8 +46,8 @@
         <button type="submit" class="w-full bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Login </button>
       </form >
       <button class="w-full border mt-4 py-2 rounded-lg flex items-center justify-center space-x-2">
-        {{!-- <img src="images/google.png" alt="Google Icon" class="h-5"> --}}
-          <a href="/user/auth/google" class="text-center">Sign up with Google</a>
+        <img src="/images/google.png" alt="Google Icon" class="h-5"> 
+          <a href="/user/auth/google" class="text-center">Login with Google</a>
       </button>
       <p class="text-center mt-4 text-gray-600">New user? <a href="/user/signup" class="text-yellow-500">Signup</a></p>
     </div>
@@ -69,27 +69,70 @@
         eyeIcon.classList.add('fa-eye');  
       }
     });
-
+  /*
     document.addEventListener('DOMContentLoaded',function(){
             document.querySelector('form').addEventListener('submit',formValidate);
         });
          const message = document.getElementById('message').value;
-         if(message){
-            swal.fire(message);
-        }
+console.log("Message value:", message); // Add this debug line
+if (message) {
+    Swal.fire({
+        icon: 'error',
+        title: message,
+        showConfirmButton: true,
+    });
+}
        
 
-        function formValidate(e) {
+    function formValidate(e) {
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        if (email === "" || password === "") {
+            e.preventDefault(); 
+            Swal.fire("All fields are required");
+            return false;
+        }
+        return true; 
+    }
+*/
+document.addEventListener('DOMContentLoaded', function() {
+    // First, let's check if the script runs at all
+    console.log("Script is running");
+    
+    const messageElement = document.getElementById('message');
+    console.log("Message element:", messageElement); 
+    
+    if (messageElement) {
+        const message = messageElement.value;
+        console.log("Message value:", message); 
+        
+        if (message) {
+            Swal.fire({
+                icon: 'error',
+                title: message,
+                showConfirmButton: true
+            });
+        }
+    }
+
+    // Your existing form validation code
+    document.querySelector('form').addEventListener('submit', formValidate);
+});
+
+function formValidate(e) {
     var email = document.getElementById('email').value;
     var password = document.getElementById('password').value;
     if (email === "" || password === "") {
         e.preventDefault(); 
-        Swal.fire("All fields are required");
+        Swal.fire({
+            icon: 'warning',
+            title: 'Required Fields',
+            text: 'All fields are required'
+        });
         return false;
     }
     return true; 
 }
-
     
       
   </script>

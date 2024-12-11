@@ -29,7 +29,16 @@ const userSchema = new mongoose.Schema({
     status:{
         type:Boolean,
         default:true
-    }
+    },
+     profileImage: {
+        type: String, 
+        default: null 
+    },
+    gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Other'], 
+    required: false, 
+  },
 })
 
 module.exports = mongoose.model('user',userSchema)

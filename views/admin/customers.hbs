@@ -1,6 +1,6 @@
 <body class="bg-gray-100 ">
   <header class="bg-black text-white p-4 flex justify-between items-center">
-    <div class="text-xl font-bold">Logo</div>
+    <img src="/images/logo.png" alt="Logo" class="h-8">
   
   </header>
   <div class="flex h-screen">
@@ -8,24 +8,32 @@
 
     <!-- Main Content -->
     <main class="flex-1 bg-white p-6 overflow-y-auto">
+      <div class="mb-5 px-5">
+        <nav class="text-gray-600 text-sm">
+          <a href="/admin/dashboard" class="hover:text-yellow-600">Dashboard</a> &gt;
+          <a href="/admin/customers" class="hover:text-yellow-600">Customers</a> &gt;
+          <span class="font-bold">All Customers</span>
+        </nav>
+      </div>
     <!-- Header -->
 <header class="flex justify-between items-center mb-6">
   <h1 class="text-2xl font-bold">Customers</h1>
 </header>
+
 <!-- Actions -->
 <div class="flex justify-end items-center mb-4">
   <!-- Search Bar -->
   <div class="relative">
-    <form id="searchForm" action="/admin/customers" method="GET">
-      <input
-        type="text"
-        name="search"
-        value="{{search}}" 
-        class="border border-gray-300 rounded-full px-4 py-2 text-sm"
-        placeholder="Search by name or email"
-        
-      />
-    </form>
+   <form id="searchForm" action="/admin/customers" method="GET">
+  <input
+    type="text"
+    name="search"
+    value="{{search}}" 
+    class="border border-gray-300 rounded-full px-4 py-2 text-sm"
+    placeholder="Search by name or email"
+  />
+</form>
+
   </div>
 </div>
 
@@ -41,30 +49,35 @@
         </tr>
     </thead>
     <tbody>
-        {{#each users}}
-        <tr class="hover:bg-gray-100 transition duration-200">
-            <td class="px-4 py-2 border-b border-gray-300 align-middle">{{this.name}}</td>
-            <td class="px-4 py-2 border-b border-gray-300 align-middle">{{this.email}}</td>
-            <td class="px-4 py-2 border-b border-gray-300 align-middle">
-                <div class="flex space-x-2">
-                    {{#if this.status}}
-                    <form action="/admin/block-user/{{this._id}}" method="POST">
-                        <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md w-24">
-                            Block
-                        </button>
-                    </form>
-                    {{else}}
-                    <form action="/admin/unblock-user/{{this._id}}" method="POST">
-                        <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded-md w-24">
-                            Unblock
-                        </button>
-                    </form>
-                    {{/if}}
-                </div>
-            </td>
-        </tr>
-        {{/each}}
-    </tbody>
+  {{#each users}}
+  <tr class="hover:bg-gray-100 transition duration-200">
+    <td class="px-4 py-2 border-b border-gray-300 align-middle">{{this.name}}</td>
+    <td class="px-4 py-2 border-b border-gray-300 align-middle">{{this.email}}</td>
+    <td class="px-4 py-2 border-b border-gray-300 align-middle">
+      <div class="flex space-x-2">
+        {{#if this.status}}
+        <form id="blockForm-{{this._id}}" action="/admin/block-user/{{this._id}}" method="POST">
+          <button type="button" 
+                  onclick="confirmAction('block', 'blockForm-{{this._id}}')" 
+                  class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md w-24">
+            Block
+          </button>
+        </form>
+        {{else}}
+        <form id="unblockForm-{{this._id}}" action="/admin/unblock-user/{{this._id}}" method="POST">
+          <button type="button" 
+                  onclick="confirmAction('unblock', 'unblockForm-{{this._id}}')" 
+                  class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded-md w-24">
+            Unblock
+          </button>
+        </form>
+        {{/if}}
+      </div>
+    </td>
+  </tr>
+  {{/each}}
+</tbody>
+
 </table>
 </div>
 
@@ -79,14 +92,42 @@
 
 <script>
    let debounceTimer;
-  const searchInput = document.getElementById('searchInput');
-  const searchForm = document.getElementById('searchForm');
+   const searchInput = document.querySelector('input[name="search"]');
+   const userTable = document.querySelector('.user-table tbody');
 
-  searchInput.addEventListener('input', () => {
-    clearTimeout(debounceTimer); 
-    debounceTimer = setTimeout(() => {
-      searchForm.submit(); 
-    }, 300); 
-  });
+   searchInput.addEventListener('input', () => {
+       clearTimeout(debounceTimer);
+       debounceTimer = setTimeout(() => {
+           const query = searchInput.value;
+
+           // Perform AJAX request to search
+           fetch(`/admin/customers?search=${encodeURIComponent(query)}`)
+               .then(response => response.text())
+               .then(html => {
+                   // Parse the response to update the table
+                   const parser = new DOMParser();
+                   const doc = parser.parseFromString(html, 'text/html');
+                   const newTableBody = doc.querySelector('.user-table tbody');
+                   userTable.innerHTML = newTableBody.innerHTML;
+               })
+               .catch(error => console.error('Error during search:', error));
+       }, 300); // Adjust debounce delay as needed
+   });
+   
+ function confirmAction(action, formId) {
+    Swal.fire({
+      title: `Are you sure you want to ${action} this user?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: action === 'block' ? '#ef4444' : '#f6e05e', 
+      cancelButtonColor: '#718096',
+      confirmButtonText: `Yes, ${action}`,
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById(formId).submit();
+      }
+    });
+  }
 </script>
 </body>

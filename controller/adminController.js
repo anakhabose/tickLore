@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const userModel = require('../model/userModel')
 const adminModel = require('../model/adminModel');
+const productModel = require('../model/productModel');
+const categoryModel = require('../model/categoryModel');
 
 module.exports ={
     loadLogin:(req,res)=>{
@@ -12,8 +14,10 @@ module.exports ={
     },
     login:async(req,res)=>{
         try{
+        
             const {email,password} = req.body;
             console.log({email,password});
+
             const admin = await adminModel.findOne({email});
             
             if(!admin){
@@ -32,42 +36,61 @@ module.exports ={
     },
     loadDashboard:(req,res)=>{
         try{
+            const admin = req.session.admin;
+            if(!admin){
+                return res.redirect('/admin/login')
+            }
             res.render('admin/dashboard', { currentPath: '/admin/dashboard' });
         }catch{
             res.status(500).send('Error');
         }
     },
    
-    loadCustomers : async (req, res) => {
-        try {
-            const admin = req.session.admin;
-            if (!admin) {
-                return res.redirect('/admin/login');
-            }
-            const search = req.query.search || ''; 
-            const userDetails = await userModel.find(
+    loadCustomers: async (req, res) => {
+    try {
+        
+        const admin = req.session.admin;
+        if (!admin) {
+            return res.redirect('/admin/login');
+        }
+
+        
+        const search = req.query.search || '';
+
+        
+        const userDetails = await userModel.find(
             {
                 $or: [
                     { name: { $regex: search, $options: 'i' } }, 
                     { email: { $regex: search, $options: 'i' } } 
                 ]
             },
-            'name email status _id'
-        );const users = userDetails.map((detail) => ({
-            
-                name: detail.name,
-                email: detail.email,
-                _id: detail._id,
-                status: detail.status, 
-            }));
-            
-            res.render('admin/customers', { users, currentPath: '/admin/customers', search}); 
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Server Error');
-        }
-    },
+            'name email status _id' 
+        );
+
+        
+        const users = userDetails.map((detail) => ({
+            name: detail.name,
+            email: detail.email,
+            _id: detail._id,
+            status: detail.status,
+        }));
+
+       
+        res.render('admin/customers', {
+            users,
+            currentPath: '/admin/customers', 
+            search, 
+        });
+    } catch (error) {
+        console.error('Error loading customers:', error);
+        res.status(500).send('Server Error');
+    }
+},
+
     blockUser:async (req, res) => {
+       const userId = req.params.id;
+
         try {
             await userModel.findByIdAndUpdate(req.params.id, { status: false });
             res.redirect('/admin/customers');
@@ -84,37 +107,146 @@ module.exports ={
             console.error(err);
             res.status(500).send('Error unblocking user');
         }
+       
     },
 
 
-    loadProducts:(req,res)=>{
-        try{
-            res.render('admin/products',{ currentPath: '/admin/products' })
-        }catch{
-            res.status(500).send('Error')
+loadProducts: async (req, res) => {
+   try {
+        const admin = req.session.admin;
+        if (!admin) {
+            return res.redirect('/admin/login');
         }
-    },
-    loadEditProducts:(req,res)=>{
-        try{
-            if(req.session.admin){
-                res.render('admin/products-edit');
+
+        const search = req.query.search || ''; 
+
+        const productDetails = await productModel.find(
+            {
+                deleted: false,
+                productName: { $regex: search, $options: 'i' }, 
             }
+        );
+
+        const products = productDetails.map((product) => ({
+            _id: product._id,
+            name: product.productName,
+            price: product.price,
+            stock: product.stock,
+            category: product.category,
+            description: product.description,
+            images: product.images
+        }));
+
+        res.render('admin/products', { 
+            products: products, 
+            currentPath: '/admin/products', 
+            search 
+        });
+    } catch (error) {
+        console.error('Error loading products:', error);
+        res.status(500).send('Error loading products');
+    }
+},
+    loadAddProducts:async(req,res)=>{
+        try{
+            const admin = req.session.admin;
+        if (!admin) {
+            return res.redirect('/admin/login');
+        }
+        const category = await categoryModel.find({status:true});
+        res.render('admin/products-add',{category});
             
         }catch{
             res.status(500).send('Server Error');
         }
     },
-    
-    loadCategory:(req,res)=>{
-        try{
-            res.render('admin/category',{ currentPath: '/admin/category' })
-        }catch{
-            res.status(500).send('Error')
+    loadEditProducts:async(req,res)=>{
+         try {
+            const admin = req.session.admin;
+            if (!admin) {
+            return res.redirect('/admin/login');
+            }
+            const productId=req.params.id;
+            const products= await productModel.findById(productId);
+
+            if(!products){
+                return res.status(404).send("Product not found")
+            }
+            res.render('admin/editProducts',{products});
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Error Occured")
         }
     },
+    
+   loadCategory: async (req, res) => {
+    try {
+        const admin = req.session.admin;
+        if (!admin) {
+            return res.redirect('/admin/login');
+        }
+
+        const search = req.query.search || ''; 
+
+        const categoryDetails = await categoryModel.find(
+            {
+                categoryName: { $regex: search, $options: 'i' },
+            }
+        );
+
+        const category = categoryDetails.map((category) => ({
+            _id: category._id,
+            name: category.categoryName,
+            status: category.status,
+            images: category.images
+        }));
+
+        res.render('admin/category', { 
+            category, 
+            currentPath: '/admin/category',
+            search 
+        });
+    } catch (error) {
+        console.error('Error loading category:', error);
+        res.status(500).send('Error loading category');
+    }
+},
+     loadAddCategory:(req,res)=>{
+        try{
+            const admin = req.session.admin;
+        if (!admin) {
+            return res.redirect('/admin/login');
+        }
+            res.render('admin/addCategory');
+            
+        }catch{
+            res.status(500).send('Server Error');
+        }
+    },
+    loadEditCategory:async(req,res)=>{
+         try {
+            const admin = req.session.admin;
+            if (!admin) {
+            return res.redirect('/admin/login');
+            }
+            const categoryId=req.params.id;
+           
+            const category= await categoryModel.findById(categoryId);
+
+            if(!category){
+                return res.status(404).send("Category not found")
+            }
+            res.render('admin/editCategory',{category});
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Error Occured")
+        }
+    },
+    
+     
     logout:(req,res)=>{
         try{
-            req.session.admin = null;
+           req.session.destroy();
             res.redirect('/admin/login');
         }catch{
             res.status(500).send('Error')

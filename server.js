@@ -23,8 +23,19 @@ app.set('views',path.join(__dirname,'views'));
 app.set('view engine','hbs');
 const partialsPath = path.join(__dirname, 'views', 'partials');
 hbs.registerPartials(partialsPath);
-hbs.registerHelper('eq', (a, b) => a === b);                                                                                                                                                                      
+hbs.registerHelper('eq', (a, b) => a === b);   
+hbs.registerHelper('getFirstImage', (images) => {
+    return images && images.length > 0 ? images[0] : ''; 
+});  
+
+hbs.registerHelper('gte', function (value1, value2) {
+    return value1 >= value2;
+});
+hbs.registerHelper('lte', function (value1, value2) {
+    return value1 <= value2;
+});                                                                                                                                                                
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 
 app.use(express.json());
@@ -34,9 +45,9 @@ connectDB();
 
 
 
-app.use(nocache())
+app.use(nocache());
 app.use(session({
-  secret: 'your_secret_key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {

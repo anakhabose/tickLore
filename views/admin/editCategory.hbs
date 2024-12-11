@@ -1,0 +1,147 @@
+
+<header class="bg-black text-white p-4 flex justify-between items-center">
+    <img src="/images/logo.png" alt="Logo" class="h-8">
+  
+  </header>
+  
+<div class="flex h-screen">
+    {{>sidebar}}
+ <main class="flex-1 p-6 bg-white">
+  <div class="mb-5 px-5">
+        <nav class="text-gray-600 text-sm">
+          <a href="/admin/dashboard" class="hover:text-yellow-600">Dashboard</a> &gt;
+          <a href="/admin/category" class="hover:text-yellow-600">Category</a> &gt;
+          <span class="font-bold">Edit Category</span>
+        </nav>
+      </div>
+      <div class="max-w-4xl mx-auto bg-grey-100 p-6 rounded-lg">
+        <h2 class="text-2xl font-bold mb-6">Edit Category</h2>
+         
+        <form id="category-form" class="space-y-6" method="post" action="/admin/editCategory/{{category._id}}" enctype="multipart/form-data">
+        <input type="hidden" name="_id" value="{{category._id}}" />
+
+           <input type="text" id="message" value="{{{message}}}" name="message" hidden >
+          <!-- Category -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="categoryName" class="block text-sm font-medium text-gray-400 mb-1">
+                Category Name*
+              </label>
+              <input
+                id="categoryName"
+                name="categoryName"
+                value="{{category.categoryName}}" 
+                type="text"
+                class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+                required
+              />
+            </div>
+    
+          </div>
+
+  <div>
+  <label class="block text-sm font-medium text-gray-400 mb-2">
+    Category Images (Image required)
+  </label>
+  
+  <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2">
+      <input type="file" id="image1" name="images" accept="image/*" class="block w-full text-sm text-gray-500">
+    
+      <img id="preview1" src="{{category.images.[0]}}" class="h-24 w-24 object-cover rounded-lg {{#if category.images.[0]}}block{{else}}hidden{{/if}}">
+    </div>
+    
+  </div>
+</div>
+ 
+          <button
+            type="submit"
+            class="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg py-2"
+          >
+           Save
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+  <!-- Footer -->
+<footer class="bg-black text-white p-4 mt-6 text-center">
+  <p>&copy; 2024 tickLore. All Rights Reserved.</p>
+</footer>
+
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+  const imageInput = document.getElementById('image1');
+  const imagePreview = document.getElementById('preview1');
+  const categoryForm = document.getElementById('category-form');
+
+  imageInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        
+        imagePreview.src = e.target.result;
+        imagePreview.classList.remove('hidden');
+        imagePreview.classList.add('block');
+      };
+      
+    
+      reader.readAsDataURL(file);
+    } else {
+      
+      imagePreview.src = '';
+      imagePreview.classList.remove('block');
+      imagePreview.classList.add('hidden');
+    }
+  });
+
+  g
+  categoryForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    try {
+      const response = await fetch(`/admin/editCategory/${formData.get('_id')}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.status) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Category Updated',
+          text: data.message,
+        }).then(() => {
+          window.location.href = '/admin/category';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message || 'Something went wrong!',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Server Error',
+        text: 'Failed to update category.',
+      });
+    }
+  });
+});
+
+</script>  

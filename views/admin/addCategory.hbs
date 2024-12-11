@@ -1,0 +1,161 @@
+
+<header class="bg-black text-white p-4 flex justify-between items-center">
+   <img src="/images/logo.png" alt="Logo" class="h-8">
+  
+  </header>
+<div class="flex h-screen">
+    {{>sidebar}}
+ <main class="flex-1 p-6 bg-white">
+  <div class="mb-5 px-5">
+        <nav class="text-gray-600 text-sm">
+          <a href="/admin/dashboard" class="hover:text-yellow-600">Dashboard</a> &gt;
+          <a href="/admin/category" class="hover:text-yellow-600">Category</a> &gt;
+          <span class="font-bold">Add Category</span>
+        </nav>
+      </div>
+      <div class="max-w-4xl mx-auto bg-grey-100 p-6 rounded-lg">
+        <h2 class="text-2xl font-bold mb-6">Add Category</h2>
+        <form class="space-y-6" method="post" action="/admin/addCategory">
+           <input type="text" id="message" value="{{{message}}}" name="message" hidden >
+          <!-- Product Name and Price -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="categoryName" class="block text-sm font-medium text-gray-400 mb-1">
+                Category Name*
+              </label>
+              <input
+                id="categoryName"
+                name="categoryName"
+                type="text"
+                class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+                required
+              />
+            </div>
+           
+          </div>
+
+        
+        <div>
+  <label class="block text-sm font-medium text-gray-400 mb-2">
+    Category Image (Image required)
+  </label>
+  
+  <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2">
+      <input type="file" id="image1" name="images" accept="image/*" class="block w-full text-sm text-gray-500" required>
+      <img id="preview1" class="h-24 w-24 object-cover rounded-lg hidden">
+    </div>
+    
+  </div>
+</div>
+          <!-- Add Product Button -->
+          <button
+            type="submit"
+            class="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg py-2"
+          >
+                Add Category
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+  <!-- Footer -->
+<footer class="bg-black text-white p-4 mt-6 text-center">
+  <p>&copy; 2024 tickLore. All Rights Reserved.</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+  const imageInputs = ['image1'].map(id => document.getElementById(id));
+  const previewContainers = ['preview1'].map(id => document.getElementById(id));
+
+  imageInputs.forEach((input, index) => {
+    input.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewContainers[index].src = e.target.result;
+          previewContainers[index].style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+
+ 
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    if (!validateForm()) return;
+
+    const formData = new FormData(form);
+    
+    try {
+      const response = await fetch('/admin/addCategory', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (data.status) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: data.message || 'Category added successfully!',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          window.location.href = '/admin/category';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message || 'Something went wrong!'
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong! Please try again.'
+      });
+    }
+  });
+
+  function validateForm() {
+    const categoryName = document.getElementById('categoryName').value;
+  
+   
+    if (!categoryName.trim()) {
+      showError('Product name is required');
+      return false;
+    }
+
+
+    let imageCount = 0;
+    imageInputs.forEach(input => {
+      if (input.files && input.files[0]) {
+        imageCount++;
+      }
+    });
+
+    if (imageCount !== 1) {
+      showError('Please upload an image');
+      return false;
+    }
+
+    return true;
+  }
+
+  function showError(message) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error',
+      text: message
+    });
+  }
+});
+</script>  

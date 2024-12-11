@@ -103,8 +103,8 @@
 
        
         startTimer();
+       
 
-     
         document.getElementById("resendOtp").addEventListener("click", async () => {
             if (timer > 0) {
                 Swal.fire({
@@ -126,7 +126,11 @@
 
                 if (data.status) {
 
-                    alert(data.message);
+                    Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: data.message,  
+            });
                     timer = 60; 
                     startTimer(); 
                 } else {
@@ -152,11 +156,23 @@
             const otpInputs = Array.from(document.querySelectorAll("#otpForm input[type=text]"));
             const otp = otpInputs.map(input => input.value).join("");
 
+
+
             if (otp.length !== 4) {
                 Swal.fire({
                     icon: "error",
                     title: "Oops...",
                     text: "Please enter a valid 4-digit OTP."
+                });
+                return;
+            }
+            const isValidOtp = /^[0-9]{4}$/.test(otp);  // **Regex checks if the OTP is exactly 4 digits long**
+
+            if (!isValidOtp) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid OTP",
+                    text: "Please enter a valid OTP consisting of only numbers."
                 });
                 return;
             }

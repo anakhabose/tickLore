@@ -1,100 +1,195 @@
-<body class="bg-gray-100 ">
+
   <header class="bg-black text-white p-4 flex justify-between items-center">
-    <div class="text-xl font-bold">Logo</div>
+    <img src="/images/logo.png" alt="Logo" class="h-8">
   
   </header>
   <div class="flex h-screen">
     {{>sidebar}}
 
-    <!-- Main Content -->
     <main class="flex-1 bg-white p-6 overflow-y-auto">
-    <!-- Header -->
+      <div class="mb-5 px-5">
+        <nav class="text-gray-600 text-sm">
+          <a href="/admin/dashboard" class="hover:text-yellow-600">Dashboard</a> &gt;
+          <a href="/admin/products" class="hover:text-yellow-600">Products</a> &gt;
+          <span class="font-bold">All Products</span>
+        </nav>
+</div>
+
 <header class="flex justify-between items-center mb-6">
   <h1 class="text-2xl font-bold">Products</h1>
 </header>
 
-<!-- Actions -->
+
+
 <div class="flex justify-between items-center mb-4">
-  <!-- Search Bar -->
-  <div class="relative ml-4"> <!-- Add margin for spacing -->
-    <input
-      type="text"
-      class="border border-gray-300 rounded-full px-4 py-2 text-sm"
-      placeholder="Search"
-    />
+ <div class="relative">
+   <form id="searchForm" action="/admin/products" method="GET">
+  <input
+    type="text"
+    name="search"
+    value="{{search}}" 
+    class="border border-gray-300 rounded-full px-4 py-2 text-sm"
+    placeholder="Search by name"
+  />
+</form>
+
   </div>
 </div>
 
-<!-- Product Table Container -->
+
 <div class="mt-6 bg-white shadow-md rounded-lg overflow-hidden">
   <table class="w-full table-auto border-collapse">
-    <!-- Table Header -->
+
     <thead>
       <tr class="bg-gray-100 text-gray-700">
         <th class="px-4 py-2 text-left border-b border-gray-300">Product</th>
+        <th class="px-4 py-2 text-left border-b border-gray-300">Category</th>
         <th class="px-4 py-2 text-left border-b border-gray-300">Price</th>
         <th class="px-4 py-2 text-left border-b border-gray-300">Stock</th>
-        <th class="px-4 py-2 text-left border-b border-gray-300">Category</th>
+        <th class="px-4 py-2 text-left border-b border-gray-300">Status</th>
         <th class="px-4 py-2 text-left border-b border-gray-300">Actions</th>
       </tr>
     </thead>
-    <!-- Table Body -->
+
     <tbody>
-      <!-- Example Row -->
+      {{#each products}}
       <tr class="hover:bg-gray-100 transition duration-200">
         <td class="px-4 py-2 border-b border-gray-300 align-middle">
-          Peter England<br><span class="text-sm text-gray-500">Color: Red</span>
+          <div class="flex items-center space-x-4">
+            <img src="{{this.images.[0]}}" class="w-10 h-10 rounded object-cover" alt="Product">
+            <span>{{this.name}}</span>
+          </div>
         </td>
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">₹1200</td>
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">10</td>
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">Leather</td>
+       
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">{{this.category}}</td>
+       
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">₹{{this.price}}</td>
+       
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">{{this.stock}}</td>
+      
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">
+          {{#if (gte this.stock 11)}}
+          <span class="bg-green-200 text-green-600 px-2 py-1 rounded-lg">In Stock</span>
+          {{else}}
+          <span class="bg-red-200 text-red-600 px-2 py-1 rounded-lg">Low Stock</span>
+          {{/if}}
+        </td>
+        
         <td class="px-4 py-2 border-b border-gray-300 align-middle">
           <div class="flex space-x-2">
-            <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded-md  w-24">
-              Edit
-            </button>
-            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md  w-24">
-              Remove
-            </button>
+            <form action="/admin/editProducts/{{this._id}}" method="GET">
+              <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded-md w-24">
+                Edit
+              </button>
+            </form>
+          
+              <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md w-24" onclick="softDelete('{{this._id}}')">
+                Delete
+              </button>
+            
           </div>
         </td>
       </tr>
-      <!-- Add More Rows as Needed -->
-      <tr class="hover:bg-gray-100 transition duration-200">
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">
-          Apple<br><span class="text-sm text-gray-500">Color: Black</span>
-        </td>
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">₹200</td>
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">20</td>
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">Smart Watch</td>
-        <td class="px-4 py-2 border-b border-gray-300 align-middle">
-          <div class="flex space-x-2">
-            <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-1 rounded-md  w-24">
-              Edit
-            </button>
-            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md  w-24">
-              Remove
-            </button>
-          </div>
-        </td>
-      </tr>
+      {{/each}}
     </tbody>
   </table>
-
-  <!-- Add New Product Button -->
+ 
   <div class="p-4 flex justify-end">
-    <a href="/admin/products-edit"> <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
-      Add New Product
-    </button></a>
-   
+    <a href="/admin/products-add">
+      <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
+        Add New Product
+      </button>
+    </a>
   </div>
 </div>
 
-
     </main>
   </div>
-  <!-- Footer -->
 <footer class="bg-black text-white p-4 mt-6 text-center">
   <p>&copy; 2024 tickLore. All Rights Reserved.</p>
 </footer>
-</body>
+
+
+  <script>
+ let debounceTimer;
+   const searchInput = document.querySelector('input[name="search"]');
+   const userTable = document.querySelector('.user-table tbody');
+
+   searchInput.addEventListener('input', () => {
+       clearTimeout(debounceTimer);
+       debounceTimer = setTimeout(() => {
+           const query = searchInput.value;
+
+           // Perform AJAX request to search
+           fetch(`/admin/products?search=${encodeURIComponent(query)}`)
+               .then(response => response.text())
+               .then(html => {
+                   // Parse the response to update the table
+                   const parser = new DOMParser();
+                   const doc = parser.parseFromString(html, 'text/html');
+                   const newTableBody = doc.querySelector('.user-table tbody');
+                   userTable.innerHTML = newTableBody.innerHTML;
+               })
+               .catch(error => console.error('Error during search:', error));
+       }, 300); // Adjust debounce delay as needed
+   });
+   
+
+ function softDelete(productId) {
+
+  Swal.fire({
+    title: 'Confirm Deletion',
+    text: "Do you really want to delete this product?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#FACC15',
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Show a loading popup while the request is being processed
+      Swal.fire({
+        title: 'Deleting...',
+        text: 'Please wait while we delete the product.',
+        icon: 'info',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+      });
+
+      // Proceed with deletion
+      fetch(`/admin/deleteProduct/${productId}`, { method: "post" })
+        .then(response => response.json())
+        .then(result => {
+          if (result.status) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted',
+              text: 'The product has been successfully deleted.',
+              confirmButtonText: 'OK',
+            }).then(() => {
+              // Reload the page after user confirms
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Deletion Failed',
+              text: result.message || 'Unable to delete the product. Please try again.',
+              confirmButtonText: 'OK',
+            });
+          }
+        })
+        .catch(() => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error Occurred',
+            text: 'Something went wrong. Please try again later.',
+            confirmButtonText: 'OK',
+          });
+        });
+    }
+  });
+}
+
+</script>

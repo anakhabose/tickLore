@@ -1,0 +1,396 @@
+
+
+    <!-- Header -->
+    <header class="bg-black text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="/images/logo.png" alt="Logo" class="h-8">
+        <nav class="space-x-6 hidden md:flex">
+          <a href="/user/home" class="hover:text-yellow-500">Home</a>
+          <a href="#" class="hover:text-yellow-500">Category</a>
+          <a href="#" class="hover:text-yellow-500">About</a>
+          <a href="#" class="hover:text-yellow-500">Contact</a>
+        </nav>
+      </div>
+      <div class="flex space-x-4 items-center">
+  <input type="text" placeholder="What are you looking for?" class="p-2 rounded-lg">
+  <a href="#" class="hover:text-yellow-500">❤️</a>
+  <a href="#" class="hover:text-yellow-500">🛒</a>
+  
+  {{#if user}}
+    <a href="/user/logout" class="hover:text-yellow-500">LOGOUT</a>
+  {{else}}
+    <a href="/user/login" class="hover:text-yellow-500">LOGIN</a>
+    <a href="/user/signup" class="hover:text-yellow-500">SIGNUP</a>
+  {{/if}}
+</div>
+
+    </div>
+  </header>
+
+    <!-- Main Content -->
+   
+    <main class="container mx-auto px-4 py-10">
+
+
+       <!-- Breadcrumbs -->
+<div class="py-2 px-4">
+  <nav class="flex text-sm font-medium text-gray-500 space-x-2">
+    <a href="/user/home" class="hover:text-yellow-600">Home</a>
+    {{!-- <span>/</span>
+    <a href="/user/category" class="hover:text-yellow-600">Category</a>
+    <span>/</span>
+    <a href="/category/{{product.category}}" class="hover:text-yellow-600">{{product.category}}</a> --}}
+    <span>/</span>
+    <span class="text-gray-900">{{product.productName}}</span>
+  </nav>
+</div>
+
+<div class="grid gap-10 md:grid-cols-2">
+<div class="relative flex bg-white p-1 -mt-2">
+    <!-- Small Images Container -->
+    <div class="flex flex-col justify-center ml-4 gap-4">
+        <img 
+            src="{{product.images.[0]}}" 
+            alt="Small Image 1" 
+            class="object-contain h-20 w-20 cursor-pointer" 
+            onclick="changeImage('{{product.images.[0]}}')" 
+        />
+        <img 
+            src="{{product.images.[1]}}" 
+            alt="Small Image 2" 
+            class="object-contain h-20 w-20 cursor-pointer" 
+            onclick="changeImage('{{product.images.[1]}}')" 
+        />
+        <img 
+            src="{{product.images.[2]}}" 
+            alt="Small Image 3" 
+            class="object-contain h-20 w-20 cursor-pointer" 
+            onclick="changeImage('{{product.images.[2]}}')" 
+        />
+        <img 
+            src="{{product.images.[3]}}" 
+            alt="Small Image 4" 
+            class="object-contain h-20 w-20 cursor-pointer" 
+            onclick="changeImage('{{product.images.[3]}}')" 
+        />
+    </div>
+
+    <!-- Big Image Container with Zoom Effect -->
+    <div class="flex justify-center items-center flex-grow">
+        <div class="zoom-container relative overflow-hidden">
+            <img 
+                id="bigImage" 
+                src="{{product.images.[0]}}" 
+                alt="Apple Smart Watch" 
+                class="object-contain h-96 w-85 transition-transform duration-200 ease-in-out" 
+            />
+            <div 
+                class="zoom-lens absolute border-2 border-black bg-black bg-opacity-20 cursor-crosshair hidden"
+                style="width: 100px; height: 100px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+ 
+            <!-- Product Details -->
+            
+  <div class="space-y-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">{{product.productName}}</h1>
+        
+    </div>
+     <!-- Display average rating -->
+  <div class="flex items-center mt-2">
+    <span class="text-yellow-500 text-lg">★★★★☆</span>
+    <p class="ml-2 text-gray-700">(4.5 out of 5)</p>
+    <p class="ml-2 text-gray-600">| Based on 120 reviews</p>
+  </div>
+
+    <p class="text-2xl font-bold text-gray-900">Rs.{{product.price}}</p>
+    <p class="text-xl font-bold text-gray-900">Description</p>
+    <div class="text-gray-700 space-y-4">
+        <p>{{product.description}}</p>
+    </div>
+
+    {{#if (lte product.stock 10)}}
+        <p class="text-red-600 px-2 py-1 rounded-lg bg-red-100 inline-block">
+            <strong>Low Stock</strong>
+        </p>
+    {{/if}}
+
+    <!-- Quantity Section -->
+  <div class="flex items-center space-x-6">
+      <!-- Label -->
+      <label for="quantity" class="text-lg font-semibold text-yellow-500">Quantity:</label>
+
+      <!-- Quantity Controller -->
+      <div class="flex items-center border border-yellow-500 rounded-full shadow-lg overflow-hidden">
+  <!-- Decrease Button -->
+  <button id="decrease" 
+      class="bg-yellow-500 text-black px-4 py-2 font-bold hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
+      -
+  </button>
+  <!-- Input Field -->
+  <input id="quantity" 
+      type="number" 
+      value="1" 
+      min="1" 
+      max="4"
+      class="w-16 text-center bg-white text-black font-medium focus:ring-0 focus:outline-none border-none" />
+  <!-- Increase Button -->
+  <button id="increase" 
+      class="bg-yellow-500 text-black px-4 py-2 font-bold hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
+      +
+  </button>
+</div>
+
+  </div>
+
+  <!-- Coupon Section -->
+<div class="mt-6">
+    <label for="couponCode" class="text-lg font-semibold text-black-500">Apply Coupon:</label>
+    <div class="flex items-center mt-2">
+        <input 
+            id="couponCode" 
+            type="text" 
+            placeholder="Enter coupon code" 
+            class="w-full md:w-auto flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500">
+        <button 
+            id="applyCoupon" 
+            class="ml-4 bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-500 transition">
+            Apply
+        </button>
+    </div>
+    <p id="couponMessage" class="mt-2 text-sm text-gray-700 hidden"></p>
+</div>
+
+  <button class="w-full md:w-auto bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-500">
+        Add to Cart
+    </button>
+    <button class="w-full md:w-auto bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500">
+        Add to Wishlist
+    </button>
+
+<!-- Write a review -->
+   {{!-- <div class="mt-4">
+    <label for="reviewText" class="block text-lg font-semibold text-gray-800">Write a Review:</label>
+    <textarea
+      id="reviewText"
+      rows="4"
+      placeholder="Share your thoughts about the product"
+      class="w-full p-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"></textarea>
+    <div class="flex items-center space-x-2 mt-2">
+      <label class="text-lg font-semibold text-gray-800">Your Rating:</label>
+      <div class="flex space-x-1">
+        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+      </div>
+    </div>
+    <button
+      id="submitReview"
+      class="bg-yellow-600 text-white px-4 py-2 mt-4 rounded-md hover:bg-yellow-500 transition">
+      Submit Review
+    </button>
+  </div> --}}
+
+  <!-- Review List -->
+  {{!-- <div class="mt-6">
+    <h3 class="text-lg font-bold text-gray-900">Recent Reviews:</h3>
+    <ul class="space-y-4 mt-4">
+      <li class="border-b border-gray-300 pb-4">
+        <div class="flex items-center justify-between">
+          <p class="font-semibold text-gray-800">John Doe</p>
+          <span class="text-yellow-500">★★★★★</span>
+        </div>
+        <p class="text-gray-700 mt-2">Great product! Highly recommend it.</p>
+      </li>
+      <li class="border-b border-gray-300 pb-4">
+        <div class="flex items-center justify-between">
+          <p class="font-semibold text-gray-800">Jane Smith</p>
+          <span class="text-yellow-500">★★★★☆</span>
+        </div>
+        <p class="text-gray-700 mt-2">Good quality but slightly expensive.</p>
+      </li>
+    </ul>
+  </div> --}}
+
+</div> 
+
+</div>
+<!-- Recommended Products Section -->
+<div class="max-w-7xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Recommended Products</h1>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {{#each recommendedProducts}}
+            <a href="/user/viewProducts/{{this._id}}" class="no-underline">
+                <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-center mb-4">
+                        <img 
+                            src="{{this.images.[0]}}" 
+                            alt="{{this.name}}" 
+                            class="h-48 object-contain"
+                        />
+                    </div>
+                    <h2 class="text-lg font-semibold text-center">{{this.productName}}</h2>
+                    <p class="text-lg font-bold text-center">Rs.{{this.price}}</p>
+                </div>
+            </a>
+        {{/each}}
+    </div>
+</div>
+
+
+
+    </main>
+
+    <!-- Footer -->
+   <footer class="bg-black text-white py-10">
+    <div class="container mx-auto grid md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="font-bold text-lg mb-4">Exclusive</h3>
+        <p>Get 10% off your first order</p>
+        <input type="email" placeholder="Enter your email" class="mt-2 p-2 rounded-lg w-full">
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Support</h3>
+        <p>111 Kochi,Kerala</p>
+        <p>ticklore@gmail.com</p>
+        <p>+88015-88888-9999</p>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Account</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">My Account</a></li>
+          <li><a href="/user/login" class="hover:text-yellow-500">Login </a></li>
+            <li><a href="/user/signup" class="hover:text-yellow-500">Signup</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Cart</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Wishlist</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Quick Link</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Terms Of Use</a></li>
+          <li><a href="#" class="hover:text-yellow-500">FAQ</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-8 text-center">
+      <img src="/images/logo.png" alt="Footer Logo" class="mx-auto h-12">
+      <p class="text-gray-600 mt-4">&copy; Copyright tickLore 2024. All rights reserved</p>
+    </div>
+  </footer>
+
+<script>
+
+  function changeImage(newSrc) {
+        // Update the main image when a small image is clicked
+        document.getElementById('bigImage').src = newSrc;
+    }
+
+       const zoomContainer = document.querySelector('.zoom-container');
+    const zoomLens = document.querySelector('.zoom-lens');
+    const bigImage = document.getElementById('bigImage');
+
+    zoomContainer.addEventListener('mousemove', function (e) {
+        const containerRect = zoomContainer.getBoundingClientRect();
+        const x = e.pageX - containerRect.left;
+        const y = e.pageY - containerRect.top;
+
+        const lensWidth = zoomLens.offsetWidth;
+        const lensHeight = zoomLens.offsetHeight;
+
+        // Move the lens based on mouse position
+        let lensX = x - lensWidth / 2;
+        let lensY = y - lensHeight / 2;
+
+        // Prevent lens from going out of bounds
+        if (lensX < 0) lensX = 0;
+        if (lensY < 0) lensY = 0;
+        if (lensX > zoomContainer.offsetWidth - lensWidth) lensX = zoomContainer.offsetWidth - lensWidth;
+        if (lensY > zoomContainer.offsetHeight - lensHeight) lensY = zoomContainer.offsetHeight - lensHeight;
+
+        zoomLens.style.left = lensX + 'px';
+        zoomLens.style.top = lensY + 'px';
+
+        // Zoom in effect
+        const zoomFactor = 2; // Adjust this value to control the zoom level
+        bigImage.style.transform = `scale(${zoomFactor})`;
+        bigImage.style.transformOrigin = `${(x / zoomContainer.offsetWidth) * 100}% ${(y / zoomContainer.offsetHeight) * 100}%`;
+    });
+
+    zoomContainer.addEventListener('mouseleave', function () {
+        zoomLens.style.display = 'none';
+        bigImage.style.transform = 'scale(1)';
+    });
+
+    zoomContainer.addEventListener('mouseenter', function () {
+        zoomLens.style.display = 'block';
+    });
+
+    // JavaScript to handle quantity increase and decrease
+   const decreaseBtn = document.getElementById('decrease');
+  const increaseBtn = document.getElementById('increase');
+  const quantityInput = document.getElementById('quantity');
+
+  // Decrease quantity
+  decreaseBtn.addEventListener('click', () => {
+    const currentValue = parseInt(quantityInput.value);
+    if (currentValue > 1) {
+      quantityInput.value = currentValue - 1;
+    }
+  });
+
+  // Increase quantity
+  increaseBtn.addEventListener('click', () => {
+    const currentValue = parseInt(quantityInput.value);
+    if (currentValue < 4) {
+      quantityInput.value = currentValue + 1;
+    }
+  });
+
+  // Prevent manual entry beyond limits
+  quantityInput.addEventListener('input', () => {
+    const value = parseInt(quantityInput.value);
+    if (value > 4) {
+      quantityInput.value = 4;
+    } else if (value < 1) {
+      quantityInput.value = 1;
+    }
+  });
+
+
+
+
+    document.getElementById('applyCoupon').addEventListener('click', function () {
+    const couponCode = document.getElementById('couponCode').value.trim();
+    const couponMessage = document.getElementById('couponMessage');
+
+    if (couponCode === "DISCOUNT10") {
+        couponMessage.textContent = "Coupon applied successfully! You received a 10% discount.";
+        couponMessage.classList.remove('hidden', 'text-red-500');
+        couponMessage.classList.add('text-green-500');
+    } else {
+        couponMessage.textContent = "Invalid coupon code. Please try again.";
+        couponMessage.classList.remove('hidden', 'text-green-500');
+        couponMessage.classList.add('text-red-500');
+    }
+});
+
+</script>
+
+
+
+

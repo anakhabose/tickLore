@@ -1,0 +1,198 @@
+<div class="flex min-h-screen flex-col">
+<header class="bg-black text-white p-4 flex justify-between items-center">
+    <img src="/images/logo.png" alt="Logo" class="h-8">
+  
+  </header>
+<div class="flex flex-1">
+    {{>sidebar}}
+ <main class="flex-1 p-6 bg-white">
+      <div class="max-w-4xl mx-auto bg-grey-100 p-6 rounded-lg">
+        <div class="mb-5 px-5">
+        <nav class="text-gray-600 text-sm">
+          <a href="/admin/dashboard" class="hover:text-yellow-600">Dashboard</a> &gt;
+          <a href="/admin/products" class="hover:text-yellow-600">Products</a> &gt;
+          <span class="font-bold">Edit Products</span>
+        </nav>
+</div>
+        <h2 class="text-2xl font-bold mb-6">Edit Product</h2>
+        <form id="product-form" class="space-y-6" method="post" action="/admin/editProducts/{{products._id}}" enctype="multipart/form-data">
+        <input type="hidden" name="_id" value="{{products._id}}" />
+
+           <input type="text" id="message" value="{{{message}}}" name="message" hidden >
+          <!-- Product Name and Price -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="productName" class="block text-sm font-medium text-gray-400 mb-1">
+                Product Name*
+              </label>
+              <input
+                id="productName"
+                name="productName"
+                value="{{products.productName}}" 
+                type="text"
+                class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+                required
+              />
+            </div>
+            <div>
+              <label for="price"  class="block text-sm font-medium text-gray-400 mb-1">
+                Price*
+              </label>
+              <input
+                id="price"
+                name="price"
+                value="{{products.price}}" 
+                type="number"
+               class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-400 mb-1">
+              Description*
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+              required
+            >{{products.description}}</textarea>
+          </div>
+
+          <!-- Category and Quantity -->
+          <div class="grid grid-cols-2 gap-6">
+           <div>
+  <label for="category" class="block text-sm font-medium text-gray-400 mb-1">
+    Category*
+  </label>
+  <select
+    id="category" 
+    name="category"
+    class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+  >
+    <!-- If a category exists, show it as the first option -->
+    <option value="" disabled {{#unless products.category}}selected{{/unless}}>
+      {{#if products.category}}
+        {{products.category}} <!-- Show current category -->
+      {{else}}
+        Select category
+      {{/if}}
+    </option>
+    <!-- Static category options -->
+    <option value="analog" {{#if (eq products.category "analog")}}selected{{/if}}>Analog</option>
+    <option value="digital" {{#if (eq products.category "digital")}}selected{{/if}}>Digital</option>
+    <option value="smart" {{#if (eq products.category "smart")}}selected{{/if}}>Smart</option>
+  </select>
+</div>
+
+            <div>
+              <label for="quantity" class="block text-sm font-medium text-gray-400 mb-1">
+                Stock
+              </label>
+              <input
+                id="stock"
+                name="stock"
+                value="{{products.stock}}" 
+                type="number"
+                class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+                min="0"
+              />
+            </div>
+          </div>
+
+
+  
+  <div>
+  <label class="block text-sm font-medium text-gray-400 mb-2">
+    Product Images (All 4 images required)
+  </label>
+  
+  <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2">
+      <input type="file" id="image1" name="images" accept="image/*" class="block w-full text-sm text-gray-500">
+    
+      <img id="preview1" src="{{products.images.[0]}}" class="h-24 w-24 object-cover rounded-lg {{#if products.images.[0]}}block{{else}}hidden{{/if}}">
+    </div>
+    
+    <div class="space-y-2">
+      <input type="file" id="image2" name="images" accept="image/*" class="block w-full text-sm text-gray-500">
+      
+      <img id="preview2" src="{{products.images.[1]}}" class="h-24 w-24 object-cover rounded-lg {{#if products.images.[1]}}block{{else}}hidden{{/if}}">
+    </div>
+    
+    <div class="space-y-2">
+      <input type="file" id="image3" name="images" accept="image/*" class="block w-full text-sm text-gray-500">
+      
+      <img id="preview3" src="{{products.images.[2]}}" class="h-24 w-24 object-cover rounded-lg {{#if products.images.[2]}}block{{else}}hidden{{/if}}">
+    </div>
+    
+    <div class="space-y-2">
+      <input type="file" id="image4" name="images" accept="image/*" class="block w-full text-sm text-gray-500">
+      
+      <img id="preview4" src="{{products.images.[3]}}" class="h-24 w-24 object-cover rounded-lg {{#if products.images.[3]}}block{{else}}hidden{{/if}}">
+    </div>
+  </div>
+</div>
+ 
+          <button
+            type="submit"
+            class="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg py-2"
+          >
+           Save
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+  <!-- Footer -->
+<footer class="bg-black text-white p-4 mt-6 text-center">
+  <p>&copy; 2024 tickLore. All Rights Reserved.</p>
+</footer>
+ </div>
+<script>
+ document.getElementById('product-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const form = event.target;
+  const formData = new FormData(form);
+  for (let [key, value] of formData.entries()) {
+  console.log(`${key}: ${value}`);
+}
+
+  try {
+    const response = await fetch(`/admin/editProducts/${formData.get('_id')}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (data.status) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Product Updated',
+        text: data.message,
+      }).then(() => {
+        window.location.href = '/admin/products';
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: data.message || 'Something went wrong!',
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Failed to update product.',
+    });
+  }
+});
+
+</script>  

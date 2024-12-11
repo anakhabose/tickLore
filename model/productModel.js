@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-  name: {
+  productName: {
     type: String,
     required: true,
     trim: true
@@ -28,13 +28,9 @@ const productSchema = new mongoose.Schema({
   images: {
     type: [String], 
     required: true,
-    validate: {
-      validator: function (value) {
-        return value.length > 0; 
-      },
-      message: 'At least one image URL is required'
-    }
-  }
+    
+  },
+  deleted: { type: Boolean, default: false },
 }, {
   timestamps: true 
 });
