@@ -2,15 +2,24 @@
 const Product = require("../model/productModel");
 
 module.exports = {
-  addProducts: async (req, res) => {
+ addProducts: async (req, res) => {
     try {
       const { productName, price, description, category, stock } = req.body;
       
-     
+    
       if (!productName || !price || !description || !category) {
         return res.status(400).json({ 
           status: false, 
           message: 'All required fields must be filled' 
+        });
+      }
+
+      
+      const existingProduct = await Product.findOne({ productName: { $regex: new RegExp(`^${productName}$`, 'i') } });
+      if (existingProduct) {
+        return res.status(400).json({
+          status: false,
+          message: 'Product name already exists'
         });
       }
 
@@ -22,7 +31,7 @@ module.exports = {
         });
       }
 
-      const images=req.files.map((file)=>file.path)
+      const images = req.files.map((file) => file.path);
      
       const product = new Product({
         productName, 
@@ -33,10 +42,8 @@ module.exports = {
         images,
       });
 
-     
       await product.save();
       
-     
       res.status(201).json({ 
         status: true, 
         message: 'Product added successfully',
@@ -44,10 +51,8 @@ module.exports = {
       });
       
     } catch (error) {
-     
       console.error('Error adding product:', error);
 
-     
       if (error.name === 'ValidationError') {
         return res.status(400).json({ 
           status: false, 
@@ -55,22 +60,35 @@ module.exports = {
         });
       }
 
-     
       res.status(500).json({ 
         status: false, 
         message: 'Error adding product',
         error: error.message
       });
     }
-  },
-
- editProducts: async (req, res) => {
+},
+editProducts: async (req, res) => {
     try {
         const productId = req.params.id;
         const { productName, description, category, brand, stock, price } = req.body;
 
         console.log('Product ID:', productId);
         console.log('Request Body:', req.body);
+
+       
+        if (productName) {
+            const existingProduct = await Product.findOne({
+                _id: { $ne: productId },
+                productName: { $regex: new RegExp(`^${productName}$`, 'i') }
+            });
+            
+            if (existingProduct) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Product name already exists'
+                });
+            }
+        }
 
         const updateProduts = await Product.findByIdAndUpdate(
             productId,

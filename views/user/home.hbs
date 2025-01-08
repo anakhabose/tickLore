@@ -6,7 +6,7 @@
         <img src="/images/logo.png" alt="Logo" class="h-8">
         <nav class="space-x-6 hidden md:flex">
           <a href="/user/home" class="hover:text-yellow-500">Home</a>
-          <a href="#" class="hover:text-yellow-500">Category</a>
+          <a href="/user/shop" class="hover:text-yellow-500">Shop</a>
           <a href="#" class="hover:text-yellow-500">About</a>
           <a href="#" class="hover:text-yellow-500">Contact</a>
         </nav>
@@ -19,8 +19,8 @@
       <a href="/user/profile" class="hover:text-yellow-500">
         <i class="fas fa-user mr-2"></i> 
       </a>
-        <a href="#" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
-  <a href="#" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
+        <a href="/user/wishlist" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
+  <a href="/user/cart" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
       <a href="/user/logout" class="hover:text-yellow-500">
         <i class="fas fa-sign-out-alt"></i>
       </a>
@@ -93,9 +93,9 @@
     <div class="max-w-7xl mx-auto p-6">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-2xl font-bold">Trending products</h1>
-          <a href="#" class="text-yellow-500 hover:underline">Shop the collection →</a>
+          <a href="/user/shop" class="text-yellow-500 hover:underline">Shop the collection →</a>
         </div>
-    
+       
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
   {{#each data}}
   
@@ -264,6 +264,21 @@
         window.location.href = `/user/viewProducts/${productId}`;
     }
 }
+if (window.location.search.includes('error')) {
+    const newUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
+}
+
+ // Add the new back button handling code
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+    window.addEventListener('popstate', function(event) {
+        window.location.reload();
+    });
 </script>
 
 

@@ -1,0 +1,538 @@
+   <header class="bg-black text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="/images/logo.png" alt="Logo" class="h-8">
+        <nav class="space-x-6 hidden md:flex">
+          <a href="/user/home" class="hover:text-yellow-500">Home</a>
+          <a href="/user/shop" class="hover:text-yellow-500">Shop</a>
+          <a href="#" class="hover:text-yellow-500">About</a>
+          <a href="#" class="hover:text-yellow-500">Contact</a>
+        </nav>
+      </div>
+      <div class="flex space-x-4 items-center">
+  <input type="text" placeholder="What are you looking for?" class="p-2 rounded-lg">
+ 
+  {{#if users}}
+      <a href="/user/profile" class="hover:text-yellow-500">
+        <i class="fas fa-user mr-2"></i> 
+      </a>
+       <a href="/user/wishlist" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
+       <a href="/user/cart" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
+
+      <a href="/user/logout" class="hover:text-yellow-500">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+
+  {{else}}
+    <a href="/user/login" class="hover:text-yellow-500">LOGIN</a>
+    <a href="/user/signup" class="hover:text-yellow-500">SIGNUP</a>
+  {{/if}}
+</div>
+    </div>
+  </header>
+<div class="flex flex-col md:flex-row min-h-screen bg-gray-50">
+   <aside class="bg-gray-100 text-black w-64 p-4 flex flex-col">
+            <div class="text-lg font-bold mb-6">Manage My Account</div>
+            <nav class="flex flex-col space-y-4">
+                <a href="/user/profile"
+                    class="p-2 rounded {{#if (eq currentPath '/profile')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-user"></i> My Profile
+                </a>
+                <a href="/user/orders"
+                    class="p-2 rounded {{#if (eq currentPath '/orders/status')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-box"></i> My Orders
+                </a>
+                <a href="/user/address"
+                    class="p-2 rounded {{#if (eq currentPath '/orders/status')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-location-arrow"></i> Saved Address
+                </a>
+                <a href="/wishlist"
+                    class="p-2 rounded {{#if (eq currentPath '/wishlist')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-wallet"></i> My Wallet
+                </a>
+                <a href="/change-password"
+                    class="p-2 rounded {{#if (eq currentPath '/change-password')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-key"></i> Change Password
+                </a>
+                <a href="/logout"
+                    class="p-2 rounded {{#if (eq currentPath '/logout')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+<div class="container mx-auto px-4 py-8">
+        <!-- Breadcrumb -->
+        <nav class="text-sm mb-8">
+            <ol class="list-none p-0 inline-flex">
+                <li class="flex items-center">
+                    <a href="#" class="text-gray-500 hover:text-gray-700">Home</a>
+                    <span class="mx-2 text-gray-500">/</span>
+                </li>
+                <li class="text-gray-700">Cart</li>
+            </ol>
+        </nav>
+
+        <!-- Cart Table -->
+        
+        <!-- Cart Table -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Table Header -->
+    <div class="grid grid-cols-12 gap-4 p-6 bg-gray-50 border-b border-gray-100">
+        <div class="col-span-5 text-sm font-semibold text-gray-600 uppercase tracking-wider">Product</div>
+        <div class="col-span-3 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Quantity</div>
+        <div class="col-span-2 text-sm font-semibold text-gray-600 uppercase tracking-wider text-right">Price</div>
+        <div class="col-span-2 text-sm font-semibold text-gray-600 uppercase tracking-wider text-right">Total</div>
+    </div>
+
+    <!-- Table Body -->
+    <div class="divide-y divide-gray-100">
+        {{#each cartItems}}
+        <div class="grid grid-cols-12 gap-4 p-6 items-center hover:bg-gray-50/50 transition-all duration-300">
+            <!-- Product Info -->
+            <div class="col-span-5">
+                <div class="flex gap-4 items-center">
+                    <div class="relative group">
+                        <div class="w-24 h-24 rounded-xl overflow-hidden bg-gray-100">
+                            <img src="{{this.productId.images.[0]}}" 
+                                 alt="{{this.productId.productName}}"
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium text-gray-900 mb-1 line-clamp-1">{{this.productId.productName}}</h3>
+                        {{#if this.productId.offer}}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700">
+                                {{round (multiply (divide (subtract this.productId.price this.productId.discountedPrice) this.productId.price) 100)}}% OFF
+                            </span>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantity Controls -->
+            <div class="col-span-3">
+                <div class="flex items-center justify-center">
+                    <div class="inline-flex items-center bg-gray-50 rounded-lg p-1">
+                        <button type="button" onclick="decrementQuantity(this)"
+                                class="w-8 h-8 flex items-center justify-center rounded-md text-gray-600 hover:bg-white hover:shadow-sm transition-all">
+                            <i class="fas fa-minus text-xs"></i>
+                        </button>
+                        <input type="number" 
+                               name="quantity" 
+                               value="{{this.quantity}}"
+                               min="1" 
+                               max="{{this.productId.quantity}}"
+                               data-product-id="{{this.productId._id}}"
+                               data-available-quantity="{{this.productId.quantity}}"
+                               data-original-quantity="{{this.quantity}}"
+                               class="w-12 text-center bg-transparent font-medium text-gray-900"
+                               oninput="handleQuantityInput(this)" 
+                               readonly>
+                        <button type="button" onclick="incrementQuantity(this)"
+                                class="w-8 h-8 flex items-center justify-center rounded-md text-gray-600 hover:bg-white hover:shadow-sm transition-all"
+                                {{#if (lte this.productId.quantity this.quantity)}}disabled{{/if}}>
+                            <i class="fas fa-plus text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price -->
+            <div class="col-span-2 text-right">
+                {{#if this.productId.discountedPrice}}
+                    <div class="text-gray-900 font-medium">₹{{this.productId.discountedPrice}}</div>
+                    <div class="text-sm text-gray-400 line-through">₹{{this.productId.price}}</div>
+                {{else}}
+                    <div class="text-gray-900 font-medium">₹{{this.productId.price}}</div>
+                {{/if}}
+            </div>
+
+            <!-- Total & Remove -->
+            <div class="col-span-2 flex items-center justify-end gap-4">
+                <div class="text-gray-900 font-medium">₹{{multiply this.salePrice this.quantity}}</div>
+                <button onclick="removeFromCart('{{this.productId._id}}')"
+                        class="p-2 text-gray-400 hover:text-red-500 transition-colors duration-200">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        {{else}}
+        <!-- Empty State -->
+        <div class="p-8 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-2xl text-gray-400"></i>
+            </div>
+            <h3 class="text-gray-500">Your cart is empty</h3>
+        </div>
+        {{/each}}
+    </div>
+</div>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-between mb-8">
+            <a href="/user/shop">
+                <button class="px-4 py-2 border rounded-lg hover:bg-gray-100">Return To Shop</button>
+            </a>
+            
+            {{!-- <button class="px-4 py-2 border rounded-lg hover:bg-gray-100">Update Cart</button> --}}
+        </div>
+
+        <!-- Coupon and Cart Totals -->
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Coupon Section -->
+            <div class="space-y-4">
+                {{!-- <div class="flex gap-4">
+                    <input type="text" placeholder="Coupon Code"
+                        class="border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-yellow-200 max-w-[200px]">
+                    <button class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">
+                        Apply Coupon
+                    </button>
+                </div> --}}
+            </div>
+
+            <!-- Cart Totals -->
+           <div class="border rounded-lg p-6 bg-white shadow">
+    <h2 class="text-lg font-semibold mb-4">Cart Total</h2>
+    <div class="space-y-4">
+        <div class="flex justify-between border-b pb-4">
+            <span>Subtotal:</span>
+            <span>Rs. {{subtotal}}</span>
+        </div>
+        <div class="flex justify-between border-b pb-4">
+            <span>Discount:</span>
+            <span>Rs. 0</span>
+        </div>
+        <div class="flex justify-between border-b pb-4">
+            <span>GST (0%):</span>
+            <span>Rs. 0</span>
+        </div>
+        <div class="flex justify-between border-b pb-4">
+            <span>Shipping:</span>
+            <span>Rs. {{deliveryCharges}}</span>
+        </div>
+        <div class="flex justify-between font-semibold">
+            <span>Total:</span>
+            <span>Rs. {{totalAmount}}</span>
+        </div>
+        
+        <!-- Modified checkout button with stock validation -->
+        <form action="/user/checkout" method="GET" class="w-full">
+            <button type="button" 
+                    onclick="validateStockBeforeCheckout()"
+                    class="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 mt-4">
+                Proceed to Checkout
+            </button>
+        </form>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+     <footer class="bg-black text-white py-10">
+    <div class="container mx-auto grid md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="font-bold text-lg mb-4">Exclusive</h3>
+        <p>Get 10% off your first order</p>
+        <input type="email" placeholder="Enter your email" class="mt-2 p-2 rounded-lg w-full">
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Support</h3>
+        <p>111 Kochi,Kerala</p>
+        <p>ticklore@gmail.com</p>
+        <p>+88015-88888-9999</p>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Account</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">My Account</a></li>
+          <li><a href="/user/login" class="hover:text-yellow-500">Login </a></li>
+            <li><a href="/user/signup" class="hover:text-yellow-500">Signup</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Cart</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Wishlist</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Quick Link</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Terms Of Use</a></li>
+          <li><a href="#" class="hover:text-yellow-500">FAQ</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-8 text-center">
+      <img src="/images/logo.png" alt="Footer Logo" class="mx-auto h-12">
+      <p class="text-gray-600 mt-4">&copy; Copyright tickLore 2024. All rights reserved</p>
+    </div>
+  </footer>
+  <script>
+    /*
+    function handleAuthError(error) {
+            if (error.redirect) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Authentication Required',
+                    text: 'Please log in to continue.',
+                    confirmButtonText: 'Go to Login',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = error.redirect;
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'An unexpected error occurred.',
+                });
+            }
+        }*/
+     let updateTimeout;
+
+function handleQuantityInput(inputElement) {
+    clearTimeout(updateTimeout);
+    
+    let quantity = parseInt(inputElement.value);
+    
+    if (isNaN(quantity)) {
+        quantity = 1;
+        inputElement.value = quantity;
+    }
+
+    updateTimeout = setTimeout(() => {
+        validateAndUpdateQuantity(inputElement);
+    }, 500); 
+}
+
+function validateAndUpdateQuantity(inputElement) {
+    const productId = inputElement.getAttribute('data-product-id');
+    const availableQuantity = parseInt(inputElement.getAttribute('data-available-quantity'));
+    let quantity = parseInt(inputElement.value);
+
+    if (isNaN(quantity)) {
+        quantity = 1;
+    }
+
+    // Check minimum quantity
+    if (quantity < 1) {
+        quantity = 1;
+        inputElement.value = quantity;
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Quantity',
+            text: 'Quantity cannot be less than 1',
+            showConfirmButton: true
+        });
+        return;
+    }
+
+    // Check stock availability
+    if (quantity > availableQuantity) {
+        quantity = availableQuantity;
+        inputElement.value = quantity;
+        Swal.fire({
+            icon: 'warning',
+            title: 'Stock Limit Reached',
+            text: `Only ${availableQuantity} item${availableQuantity === 1 ? '' : 's'} available in stock.`,
+            showConfirmButton: true
+        });
+        return;
+    }
+
+    const originalQuantity = parseInt(inputElement.getAttribute('data-original-quantity'));
+    if (quantity !== originalQuantity) {
+        updateQuantity(productId, quantity);
+    }
+}
+        function updateQuantity(productId, quantity) {
+            fetch('/user/updateCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin', 
+                body: JSON.stringify({ productId, quantity }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Cart updated successfully') {
+                    
+                    const quantityInput = document.querySelector(`input[data-product-id="${productId}"]`);
+                    if (quantityInput) {
+                        quantityInput.setAttribute('data-original-quantity', quantity.toString());
+                    }
+                    window.location.reload();
+                } else if (data.redirect) {
+                    handleAuthError(data);
+                } 
+                else {
+                    throw new Error(data.message || 'Failed to update cart');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        }
+
+       
+function removeFromCart(productId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, remove it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/user/removeFromCart/${productId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message === 'Item removed from cart successfully') {
+                            Swal.fire(
+                                'Removed!',
+                                'The item has been removed from your cart.',
+                                'success'
+                            ).then(() => {
+                                window.location.reload();
+                            });
+                        } else if (data.redirect) {
+                            handleAuthError(data);
+                        } else {
+                            throw new Error(data.message || 'Failed to remove item from cart');
+                        }
+                    })
+                    .catch(error => {
+                        handleAuthError(error);
+                    });
+                }
+            });
+}
+
+function incrementQuantity(button) {
+    const input = button.previousElementSibling;
+    const currentValue = parseInt(input.value);
+    const availableQuantity = parseInt(input.getAttribute('data-available-quantity'));
+    
+    
+    if (currentValue >= availableQuantity) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Stock Limit Reached',
+            text: `Only ${availableQuantity} item${availableQuantity === 1 ? '' : 's'} available in stock.`,
+            showConfirmButton: true
+        });
+        return;
+    }
+    
+    
+    if (currentValue >= 4) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Quantity Limit Reached',
+            text: 'Maximum quantity limit is 4 items',
+            showConfirmButton: true
+        });
+        return;
+    }
+    
+    input.value = currentValue + 1;
+    handleQuantityInput(input);
+    
+    // Disable increment button if we've reached either limit
+    if (currentValue + 1 >= availableQuantity || currentValue + 1 >= 4) {
+        button.disabled = true;
+        button.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+
+function decrementQuantity(button) {
+    const input = button.nextElementSibling;
+    const currentValue = parseInt(input.value);
+    
+    if (currentValue <= 1) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Quantity',
+            text: 'Quantity cannot be less than 1',
+            showConfirmButton: true
+        });
+        return;
+    }
+    
+    input.value = currentValue - 1;
+    handleQuantityInput(input);
+}
+
+function validateStockBeforeCheckout() {
+     // Get all quantity inputs
+    const quantityInputs = document.querySelectorAll('input[name="quantity"]');
+    
+    // If there are no items in cart, redirect to checkout
+    if (!quantityInputs || quantityInputs.length === 0) {
+        window.location.href = '/user/checkout';
+        return;
+    }
+
+    let hasStockIssue = false;
+    let stockMessage = '';
+
+    quantityInputs.forEach(input => {
+        try {
+            // Get the grid container for this cart item
+            const gridContainer = input.closest('.grid.grid-cols-12');
+            if (!gridContainer) {
+                console.error('Grid container not found for input:', input);
+                return;
+            }
+
+            // Get the product name element
+            const productNameElement = gridContainer.querySelector('h3.font-medium.text-gray-900');
+            if (!productNameElement) {
+                console.error('Product name element not found');
+                return;
+            }
+
+            const productName = productNameElement.textContent.trim();
+            const requestedQuantity = parseInt(input.value);
+            const availableQuantity = parseInt(input.getAttribute('data-available-quantity'));
+
+            console.log('Product:', {
+                name: productName,
+                requested: requestedQuantity,
+                available: availableQuantity
+            });
+
+            if (availableQuantity === 0) {
+                hasStockIssue = true;
+                stockMessage += `${productName} is out of stock\n`;
+            } else if (requestedQuantity > availableQuantity) {
+                hasStockIssue = true;
+                stockMessage += `Only ${availableQuantity} units available for ${productName}\n`;
+            }
+        } catch (error) {
+            console.error('Error processing cart item:', error);
+        }
+    });
+
+    if (hasStockIssue) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Stock Issue',
+            text: stockMessage,
+            confirmButtonText: 'OK'
+        });
+    } else {
+        // If no stock issues, proceed with checkout
+        window.location.href = '/user/checkout';
+    }
+}
+
+</script>

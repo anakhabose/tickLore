@@ -1,22 +1,545 @@
-<body class="bg-gray-100 ">
+<body class="bg-gray-100">
   <header class="bg-black text-white p-4 flex justify-between items-center">
     <img src="/images/logo.png" alt="Logo" class="h-8">
-  
   </header>
+  
   <div class="flex h-screen">
     {{>sidebar}}
 
     <!-- Main Content -->
     <main class="flex-1 bg-white p-6 overflow-y-auto">
-    <!-- Header -->
-<header class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold">Dashboard</h1>
-</header>
+      <!-- Header -->
+      <header class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+      </header>
 
+      <!-- Metrics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Orders Card -->
+        <div class="bg-white shadow-lg rounded-xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-l-4 border-blue-500 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <div class="flex flex-col relative z-10">
+            <h3 class="text-gray-600 font-semibold text-sm uppercase tracking-wider mb-2 group-hover:text-blue-600 transition-colors duration-300">Total Orders</h3>
+            <p class="text-3xl font-bold text-gray-800" id="totalOrders">{{statistics.totalOrders}}</p>
+            <div class="mt-2 text-blue-500 flex items-center">
+              <i class="fas fa-shopping-cart mr-2 animate-bounce"></i>
+              <span class="text-sm font-semibold group-hover:font-bold">Orders Processed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Revenue Card (Gross) -->
+        <div class="bg-white shadow-lg rounded-xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-l-4 border-green-500 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-r from-green-100 to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <div class="flex flex-col relative z-10">
+            <h3 class="text-gray-600 font-semibold text-sm uppercase tracking-wider mb-2 group-hover:text-green-600 transition-colors duration-300">Total Revenue</h3>
+            <p class="text-3xl font-bold text-gray-800" id="totalRevenue">₹{{statistics.totalRevenue}}</p>
+            <div class="mt-2 text-green-500 flex items-center">
+              <i class="fas fa-chart-line mr-2 animate-pulse"></i>
+              <span class="text-sm font-semibold group-hover:font-bold">Gross Income</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Discounts Card -->
+        <div class="bg-white shadow-lg rounded-xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-l-4 border-purple-500 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-100 to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <div class="flex flex-col relative z-10">
+            <h3 class="text-gray-600 font-semibold text-sm uppercase tracking-wider mb-2 group-hover:text-purple-600 transition-colors duration-300">Total Discounts</h3>
+            <p class="text-3xl font-bold text-gray-800" id="totalDiscount">₹{{statistics.totalDiscount}}</p>
+            <div class="mt-2 text-purple-500 flex items-center">
+              <i class="fas fa-tags mr-2 animate-spin"></i>
+              <span class="text-sm font-semibold group-hover:font-bold">Savings Offered</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Net Revenue Card -->
+        <div class="bg-white shadow-lg rounded-xl p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border-l-4 border-red-500 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-r from-red-100 to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <div class="flex flex-col relative z-10">
+            <h3 class="text-gray-600 font-semibold text-sm uppercase tracking-wider mb-2 group-hover:text-red-600 transition-colors duration-300">Net Revenue</h3>
+            <p class="text-3xl font-bold text-gray-800" id="netRevenue">₹{{statistics.netRevenue}}</p>
+            <div class="mt-2 text-red-500 flex items-center">
+              <i class="fas fa-dollar-sign mr-2 animate-pulse"></i>
+              <span class="text-sm font-semibold group-hover:font-bold">Final Earnings</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Report Section -->
+      <div class="bg-white shadow-lg rounded-2xl p-8 mb-8">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-3xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Sales Report</h2>
+          
+          <!-- Filter Controls -->
+          <div class="flex items-center space-x-6">
+            <!-- Quick Filters -->
+            <div class="flex space-x-3">
+              <button onclick="filterSales('day')" 
+                      class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                Today
+              </button>
+              <button onclick="filterSales('week')" 
+                      class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                This Week
+              </button>
+              <button onclick="filterData('month')" 
+                      class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                This Month
+              </button>
+            </div>
+
+            <!-- Custom Date Range -->
+            <div class="flex items-center space-x-3">
+              <input type="date" id="startDate" 
+                     class="px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+              <span class="text-gray-500 font-medium">to</span>
+              <input type="date" id="endDate" 
+                     class="px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+              <button onclick="filterCustomRange()" 
+                      class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                Apply
+              </button>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="flex space-x-3">
+              <button onclick="exportToPDF()" 
+                      class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <i class="fas fa-file-pdf mr-2"></i> PDF
+              </button>
+              <button onclick="exportToExcel()" 
+                      class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <i class="fas fa-file-excel mr-2"></i> Excel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sales Table -->
+        <div class="overflow-x-auto rounded-xl shadow-md border border-gray-100">
+          <table class="min-w-full bg-white">
+            <thead>
+              <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+                <th class="group px-6 py-4 text-left">
+                  <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span>Date</span>
+                    <i class="fas fa-sort text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </th>
+                <th class="group px-6 py-4 text-left">
+                  <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span>Order ID</span>
+                    <i class="fas fa-sort text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </th>
+                <th class="group px-6 py-4 text-left">
+                  <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span>Customer</span>
+                    <i class="fas fa-sort text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </th>
+                <th class="group px-6 py-4 text-left">
+                  <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span>Original Price</span>
+                    <i class="fas fa-sort text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </th>
+                <th class="group px-6 py-4 text-left">
+                  <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span> Discount</span>
+                    <i class="fas fa-sort text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </th>
+                {{!-- <th class="group px-6 py-4 text-left">
+                  <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span>Coupon Discount</span>
+                    <i class="fas fa-sort text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </th> --}}
+                <th class="group px-6 py-4 text-left">
+                  <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span>Net Amount</span>
+                    <i class="fas fa-sort text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" id="salesReportBody">
+              {{#each orders}}
+              <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <i class="far fa-calendar-alt text-gray-400 mr-2"></i>
+                    <span>{{formatDate this.createdAt}}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <i class="fas fa-hashtag text-blue-400 mr-2"></i>
+                    <span class="text-blue-600 font-medium">{{this._id}}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">{{this.userId.name}}</td>
+                <td class="px-6 py-4 whitespace-nowrap">₹{{this.finalAmount}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-green-600">₹{{this.offerDiscount}}</td>
+                {{!-- <td class="px-6 py-4 whitespace-nowrap text-purple-600">₹{{this.couponDiscount}}</td> --}}
+                <td class="px-6 py-4 whitespace-nowrap font-medium">₹{{this.originalAmount}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+            <tfoot class="bg-gray-100">
+              <tr>
+                <td colspan="3" class="px-6 py-4 text-right font-semibold">Total:</td>
+                <td class="px-6 py-4 font-semibold">₹{{summary.totalOriginal}}</td>
+                <td class="px-6 py-4 font-semibold text-green-600">₹{{summary.totalOfferDiscount}}</td>
+                {{!-- <td class="px-6 py-4 font-semibold text-purple-600">₹{{summary.totalCouponDiscount}}</td> --}}
+                <td class="px-6 py-4 font-semibold">₹{{summary.totalNet}}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sales Chart -->
+      <div class="bg-white shadow-lg rounded-xl p-6 mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-semibold text-gray-800">Sales Trend</h3>
+          <div class="flex space-x-3">
+            <button onclick="updateChart('weekly')" 
+                    class="px-3 py-1.5 text-sm bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              Weekly
+            </button>
+            <button onclick="updateChart('monthly')" 
+                    class="px-3 py-1.5 text-sm bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              Monthly
+            </button>
+            <button onclick="updateChart('yearly')" 
+                    class="px-3 py-1.5 text-sm bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-medium rounded-lg hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              Yearly
+            </button>
+          </div>
+        </div>
+        <div class="h-64">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
     </main>
   </div>
+
   <!-- Footer -->
 <footer class="bg-black text-white p-4 mt-6 text-center">
   <p>&copy; 2024 tickLore. All Rights Reserved.</p>
 </footer>
+
+<!-- Make sure Chart.js is loaded -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let salesChart = null;
+
+function initializeChart() {
+    const ctx = document.getElementById('salesChart');
+    if (!ctx) return;
+
+    // Clear any existing chart
+    if (salesChart) {
+        salesChart.destroy();
+    }
+
+    // Create gradient
+    const ctx2d = ctx.getContext('2d');
+    const gradient = ctx2d.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(234, 179, 8, 0.2)');
+    gradient.addColorStop(1, 'rgba(251, 191, 36, 0.05)');
+
+    // Initialize chart with white background
+    salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Sales',
+                data: [],
+                borderColor: '#EAB308',
+                backgroundColor: gradient,
+                borderWidth: 2.5,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#EAB308',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#1e293b',
+                    bodyColor: '#1e293b',
+                    borderColor: '#e2e8f0',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `₹${context.parsed.y.toLocaleString('en-IN')}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(226, 232, 240, 0.4)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: value => '₹' + value.toLocaleString('en-IN'),
+                        padding: 8,
+                        color: '#64748b'
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        padding: 8,
+                        color: '#64748b'
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 10,
+                    bottom: 10
+                }
+            },
+            backgroundColor: 'white' // Explicitly set background color
+        }
+    });
+}
+
+// Initialize chart and data when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    initializeChart();
+    filterData('month'); // Load initial month data
+});
+
+async function updateChart(period) {
+    try {
+        const response = await fetch(`/admin/sales-data?period=${period}`);
+        if (!response.ok) throw new Error('Failed to fetch chart data');
+        
+        const data = await response.json();
+        
+        if (salesChart) {
+            salesChart.data.labels = data.labels;
+            salesChart.data.datasets[0].data = data.values;
+            salesChart.update();
+        }
+
+        // Update button states
+        const buttons = document.querySelectorAll('[onclick^="updateChart"]');
+        buttons.forEach(btn => {
+            const btnPeriod = btn.onclick.toString().match(/updateChart\('(.+?)'\)/)[1];
+            if (btnPeriod === period) {
+                btn.classList.remove('from-yellow-400', 'to-amber-500');
+                btn.classList.add('from-yellow-500', 'to-amber-600');
+            } else {
+                btn.classList.remove('from-yellow-500', 'to-amber-600');
+                btn.classList.add('from-yellow-400', 'to-amber-500');
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating chart:', error);
+    }
+}
+
+// Update the filterData function to call updateChart with the correct period
+async function filterData(period) {
+    try {
+        const response = await fetch('/admin/filter-orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ filterType: period })
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        const data = await response.json();
+        
+        // Update metrics and table as before...
+        
+        // Update chart with the same period
+        await updateChart(period === 'day' ? 'weekly' : 
+                         period === 'week' ? 'weekly' : 
+                         'monthly');
+        
+    } catch (error) {
+        console.error('Error filtering data:', error);
+    }
+}
+
+function setActiveFilter(button) {
+    // Remove active class from all filter buttons
+    document.querySelectorAll('[onclick^="filterSales"]').forEach(btn => {
+        btn.classList.remove('from-yellow-500', 'to-amber-600');
+        btn.classList.add('from-yellow-400', 'to-amber-500');
+    });
+    
+    // Add active class to clicked button
+    button.classList.remove('from-yellow-400', 'to-amber-500');
+    button.classList.add('from-yellow-500', 'to-amber-600');
+}
+
+function filterSales(type) {
+    const button = event.currentTarget;
+    setActiveFilter(button);
+
+    fetch('/admin/filter-orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filterType: type })
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateSalesTable(data.orders, data.summary);
+        updateChart(type === 'day' ? 'weekly' : type === 'week' ? 'weekly' : 'monthly');
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function filterCustomRange() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+
+    fetch('/admin/filter-orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ startDate, endDate })
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateSalesTable(data.orders, data.summary);
+        updateChart('weekly'); // Default to weekly view for custom range
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function updateSalesTable(orders, summary) {
+    const tbody = document.getElementById('salesReportBody');
+    tbody.innerHTML = '';
+
+    orders.forEach(order => {
+        const row = `
+            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <i class="far fa-calendar-alt text-gray-400 mr-2"></i>
+                        <span>${new Date(order.createdAt).toLocaleDateString()}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <i class="fas fa-hashtag text-blue-400 mr-2"></i>
+                        <span class="text-blue-600 font-medium">${order._id}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">${order.userId.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">₹${order.originalAmount.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-green-600">₹${order.offerDiscount.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-purple-600">₹${order.couponDiscount.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap font-medium">₹${order.finalAmount.toFixed(2)}</td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+
+    // Update summary row
+    document.querySelector('tfoot').innerHTML = `
+        <tr>
+            <td colspan="3" class="px-6 py-4 text-right font-semibold">Total:</td>
+            <td class="px-6 py-4 font-semibold">₹${summary.totalOriginal.toFixed(2)}</td>
+            <td class="px-6 py-4 font-semibold text-green-600">₹${summary.totalOfferDiscount.toFixed(2)}</td>
+            <td class="px-6 py-4 font-semibold text-purple-600">₹${summary.totalCouponDiscount.toFixed(2)}</td>
+            <td class="px-6 py-4 font-semibold">₹${summary.totalNet.toFixed(2)}</td>
+        </tr>
+    `;
+}
+
+async function exportToPDF() {
+    try {
+        const response = await fetch('/admin/export-sales-pdf', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to generate PDF');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    } catch (error) {
+        console.error('Error exporting PDF:', error);
+        alert('Failed to export PDF. Please try again.');
+    }
+}
+
+async function exportToExcel() {
+    try {
+        const response = await fetch('/admin/export-sales-excel', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to generate Excel file');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    } catch (error) {
+        console.error('Error exporting Excel:', error);
+        alert('Failed to export Excel file. Please try again.');
+    }
+}
+</script>
+
 </body>

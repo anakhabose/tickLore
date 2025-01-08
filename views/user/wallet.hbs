@@ -1,0 +1,363 @@
+ <header class="bg-black text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="/images/logo.png" alt="Logo" class="h-8">
+        <nav class="space-x-6 hidden md:flex">
+          <a href="/user/home" class="hover:text-yellow-500">Home</a>
+          <a href="/user/shop" class="hover:text-yellow-500">Shop</a>
+          <a href="#" class="hover:text-yellow-500">About</a>
+          <a href="#" class="hover:text-yellow-500">Contact</a>
+        </nav>
+      </div>
+      <div class="flex space-x-4 items-center">
+  <input type="text" placeholder="What are you looking for?" class="p-2 rounded-lg">
+ 
+  {{#if user}}
+      <a href="/user/profile" class="hover:text-yellow-500">
+        <i class="fas fa-user mr-2"></i> 
+      </a>
+       <a href="#" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
+       <a href="/user/cart" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
+
+      <a href="/user/logout" class="hover:text-yellow-500">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+
+  {{else}}
+    <a href="/user/login" class="hover:text-yellow-500">LOGIN</a>
+    <a href="/user/signup" class="hover:text-yellow-500">SIGNUP</a>
+  {{/if}}
+</div>
+    </div>
+  </header>
+ <div class="flex flex-col md:flex-row min-h-screen bg-gray-50">
+   <aside class="bg-gray-100 text-black w-64 p-4 flex flex-col">
+            <div class="text-lg font-bold mb-6">Manage My Account</div>
+            <nav class="flex flex-col space-y-4">
+                <a href="/user/profile"
+                    class="p-2 rounded {{#if (eq currentPath '/user/profile')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-user"></i> My Profile
+                </a>
+                <a href="/user/orders"
+                    class="p-2 rounded {{#if (eq currentPath '/user/orders')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-box"></i> My Orders
+                </a>
+                <a href="/user/address"
+                    class="p-2 rounded {{#if (eq currentPath '/user/address')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-location-arrow"></i> Saved Address
+                </a>
+                <a href="/user/wallet"
+                    class="p-2 rounded {{#if (eq currentPath '/user/wallet')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-wallet"></i> My Wallet
+                </a>
+                <a href="/change-password"
+                    class="p-2 rounded {{#if (eq currentPath '/user/change-password')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-key"></i> Change Password
+                </a>
+                <a href="/logout"
+                    class="p-2 rounded {{#if (eq currentPath '/logout')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+<div class="container mx-auto p-6">
+    <h2 class="text-2xl font-bold mb-6">My Wallet</h2>
+    <div class="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-xl font-semibold text-gray-800">Wallet Balance</h3>
+                <p class="text-3xl font-bold text-yellow-500 mt-2">₹{{wallet.balance}}</p>
+            </div>
+            <div class="bg-yellow-500 text-white rounded-full p-3">
+                <i class="fas fa-wallet text-2xl"></i>
+            </div>
+        </div>
+        
+        <button 
+            class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+            onclick="openAddMoneyModal()">
+            <i class="fas fa-plus-circle mr-2"></i>
+            Add Money
+        </button>
+    </div>
+ <div class="mt-8 bg-white rounded-lg shadow-lg p-8 max-w-5xl mx-auto border border-gray-200">
+    <h3 class="text-2xl font-semibold text-gray-800 mb-6">Transaction History</h3>
+    
+    {{#if wallet.transactions}}
+    <div class="overflow-x-auto">
+        <table class="w-full table-auto border-collapse">
+            <thead>
+                <tr class="bg-gray-100 text-gray-700">
+                    <th class="px-6 py-4 text-left border-b border-gray-300">#</th>
+                    <th class="px-6 py-4 text-left border-b border-gray-300">Date</th>
+                    <th class="px-6 py-4 text-left border-b border-gray-300">Type</th>
+                    <th class="px-6 py-4 text-left border-b border-gray-300">Amount</th>
+                    <th class="px-6 py-4 text-left border-b border-gray-300">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each wallet.transactions}}
+                <tr class="hover:bg-gray-100 transition duration-200">
+                    <td class="px-6 py-4 border-b border-gray-300 align-middle">
+                        {{add (add @index 1) (multiply (subtract ../pagination.currentPage 1) 10)}}
+                    </td>
+                    <td class="px-6 py-4 border-b border-gray-300 align-middle">
+                        {{formatDate this.date}}
+                    </td>
+                    <td class="px-6 py-4 border-b border-gray-300 align-middle">
+                        {{#if (or (eq this.type 'credit') (eq this.type 'refund'))}}
+                        <span class="bg-green-200 text-green-600 px-3 py-1 rounded-lg">{{this.type}}</span>
+                        {{else}}
+                        <span class="bg-red-200 text-red-600 px-3 py-1 rounded-lg">{{this.type}}</span>
+                        {{/if}}
+                    </td>
+                    <td class="px-6 py-4 border-b border-gray-300 align-middle">
+                        {{#if (or (eq this.type 'credit') (eq this.type 'refund'))}}
+                        <span class="text-green-600">+₹{{this.amount}}</span>
+                        {{else}}
+                        <span class="text-red-600">-₹{{this.amount}}</span>
+                        {{/if}}
+                    </td>
+                    <td class="px-6 py-4 border-b border-gray-300 align-middle">{{this.description}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+    {{else}}
+    <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-history text-5xl mb-4 text-gray-400"></i>
+        <p class="text-gray-600 text-lg">No transactions found</p>
+    </div>
+    {{/if}}
+
+    {{#if wallet.transactions}}
+        <div class="mt-6 flex justify-center items-center space-x-4">
+            {{#if pagination.hasPrev}}
+                <a href="?page={{subtract pagination.currentPage 1}}" 
+                   class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                    Previous
+                </a>
+            {{else}}
+                <button class="px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed">
+                    Previous
+                </button>
+            {{/if}}
+
+            <span class="text-gray-600">
+                Page {{pagination.currentPage}} of {{pagination.totalPages}}
+            </span>
+
+            {{#if pagination.hasNext}}
+                <a href="?page={{add pagination.currentPage 1}}" 
+                   class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                    Next
+                </a>
+            {{else}}
+                <button class="px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed">
+                    Next
+                </button>
+            {{/if}}
+        </div>
+    {{/if}}
+</div>
+
+</div>
+ 
+</div>
+<!-- Add Money Modal -->
+<div id="addMoneyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Add Money to Wallet</h3>
+            <button onclick="closeAddMoneyModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="setAmount(100)" class="p-2 border rounded hover:bg-yellow-100">₹100</button>
+                <button onclick="setAmount(500)" class="p-2 border rounded hover:bg-yellow-100">₹500</button>
+                <button onclick="setAmount(1000)" class="p-2 border rounded hover:bg-yellow-100">₹1000</button>
+            </div>
+            <div>
+                <input 
+                    type="number" 
+                    id="addAmount" 
+                    class="w-full p-2 border rounded" 
+                    placeholder="Enter custom amount"
+                    min="1"
+                >
+            </div>
+            <button 
+                onclick="initiatePayment()"
+                class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">
+                Proceed to Add Money
+            </button>
+        </div>
+    </div>
+</div>
+
+      <footer class="bg-black text-white py-10">
+    <div class="container mx-auto grid md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="font-bold text-lg mb-4">Exclusive</h3>
+        <p>Get 10% off your first order</p>
+        <input type="email" placeholder="Enter your email" class="mt-2 p-2 rounded-lg w-full">
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Support</h3>
+        <p>111 Kochi,Kerala</p>
+        <p>ticklore@gmail.com</p>
+        <p>+88015-88888-9999</p>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Account</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">My Account</a></li>
+          <li><a href="/user/login" class="hover:text-yellow-500">Login </a></li>
+            <li><a href="/user/signup" class="hover:text-yellow-500">Signup</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Cart</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Wishlist</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Quick Link</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Terms Of Use</a></li>
+          <li><a href="#" class="hover:text-yellow-500">FAQ</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-8 text-center">
+      <img src="/images/logo.png" alt="Footer Logo" class="mx-auto h-12">
+      <p class="text-gray-600 mt-4">&copy; Copyright tickLore 2024. All rights reserved</p>
+    </div>
+  </footer>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+function setAmount(amount) {
+    document.getElementById('addAmount').value = amount;
+}
+
+function initiatePayment() {
+    const amount = document.getElementById('addAmount').value;
+    if (!amount || amount <= 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Amount',
+            text: 'Please enter a valid amount',
+            confirmButtonColor: '#EAB308'
+        });
+        return;
+    }
+
+    console.log('Initiating payment for amount:', amount);
+
+    fetch('/user/wallet/add-money', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ amount: parseInt(amount) * 100 })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Order creation response:', data);
+
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to create order');
+        }
+
+        const options = {
+            key: data.key_id,
+            amount: data.amount,
+            currency: 'INR',
+            name: 'tickLore',
+            description: 'Wallet Recharge',
+            order_id: data.order_id,
+            handler: function(response) {
+                console.log('Payment response:', response);
+                verifyPayment(response, {
+                    order_id: data.order_id,
+                    amount: data.amount
+                });
+            },
+            theme: {
+                color: '#EAB308'
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Payment Error',
+            text: 'Error initiating payment: ' + error.message,
+            confirmButtonColor: '#EAB308'
+        });
+    });
+}
+
+function verifyPayment(payment, order) {
+    fetch('/user/wallet/verify-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            payment,
+            order
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Payment successful! Wallet updated.',
+                confirmButtonColor: '#EAB308'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Verification Failed',
+                text: data.message || 'Payment verification failed',
+                confirmButtonColor: '#EAB308'
+            });
+            console.error('Verification error:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Verification Error',
+            text: 'Error verifying payment: ' + error.message,
+            confirmButtonColor: '#EAB308'
+        });
+    });
+}
+
+function openAddMoneyModal() {
+    document.getElementById('addMoneyModal').classList.remove('hidden');
+    document.getElementById('addMoneyModal').classList.add('flex');
+}
+
+function closeAddMoneyModal() {
+    document.getElementById('addMoneyModal').classList.remove('flex');
+    document.getElementById('addMoneyModal').classList.add('hidden');
+}
+</script>

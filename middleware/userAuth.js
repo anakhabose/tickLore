@@ -1,3 +1,4 @@
+const userSchema = require('../model/userModel');
 
 const checkSession = (req,res,next)=>{
     if(req.session.user){

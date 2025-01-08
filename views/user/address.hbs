@@ -1,0 +1,716 @@
+
+  <header class="bg-black text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="/images/logo.png" alt="Logo" class="h-8">
+        <nav class="space-x-6 hidden md:flex">
+          <a href="/user/home" class="hover:text-yellow-500">Home</a>
+          <a href="/user/shop" class="hover:text-yellow-500">Shop</a>
+          <a href="#" class="hover:text-yellow-500">About</a>
+          <a href="#" class="hover:text-yellow-500">Contact</a>
+        </nav>
+      </div>
+      <div class="flex space-x-4 items-center">
+        <input type="text" placeholder="What are you looking for?" class="p-2 rounded-lg">
+        {{#if users}}
+          <a href="/user/profile" class="hover:text-yellow-500">
+            <i class="fas fa-user mr-2"></i> 
+          </a>
+          <a href="#" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
+          <a href="/user/cart" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
+          <a href="/user/logout" class="hover:text-yellow-500">
+            <i class="fas fa-sign-out-alt"></i>
+          </a>
+        {{else}}
+          <a href="/user/login" class="hover:text-yellow-500">LOGIN</a>
+          <a href="/user/signup" class="hover:text-yellow-500">SIGNUP</a>
+        {{/if}}
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-col md:flex-row min-h-screen bg-gray-50">
+    <!-- Sidebar Navigation -->
+    <aside class="bg-gray-100 text-black w-64 p-4 flex flex-col">
+      <div class="text-lg font-bold mb-6">Manage My Account</div>
+      <nav class="flex flex-col space-y-4">
+        <a href="/user/profile" class="p-2 rounded {{#if (eq currentPath '/profile')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+          <i class="fas fa-user"></i> My Profile
+        </a>
+        <a href="/user/orders" class="p-2 rounded {{#if (eq currentPath '/orders/status')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+          <i class="fas fa-box"></i> My Orders
+        </a>
+        <a href="/user/address" class="p-2 rounded {{#if (eq currentPath '/orders/status')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+          <i class="fas fa-location-arrow"></i> Saved Address
+        </a>
+        <a href="/user/wallet" class="p-2 rounded {{#if (eq currentPath '/wishlist')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+          <i class="fas fa-wallet"></i> My Wallet
+        </a>
+        <a href="/change-password" class="p-2 rounded {{#if (eq currentPath '/change-password')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+          <i class="fas fa-key"></i> Change Password
+        </a>
+        <a href="/logout" class="p-2 rounded {{#if (eq currentPath '/logout')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+      <div class="max-w-2xl mx-auto">
+       
+
+        <!-- Address Management -->
+       <div class="bg-gray-100 p-8 rounded-lg shadow-md w-full max-w-4xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Address Book</h1>
+  <button
+    id="addAddressBtn"
+    class="bg-yellow-500 text-white px-6 py-2 rounded-lg shadow hover:bg-yellow-600 transition-all ease-in-out"
+  >
+    + Add Address
+  </button>
+  <div id="addressList" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+    {{#each addresses}}
+    <div class="p-6 bg-white rounded-lg shadow-md border border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">{{name}}</h2>
+      <p class="text-gray-600">{{addressLine1}}</p>
+      {{#if addressLine2}}<p class="text-gray-600">{{addressLine2}}</p>{{/if}}
+      <p class="text-gray-600">{{city}}, {{state}}, {{pincode}}</p>
+      <p class="text-gray-600">{{country}}</p>
+      <p class="text-gray-600"><strong>Phone:</strong> {{phoneNumber}}</p>
+       {{#if isDefault}}
+                    <span class="inline-block mt-2 bg-green-500 text-white px-2 py-1 rounded text-sm">Default</span>
+       {{/if}}
+      <div class="mt-4 flex justify-end space-x-4">
+        <button
+          class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition-all ease-in-out"
+          data-modal-toggle="editAddressModal" 
+          onclick="openEditModal({{json this}})"
+        >
+          Edit
+        </button>
+       
+        <button
+          class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition-all ease-in-out"
+          onclick="deleteAddress('{{_id}}')"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+</div>
+
+
+
+        
+       <!-- Modal for Adding/Editing Address -->
+<div id="addressModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded w-full max-w-4xl mx-4 sm:mx-0">
+    <h2 id="modalTitle" class="text-xl font-semibold mb-4">Add Address</h2>
+    <form id="addressForm" novalidate onsubmit="return false;" class="space-y-6">
+      <input type="hidden" id="addressId" />
+      
+      <!-- Name Field -->
+      <div>
+        <label class="block font-medium">Name</label>
+        <input type="text" id="name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+      </div>
+
+      <!-- Address Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">Address Line 1</label>
+          <input type="text" id="addressLine1" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="5" maxlength="100" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">Address Line 2 (Optional)</label>
+          <input type="text" id="addressLine2" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" maxlength="100" />
+        </div>
+      </div>
+
+      <!-- City and State Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">City</label>
+          <input type="text" id="city" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">State</label>
+          <input type="text" id="state" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+      </div>
+
+      <!-- Country and Pincode Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">Country</label>
+          <input type="text" id="country" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">Pincode</label>
+          <input type="text" id="pincode" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required pattern="^[1-9][0-9]{5}$" />
+        </div>
+      </div>
+
+      <!-- Phone Number Field -->
+      <div>
+        <label class="block font-medium">Phone Number</label>
+        <input type="text" id="phoneNumber" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required pattern="^[6-9][0-9]{9}$" />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-2">
+        <button type="button" id="cancelBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+       
+       <!-- Modal for Editing Address -->
+<div id="editAddressModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded w-full max-w-4xl mx-4 sm:mx-0">
+    <h2 id="modalTitle" class="text-xl font-semibold mb-4">Edit Address</h2>
+    <form id="editAddressForm" novalidate onsubmit="return false;" class="space-y-6">
+      <input type="hidden" id="addressId" name="id" />
+      
+      <!-- Name Field -->
+      <div>
+        <label class="block font-medium">Name</label>
+        <input type="text" id="name" name="name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+      </div>
+
+      <!-- Address Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">Address Line 1</label>
+          <input type="text" id="addressLine1" name="addressLine1" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="5" maxlength="100" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">Address Line 2 (Optional)</label>
+          <input type="text" id="addressLine2" name="addressLine2" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" maxlength="100" />
+        </div>
+      </div>
+
+      <!-- City and State Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">City</label>
+          <input type="text" id="city" name="city" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">State</label>
+          <input type="text" id="state" name="state" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+      </div>
+
+      <!-- Country and Pincode Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">Country</label>
+          <input type="text" id="country" name="country" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">Pincode</label>
+          <input type="text" id="pincode" name="pincode" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required pattern="^[1-9][0-9]{5}$" />
+        </div>
+      </div>
+
+      <!-- Phone Number Field -->
+      <div>
+        <label class="block font-medium">Phone Number</label>
+        <input type="text" id="phoneNumber" name="phoneNumber" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required pattern="^[6-9][0-9]{9}$" />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-2">
+        <button type="button" id="editCancelBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+      </div>
+    </main>
+  </div>
+  
+
+
+<script>
+  function selectAddress(address) {
+    // Fill the billing form with selected address
+    document.getElementById('firstName').value = address.name;
+    document.getElementById('streetAddress').value = address.streetAddress;
+    document.getElementById('apartment').value = address.landmark;
+    document.getElementById('townCity').value = address.city;
+    document.getElementById('state').value = address.state;
+    document.getElementById('country').value = address.country;
+    document.getElementById('pincode').value = address.pincode;
+    document.getElementById('phone').value = address.phone;
+    
+    closeAddressModal();
+}
+  
+  // Fetch addresses from server
+  async function fetchAddresses() {
+    try {
+      const response = await fetch('/user/address', {
+        headers: {
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data.status) {
+        renderAddresses(data.addresses);
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      if (error.message.includes('401')) {
+        window.location.href = '/user/login';
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+  // Get DOM elements
+  const addressModal = document.getElementById('addressModal');
+  const addAddressBtn = document.getElementById('addAddressBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const addressForm = document.getElementById('addressForm');
+  const modalTitle = document.getElementById('modalTitle');
+
+  // Toggle modal visibility
+  const toggleModal = (show) => {
+    addressModal.classList.toggle('hidden', !show);
+  };
+
+  // Validate form inputs
+  function validateForm() {
+    const name = document.getElementById('name').value.trim();
+    const addressLine1 = document.getElementById('addressLine1').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const pincode = document.getElementById('pincode').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    
+    if (name.length < 2) {
+      showError('Name should be at least 2 characters long');
+      return false;
+    }
+
+    if (addressLine1.length < 5) {
+      showError('Please enter a valid address (minimum 5 characters)');
+      return false;
+    }
+
+    if (city.length < 2) {
+      showError('Please enter a valid city name');
+      return false;
+    }
+
+    if (state.length < 2) {
+      showError('Please enter a valid state name');
+      return false;
+    }
+
+    if (country.length < 2) {
+      showError('Please enter a valid country name');
+      return false;
+    }
+
+    const pincodeRegex = /^[1-9][0-9]{5}$/;
+    if (!pincodeRegex.test(pincode)) {
+      showError('Please enter a valid 6-digit pincode');
+      return false;
+    }
+
+    const phoneRegex = /^[6-9][0-9]{9}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      showError('Please enter a valid 10-digit phone number');
+      return false;
+    }
+
+    return true;
+  }
+
+  // Show error message using SweetAlert
+  function showError(message) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error',
+      text: message
+    });
+  }
+
+  // Handle form submission
+  async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    if (!validateForm()) return;
+
+    const formData = {
+      name: document.getElementById('name').value,
+      addressLine1: document.getElementById('addressLine1').value,
+      addressLine2: document.getElementById('addressLine2').value,
+      city: document.getElementById('city').value,
+      state: document.getElementById('state').value,
+      country: document.getElementById('country').value,
+      pincode: document.getElementById('pincode').value,
+      phoneNumber: document.getElementById('phoneNumber').value
+    };
+    
+    try {
+      const response = await fetch('/user/addAddress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      if (data.status) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: data.message || 'Address added successfully!',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#EAB308'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      } else {
+        throw new Error(data.message || 'Failed to add address');
+      }
+    } catch (error) {
+      console.error('Error adding address:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Something went wrong! Please try again.'
+      });
+    }
+  }
+
+ 
+  // Event listeners
+  addAddressBtn.addEventListener('click', () => {
+    modalTitle.textContent = 'Add Address';
+    document.getElementById('addressId').value = '';
+    addressForm.reset();
+    toggleModal(true);
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    toggleModal(false);
+    addressForm.reset();
+  });
+
+  addressForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const id = document.getElementById('addressId').value;
+    
+    if (id) {
+      await updateAddress(event);
+    } else {
+      await handleFormSubmit(event);
+    }
+  });
+
+  // Initial fetch of addresses
+  fetchAddresses();
+
+  // Add this new event listener
+  const editCancelBtn = document.getElementById('editCancelBtn');
+  const editAddressModal = document.getElementById('editAddressModal');
+
+  editCancelBtn.addEventListener('click', () => {
+    editAddressModal.classList.add('hidden');
+    document.getElementById('editAddressForm').reset();
+  });
+});
+function openEditModal(address) {
+     const editModal = document.getElementById('editAddressModal');
+    const editForm = document.getElementById('editAddressForm');
+    
+    // Set values in the edit form
+    editForm.querySelector('#addressId').value = address._id;
+    editForm.querySelector('#name').value = address.name;
+    editForm.querySelector('#phoneNumber').value = address.phoneNumber;
+    editForm.querySelector('#pincode').value = address.pincode;
+    editForm.querySelector('#addressLine1').value = address.addressLine1;
+    editForm.querySelector('#addressLine2').value = address.addressLine2 || '';
+    editForm.querySelector('#city').value = address.city;
+    editForm.querySelector('#state').value = address.state;
+    editForm.querySelector('#country').value = address.country;
+    
+    // Show the edit modal
+    editModal.classList.remove('hidden');
+}
+
+
+ document.getElementById('editAddressForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    
+    // Get all form data
+    const formData = {
+        id: this.querySelector('#addressId').value,
+        name: this.querySelector('#name').value,
+        addressLine1: this.querySelector('#addressLine1').value,
+        addressLine2: this.querySelector('#addressLine2').value,
+        city: this.querySelector('#city').value,
+        state: this.querySelector('#state').value,
+        country: this.querySelector('#country').value,
+        pincode: this.querySelector('#pincode').value,
+        phoneNumber: this.querySelector('#phoneNumber').value
+    };
+
+    try {
+        const response = await fetch(`/user/editAddress/${formData.id}`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+                if (response.ok) {
+                   document.getElementById('editAddressModal').classList.add('hidden');
+                    Swal.fire('Success', 'Address updated successfully', 'success');
+                     Swal.fire({
+                icon: 'success',
+                title: 'Address Updated!',
+                text: 'Your address has been successfully updated.',
+                showConfirmButton: true,
+                confirmButtonColor: '#EAB308', // Yellow-500 color
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.reload(); // Reload page after clicking OK
+                }
+            });
+                   
+                } else {
+                    const error = await response.json();
+                    Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: error.message || 'Failed to update address',
+                confirmButtonColor: '#EAB308'
+            });
+                }
+            } catch (error) {
+                Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Please try again.',
+            confirmButtonColor: '#EAB308'
+        });
+            }
+        });
+
+// Update address function (globally accessible)
+async function updateAddress(event) {
+  event.preventDefault();
+  
+  if (!validateForm()) return;
+
+  const id = document.getElementById('addressId').value;
+  const formData = {
+    name: document.getElementById('name').value,
+    addressLine1: document.getElementById('addressLine1').value,
+    addressLine2: document.getElementById('addressLine2').value,
+    city: document.getElementById('city').value,
+    state: document.getElementById('state').value,
+    country: document.getElementById('country').value,
+    pincode: document.getElementById('pincode').value,
+    phoneNumber: document.getElementById('phoneNumber').value
+  };
+
+  try {
+    const response = await fetch(`/user/address/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update address');
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Address updated successfully!',
+      confirmButtonText: 'OK'
+    }).then(() => {
+      document.getElementById('addressModal').classList.add('hidden');
+      document.getElementById('addressForm').reset();
+      fetchAddresses();
+    });
+
+  } catch (error) {
+    console.error('Error updating address:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'Failed to update address'
+    });
+  }
+}
+
+// Delete address function (globally accessible)
+async function deleteAddress(id) {
+  try {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      const response = await fetch(`/user/deleteAddress/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete address');
+      }
+
+      Swal.fire(
+        'Deleted!',
+        'Your address has been deleted.',
+        'success'
+      );
+      
+      fetchAddresses();
+    }
+  } catch (error) {
+    console.error('Error deleting address:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'Failed to delete address'
+    });
+  }
+}
+
+// Add this validation function
+function validateAddressForm(formElement) {
+  // Get form inputs
+  const name = formElement.querySelector('#name').value.trim();
+  const addressLine1 = formElement.querySelector('#addressLine1').value.trim();
+  const city = formElement.querySelector('#city').value.trim();
+  const state = formElement.querySelector('#state').value.trim();
+  const country = formElement.querySelector('#country').value.trim();
+  const pincode = formElement.querySelector('#pincode').value.trim();
+  const phoneNumber = formElement.querySelector('#phoneNumber').value.trim();
+
+  // Validation rules
+  const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+  const pincodeRegex = /^[1-9][0-9]{5}$/;
+  const phoneRegex = /^[6-9][0-9]{9}$/;
+  
+  if (!nameRegex.test(name)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Name',
+      text: 'Name should contain only letters and spaces (2-50 characters)'
+    });
+    return false;
+  }
+
+  if (addressLine1.length < 5 || addressLine1.length > 100) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Address',
+      text: 'Address Line 1 should be between 5-100 characters'
+    });
+    return false;
+  }
+
+  if (city.length < 2 || !/^[a-zA-Z\s]+$/.test(city)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid City',
+      text: 'Please enter a valid city name (letters only)'
+    });
+    return false;
+  }
+
+  if (state.length < 2 || !/^[a-zA-Z\s]+$/.test(state)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid State',
+      text: 'Please enter a valid state name (letters only)'
+    });
+    return false;
+  }
+
+  if (country.length < 2 || !/^[a-zA-Z\s]+$/.test(country)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Country',
+      text: 'Please enter a valid country name (letters only)'
+    });
+    return false;
+  }
+
+  if (!pincodeRegex.test(pincode)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Pincode',
+      text: 'Please enter a valid 6-digit pincode'
+    });
+    return false;
+  }
+
+  if (!phoneRegex.test(phoneNumber)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Phone Number',
+      text: 'Please enter a valid 10-digit phone number'
+    });
+    return false;
+  }
+
+  return true;
+}
+</script>

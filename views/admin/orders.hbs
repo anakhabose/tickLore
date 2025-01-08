@@ -1,0 +1,215 @@
+
+  <header class="bg-black text-white p-4 flex justify-between items-center">
+    <img src="/images/logo.png" alt="Logo" class="h-8">
+  
+  </header>
+  <div class="flex h-screen">
+    {{>sidebar}}
+
+    <main class="flex-1 bg-white p-6 overflow-y-auto">
+      <div class="mb-5 px-5">
+        <nav class="text-gray-600 text-sm">
+          <a href="/admin/dashboard" class="hover:text-yellow-600">Dashboard</a> &gt;
+          <a href="/admin/orders" class="hover:text-yellow-600">Orders</a> &gt;
+          <span class="font-bold">All Orders</span>
+        </nav>
+</div>
+
+<header class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">Orders</h1>
+</header>
+
+
+
+<div class="flex justify-between items-center mb-4">
+ <div class="relative">
+   <form id="searchForm" action="/admin/products" method="GET">
+  <input
+    type="text"
+    name="search"
+    value="{{search}}" 
+    class="border border-gray-300 rounded-full px-4 py-2 text-sm"
+    placeholder="Search by name"
+  />
+</form>
+
+  </div>
+</div>
+
+
+<div class="mt-6 bg-white shadow-md rounded-lg overflow-hidden">
+  <table class="w-full table-auto border-collapse">
+
+    <thead>
+      <tr class="bg-gray-100 text-gray-700">
+        <th class="px-4 py-2 text-left border-b border-gray-300">Product</th>
+        <th class="px-4 py-2 text-left border-b border-gray-300">Order ID</th>
+        <th class="px-4 py-2 text-left border-b border-gray-300">Quantity</th>
+        <th class="px-4 py-2 text-left border-b border-gray-300">Price</th>
+        <th class="px-4 py-2 text-left border-b border-gray-300">Status</th>
+        <th class="px-4 py-2 text-left border-b border-gray-300">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each orders}}
+      <tr class="hover:bg-gray-100 transition duration-200">
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">
+          {{#each this.items}}
+          <div class="flex items-center space-x-4 mb-2">
+            <img src="{{this.product.images.[0]}}" class="w-10 h-10 rounded object-cover" alt="Product">
+            <span>{{this.product.productName}}</span>
+          </div>
+          {{/each}}
+        </td>
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">{{this._id}}</td>
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">
+          {{#each this.items}}
+            <div class="mb-2">{{this.quantity}}</div>
+          {{/each}}
+        </td>
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">₹{{this.total}}</td>
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">
+          <span class="px-3 py-1 rounded-full text-sm
+            {{#if (eq this.status 'Delivered')}}
+              bg-green-100 text-green-800
+            {{else if (eq this.status 'Shipped')}}
+              bg-blue-100 text-blue-800
+            {{else if (eq this.status 'Out for Delivery')}}
+              bg-purple-100 text-purple-800
+            {{else}}
+              bg-yellow-100 text-yellow-800
+            {{/if}}
+          ">
+            {{this.status}}
+          </span>
+        </td>
+        <td class="px-4 py-2 border-b border-gray-300 align-middle">
+          <div class="flex flex-col space-y-2">
+          
+            <a href="/admin/viewDetailAdmin/{{this._id}}" class="text-blue-600 hover:text-blue-800 text-sm">
+              View Details
+            </a>
+          </div>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  {{#if pagination}}
+  <div class="flex justify-between items-center px-4 py-3 bg-white border-t border-gray-200">
+    <div class="text-sm text-gray-700">
+      Showing <span class="font-medium">{{pagination.startIndex}}</span> to 
+      <span class="font-medium">{{pagination.endIndex}}</span> of 
+      <span class="font-medium">{{pagination.totalOrders}}</span> orders
+    </div>
+    <div class="flex space-x-2">
+      {{#if pagination.hasPrev}}
+        <a href="?page={{pagination.prevPage}}" class="px-3 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Previous</a>
+      {{/if}}
+      
+      {{#each pagination.pages}}
+        <a href="?page={{this}}" 
+           class="px-3 py-1 rounded-md {{#if (eq this ../pagination.page)}}bg-yellow-500 text-white{{else}}bg-gray-200 text-gray-700 hover:bg-gray-300{{/if}}">
+          {{this}}
+        </a>
+      {{/each}}
+      
+      {{#if pagination.hasNext}}
+        <a href="?page={{pagination.nextPage}}" class="px-3 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Next</a>
+      {{/if}}
+    </div>
+  </div>
+  {{/if}}
+</div>
+
+    </main>
+  </div>
+<footer class="bg-black text-white p-4 mt-6 text-center">
+  <p>&copy; 2024 tickLore. All Rights Reserved.</p>
+</footer>
+
+
+  <script>
+ let debounceTimer;
+   const searchInput = document.querySelector('input[name="search"]');
+   const userTable = document.querySelector('.user-table tbody');
+
+   searchInput.addEventListener('input', () => {
+       clearTimeout(debounceTimer);
+       debounceTimer = setTimeout(() => {
+           const query = searchInput.value;
+
+           // Perform AJAX request to search
+           fetch(`/admin/products?search=${encodeURIComponent(query)}`)
+               .then(response => response.text())
+               .then(html => {
+                   // Parse the response to update the table
+                   const parser = new DOMParser();
+                   const doc = parser.parseFromString(html, 'text/html');
+                   const newTableBody = doc.querySelector('.user-table tbody');
+                   userTable.innerHTML = newTableBody.innerHTML;
+               })
+               .catch(error => console.error('Error during search:', error));
+       }, 300); // Adjust debounce delay as needed
+   });
+   
+
+ function softDelete(productId) {
+
+  Swal.fire({
+    title: 'Confirm Deletion',
+    text: "Do you really want to delete this product?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#FACC15',
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+  }).then((result) => {
+    if (result.isConfirmed) {
+    
+      Swal.fire({
+        title: 'Deleting...',
+        text: 'Please wait while we delete the product.',
+        icon: 'info',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+      });
+
+      // Proceed with deletion
+      fetch(`/admin/deleteProduct/${productId}`, { method: "post" })
+        .then(response => response.json())
+        .then(result => {
+          if (result.status) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted',
+              text: 'The product has been successfully deleted.',
+              confirmButtonText: 'OK',
+            }).then(() => {
+              // Reload the page after user confirms
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Deletion Failed',
+              text: result.message || 'Unable to delete the product. Please try again.',
+              confirmButtonText: 'OK',
+            });
+          }
+        })
+        .catch(() => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error Occurred',
+            text: 'Something went wrong. Please try again later.',
+            confirmButtonText: 'OK',
+          });
+        });
+    }
+  });
+}
+
+</script>

@@ -1,0 +1,192 @@
+<div class="flex min-h-screen flex-col">
+  <header class="bg-black text-white p-4 flex justify-between items-center">
+    <img src="/images/logo.png" alt="Logo" class="h-8">
+  </header>
+
+  <div class="flex flex-1">
+    {{>sidebar}}
+    <main class="flex-1 p-6 bg-white">
+      <div class="max-w-4xl mx-auto bg-grey-100 p-6 rounded-lg">
+        <h2 class="text-2xl font-bold mb-6">Add Offer</h2>
+        
+        <form id="addOfferForm" class="space-y-4" method="POST" action="/admin/addOffer">
+          <div>
+            <label class="block text-sm font-medium">Offer Title</label>
+            <input type="text" id="offerTitle" name="offerTitle" placeholder="Offer Title..." class="w-full border p-2 rounded">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium">Apply Offer To</label>
+            <select id="offerType" name="offerType" class="w-full border p-2 rounded" onchange="toggleOfferType()">
+              <option value="">-- Select Offer Type --</option>
+              <option value="product">Product</option>
+              <option value="category">Category</option>
+            </select>
+          </div>
+
+          <div id="productSelection" class="hidden">
+            <label class="block text-sm font-medium">Select Product</label>
+            <select id="productId" name="productId" class="w-full border p-2 rounded">
+              <option value="">-- Select Product --</option>
+              {{#if products.length}}
+                  {{#each products}}
+                      <option value="{{this._id}}">{{this.productName}} - ₹{{this.price}}</option>
+                  {{/each}}
+              {{else}}
+                  <option value="" disabled>No products available</option>
+              {{/if}}
+            </select>
+          </div>
+
+          <div id="categorySelection" class="hidden">
+            <label class="block text-sm font-medium">Select Category</label>
+            <select id="categoryId" name="categoryId" class="w-full border p-2 rounded">
+              <option value="">-- Select Category --</option>
+              {{#if categories.length}}
+                  {{#each categories}}
+                      <option value="{{this._id}}">{{this.categoryName}}</option>
+                  {{/each}}
+              {{else}}
+                  <option value="" disabled>No categories available</option>
+              {{/if}}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium">Discount Value (%)</label>
+            <input type="number" id="discountValue" name="discountValue" placeholder="Discount Value in Percentage..." class="w-full border p-2 rounded">
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium">Start Date</label>
+              <input type="date" id="startDate" name="startDate" class="w-full border p-2 rounded">
+            </div>
+            <div>
+              <label class="block text-sm font-medium">End Date</label>
+              <input type="date" id="endDate" name="endDate" class="w-full border p-2 rounded">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg py-2">
+            Add Offer
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <footer class="bg-black text-white p-4 mt-6 text-center">
+    <p>&copy; 2024 tickLore. All Rights Reserved.</p>
+  </footer>
+</div>
+
+<script>
+function toggleOfferType() {
+    const offerType = document.getElementById('offerType').value;
+    const productSelection = document.getElementById('productSelection');
+    const categorySelection = document.getElementById('categorySelection');
+
+    if (offerType === 'product') {
+        productSelection.classList.remove('hidden');
+        categorySelection.classList.add('hidden');
+    } else if (offerType === 'category') {
+        categorySelection.classList.remove('hidden');
+        productSelection.classList.add('hidden');
+    } else {
+        productSelection.classList.add('hidden');
+        categorySelection.classList.add('hidden');
+    }
+}
+
+document.getElementById('addOfferForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        offerTitle: document.getElementById('offerTitle').value.trim(),
+        offerType: document.getElementById('offerType').value,
+        discountValue: document.getElementById('discountValue').value,
+        startDate: document.getElementById('startDate').value,
+        endDate: document.getElementById('endDate').value,
+    };
+
+    // Add productId or categoryId based on offer type
+    if (formData.offerType === 'product') {
+        formData.productId = document.getElementById('productId').value;
+    } else if (formData.offerType === 'category') {
+        formData.categoryId = document.getElementById('categoryId').value;
+    }
+
+    // Validation
+    if (!formData.offerTitle) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please enter an offer title'
+        });
+        return;
+    }
+
+    if (!formData.offerType) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please select an offer type'
+        });
+        return;
+    }
+
+    if (!formData.discountValue || formData.discountValue < 1 || formData.discountValue > 90) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Discount value must be between 1 and 90'
+        });
+        return;
+    }
+
+    if (!formData.startDate || !formData.endDate) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please select both start and end dates'
+        });
+        return;
+    }
+
+    try {
+        const response = await fetch('/admin/addOffer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.status) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Offer added successfully!'
+            }).then(() => {
+                window.location.href = '/admin/offers';
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'An error occurred while adding the offer'
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while adding the offer'
+        });
+    }
+});
+</script>  

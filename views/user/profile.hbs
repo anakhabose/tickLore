@@ -6,7 +6,7 @@
         <img src="/images/logo.png" alt="Logo" class="h-8">
         <nav class="space-x-6 hidden md:flex">
           <a href="/user/home" class="hover:text-yellow-500">Home</a>
-          <a href="#" class="hover:text-yellow-500">Category</a>
+          <a href="/user/shop" class="hover:text-yellow-500">Shop</a>
           <a href="#" class="hover:text-yellow-500">About</a>
           <a href="#" class="hover:text-yellow-500">Contact</a>
         </nav>
@@ -18,8 +18,8 @@
       <a href="/user/profile" class="hover:text-yellow-500">
         <i class="fas fa-user mr-2"></i> 
       </a>
-       <a href="#" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
-       <a href="#" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
+       <a href="/user/wishlist" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
+       <a href="/user/cart" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
 
       <a href="/user/logout" class="hover:text-yellow-500">
         <i class="fas fa-sign-out-alt"></i>
@@ -41,20 +41,20 @@
                     class="p-2 rounded {{#if (eq currentPath '/profile')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-user"></i> My Profile
                 </a>
-                <a href="/orders/status"
+                <a href="/user/orders"
                     class="p-2 rounded {{#if (eq currentPath '/orders/status')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-box"></i> My Orders
                 </a>
-                <a href="/orders/status"
+                <a href="/user/address"
                     class="p-2 rounded {{#if (eq currentPath '/orders/status')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-location-arrow"></i> Saved Address
                 </a>
-                <a href="/wishlist"
+                <a href="/user/wallet"
                     class="p-2 rounded {{#if (eq currentPath '/wishlist')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-wallet"></i> My Wallet
                 </a>
-                <a href="/change-password"
-                    class="p-2 rounded {{#if (eq currentPath '/change-password')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
+                <a href="/user/changePassword"
+                    class="p-2 rounded {{#if (eq currentPath '/user/changePassword')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-key"></i> Change Password
                 </a>
                 <a href="/logout"
@@ -70,6 +70,13 @@
             <div class="max-w-2xl mx-auto">
                 <div class="flex items-center justify-between mb-6">
     <div class="flex items-center gap-4">
+      <div class="relative">
+          <img id="profile-image" src={{users.profileImage}} alt="Profile" class="rounded-full w-20 h-20">
+          <label for="profile-image-upload" class="absolute bottom-0 right-0 bg-yellow-600 text-white rounded-full p-1 cursor-pointer hover:bg-yellow-700 z-10">
+            <input type="file" class="hidden" name="profileImage" id="profile-image-upload" accept="image/*">
+            <span class="text-sm">&#9998;</span>
+          </label>
+        </div>
         
         <div>
             <p class="text-sm text-gray-500">Welcome!</p>
@@ -80,8 +87,7 @@
 
 <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl mx-auto">
     <h1 class="text-2xl font-semibold mb-6">Edit Your Profile</h1>
- <form id="profileForm" class="space-y-6" enctype="multipart/form-data">
-
+ <form id="profileForm" class="space-y-6" enctype="multipart/form-data" >
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="space-y-2">
       <label for="firstName" class="text-sm font-medium">First Name</label>
@@ -101,8 +107,8 @@
       <input id="email" name="email" type="email" value="{{users.email}}" class="w-full px-4 py-2 border rounded" disabled>
     </div>
     <div class="space-y-2">
-      <label for="city" class="text-sm font-medium">City</label>
-      <input id="city" name="city" type="text" value="{{users.city}}" class="w-full px-4 py-2 border rounded">
+      <label for="city" class="text-sm font-medium">Phone Number</label>
+      <input id="phoneNumber" name="phoneNumber" type="text" value="{{users.phoneNumber}}" class="w-full px-4 py-2 border rounded">
     </div>
   </div>
 
@@ -116,6 +122,18 @@
 </div>
 
             </div>
+             <!-- Cropper Modal -->
+  <div id="cropper-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg">
+      <div class="w-96 h-96">
+        <img id="cropper-image" src="" class="max-w-full max-h-full">
+      </div>
+      <div class="flex justify-end mt-4 space-x-2">
+        <button id="crop-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Crop</button>
+        <button id="cancel-btn" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </div>
+  </div>
         </main>
     </div>
     <footer class="bg-black text-white py-10">
@@ -160,9 +178,82 @@
 
 
   <script>
- 
+     const profileImageUpload = document.getElementById('profile-image-upload');
+  const profileImage = document.getElementById('profile-image');
+  const cropperModal = document.getElementById('cropper-modal');
+  const cropperImage = document.getElementById('cropper-image');
+  const cropBtn = document.getElementById('crop-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  let cropper;
+
+  profileImageUpload.addEventListener('change', function () {
+    console.log("File input triggered"); 
+
+  const file = this.files[0];
+  if (file) {
+    console.log("File selected:", file); // Debug log
+    const reader = new FileReader();
+    reader.onload = function (e) {
+
+      console.log("File read successfully");
+      console.log("Loaded image URL:", e.target.result); // Debug log
+      cropperImage.src = e.target.result;
+      cropperModal.classList.remove('hidden');
+      
+      // Additional error handling
+      try {
+        if (cropper) cropper.destroy(); // Ensure no duplication
+        cropper = new Cropper(cropperImage, {
+          aspectRatio: 1,
+          viewMode: 1,
+        });
+        console.log("Cropper initialized successfully"); // Debug log
+      } catch (error) {
+        console.error("Error initializing Cropper:", error);
+      }
+    };
+    reader.onerror = function(error) {
+      console.error("Error reading file:", error);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    console.error("No file selected.");
+  }
+});
+  cropBtn.addEventListener('click', function () {
+  console.log("Crop button clicked");
+  const canvas = cropper.getCroppedCanvas();
+  const croppedImage = canvas.toDataURL(); // Convert to base64
+  console.log("Cropped image data:", croppedImage);
+  profileImage.src = croppedImage; // Update profile image
+  cropper.destroy(); // Clean up cropper
+  cropperModal.classList.add('hidden'); // Hide modal
+});
+
+
+  cancelBtn.addEventListener('click', function () {
+    if (cropper) cropper.destroy();
+    cropperModal.classList.add('hidden');
+  });
+        
   document.getElementById('profileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+     
+ // Debug: Log form data contents
+ for (let [key, value] of formData.entries()) {
+   console.log(key, value);
+ }
+    
+    // Add the file to FormData if it exists
+    const fileInput = document.getElementById('profile-image-upload');
+    if (fileInput.files[0]) {
+        formData.append('profileImage', fileInput.files[0]);
+    }
+
+
 const firstName = document.getElementById('firstName').value.trim();
   
   if (!firstName) {
@@ -199,49 +290,60 @@ const firstName = document.getElementById('firstName').value.trim();
   }
 
 
-    const form = e.target;
-    const formData = new FormData(form);
-
+   
     try {
-     
-      const response = await fetch('/user/editProfile', {
-        method: 'PATCH',
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-         const imagePreview = document.getElementById('preview');
-    imagePreview.src = result.imageUrl;  // Assuming the response contains the URL of the image
-
-      
-        Swal.fire({
-          title: 'Success',
-          text: 'Your profile has been updated successfully!',
-          icon: 'success',
-          confirmButtonText: 'OK',
-        });
-      } else {
-        
-        Swal.fire({
-          title: 'Error',
-          text: result.message || 'Something went wrong. Please try again.',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-      }
-    } catch (error) {
-      
-      Swal.fire({
-        title: 'Error',
-        text: 'Unable to connect to the server. Please check your internet connection.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
-    }
+  const response = await fetch('/user/editProfile', {
+    method: 'PATCH',
+    headers: {
+      'Accept': 'application/json',
+    },
+    body: formData,
   });
 
+  const result = await response.json();
+  console.log('Server Response:', response.status, result);
+
+
+  if (response.status === 200) {
+    if (result.imageUrl) {
+      const imagePreview = document.getElementById('preview');
+      imagePreview.src = result.imageUrl;
+    }
+    
+    Swal.fire({
+      title: 'Success',
+      text: 'Profile updated successfully!',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+  } else if (response.status === 400) {
+    Swal.fire({
+      title: 'Validation Error',
+      text: result.message || 'Please check your input.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  } else {
+    throw new Error(result.message || 'Server error');
+  }
+} catch (error) {
+  console.error('Error:', error);
+  Swal.fire({
+    title: 'Error',
+    text: 'Unable to update profile. Please try again later.',
+    icon: 'error',
+    confirmButtonText: 'OK'
+  });
+}
+  });
+
+document.getElementById('profile-image-upload').addEventListener('click', function(e) {
+  console.log('Click detected on file input');
+});
+
+document.querySelector('label[for="profile-image-upload"]').addEventListener('click', function(e) {
+  console.log('Click detected on label');
+});
 
 </script>
 

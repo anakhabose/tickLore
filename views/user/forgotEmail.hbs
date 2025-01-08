@@ -1,0 +1,112 @@
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Forgot Password Card -->
+    <div class="w-full max-w-md bg-white shadow-lg rounded-lg">
+        <div class="p-6 space-y-6">
+            <!-- Header -->
+            <div class="text-center space-y-2">
+                <h1 class="text-2xl font-bold text-gray-900">Did You Forget Your Password?</h1>
+                <p class="text-gray-500">Enter the e-mail to reset the password</p>
+            </div>
+
+            <!-- Form -->
+            <form id="forgotPasswordForm" class="space-y-4">
+                <!-- Email Input -->
+                <div>
+                    <input id="email" type="email" placeholder="Your Email" required
+                        class="w-full border-b border-gray-300 focus:outline-none focus:border-gray-900 text-gray-700 py-2" />
+                </div>
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded transition-colors">
+                    SEND OTP
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('emailError');
+        
+        // Email validation function
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Validate email only when user leaves the input field
+        emailInput.addEventListener('blur', function() {
+            const email = this.value;
+            
+            if (email && !validateEmail(email)) {
+                emailError.textContent = 'Please enter a valid email address';
+                emailError.classList.remove('hidden');
+            } else {
+                emailError.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('forgotPasswordForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            
+            const email = emailInput.value;
+            
+            // Frontend validation
+            if (!email) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please enter your email address'
+                });
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please enter a valid email address'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/user/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'OTP has been sent to your email',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Redirect to OTP verification page
+                        window.location.href = `/user/forgot-otp?email=${email}`;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong. Please try again.'
+                });
+            }
+        });
+    </script>

@@ -1,0 +1,223 @@
+<!-- Main Content Container -->
+<main class="flex-grow flex flex-col items-center justify-center h-screen">
+
+  <!-- OTP Container -->
+  <div class="bg-white shadow-md rounded-md p-8 w-80 text-center">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Enter OTP</h2>
+    
+    <!-- OTP Input Boxes -->
+    <form id="otpForm" > 
+      <div class="flex justify-center space-x-4 mb-6">
+        <input type="text" maxlength="1" name="otp1" id="otp1" class="w-10 h-12 text-center border-2 border-yellow-500 rounded focus:outline-none focus:border-yellow-700" required />
+        <input type="text" maxlength="1" name="otp2" id="otp2" class="w-10 h-12 text-center border-2 border-yellow-500 rounded focus:outline-none focus:border-yellow-700" required />
+        <input type="text" maxlength="1" name="otp3" id="otp3" class="w-10 h-12 text-center border-2 border-yellow-500 rounded focus:outline-none focus:border-yellow-700" required />
+        <input type="text" maxlength="1" name="otp4" id="otp4" class="w-10 h-12 text-center border-2 border-yellow-500 rounded focus:outline-none focus:border-yellow-700" required />
+      </div>
+      
+      <!-- Timer and Resend Link -->
+      <p class="text-gray-500 text-sm">00:<span id="timer">59</span></p>
+      <p class="text-gray-500 text-sm mt-2">
+        Didn’t get the code? <a href="#" id="resendOtp" class="text-yellow-500 hover:underline">Resend</a>
+      </p>
+      
+      <!-- Validate Button -->
+      <button type="submit" id="verifyBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-full mt-6">Validate</button>
+    </form>
+  </div>
+</main>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get("email");
+        let timerInterval;
+        let isTimerRunning = true; // Add this flag to track timer status
+
+        if (!email) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Email not found! Please try again."
+            }).then(() => {
+                window.location.href = "/user/forgot-password";
+            });
+            return;
+        }
+
+        // Timer functionality
+        function startTimer(duration) {
+            const timerDisplay = document.getElementById('timer');
+            let timeLeft = duration;
+            isTimerRunning = true;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft >= 0) {
+                    timerDisplay.textContent = timeLeft.toString().padStart(2, '0');
+                }
+
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                }
+            }, 1000);
+        }
+
+        // Start initial timer
+        startTimer(59);
+
+        // Resend OTP functionality
+        document.getElementById('resendOtp').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            // Check if timer is still running
+            if (isTimerRunning) {
+                const remainingTime = document.getElementById('timer').textContent;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please Wait',
+                    text: `Please wait ${remainingTime} seconds before requesting a new OTP.`
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/user/resend-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+                    // Restart timer
+                    startTimer(59);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'OTP has been resent to your email'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong while resending OTP'
+                });
+            }
+        });
+
+        // Auto-focus and input handling
+        const otpInputs = [
+            document.getElementById('otp1'),
+            document.getElementById('otp2'),
+            document.getElementById('otp3'),
+            document.getElementById('otp4')
+        ];
+
+        // Auto-focus and input handling
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value) {
+                    if (index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Focus first input on page load
+        otpInputs[0].focus();
+
+        // Clean up timer when leaving page
+        window.addEventListener('beforeunload', () => {
+            clearInterval(timerInterval);
+        });
+
+        // Rest of your existing code (OTP input handling and form submission)...
+
+        document.getElementById("otpForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const otpInputs = Array.from(document.querySelectorAll("#otpForm input[type=text]"));
+            const otp = otpInputs.map(input => input.value).join("");
+
+            if (otp.length !== 4) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Please enter a valid 4-digit OTP."
+                });
+                return;
+            }
+
+            const isValidOtp = /^[0-9]{4}$/.test(otp);
+
+            if (!isValidOtp) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid OTP",
+                    text: "Please enter a valid OTP consisting of only numbers."
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch("/user/verify-forgot-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        email: urlParams.get("email"), 
+                        otp: otp 
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: "OTP verified successfully"
+                    }).then(() => {
+                        window.location.href = `/user/newPassword?email=${urlParams.get("email")}`;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: data.message
+                    });
+                }
+            } catch (error) {
+                console.error("Error verifying OTP:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Failed to verify OTP. Please try again later."
+                });
+            }
+        });
+    });
+</script>

@@ -2,73 +2,94 @@
 const category = require("../model/categoryModel");
 
 module.exports = {
- addCategory : async (req, res) => {
+addCategory: async (req, res) => {
     try {
         const { categoryName } = req.body;
         const images = req.file.path;
-     
-        const newCategory = new category({  
-            categoryName, 
+
+        
+        const existingCategory = await category.findOne({
+            categoryName: { $regex: new RegExp(`^${categoryName}$`, 'i') }
+        });
+
+        if (existingCategory) {
+            return res.status(400).json({
+                status: false,
+                message: 'A category with this name already exists'
+            });
+        }
+
+        const newCategory = new category({
+            categoryName,
             images
         });
 
         await newCategory.save();
-      
-        res.status(201).json({ 
-            status: true, 
+
+        res.status(201).json({
+            status: true,
             message: 'Category added successfully',
             categoryId: newCategory._id
         });
-      
+
     } catch (error) {
         console.error('Error adding category:', error);
-        res.status(500).json({ 
-            status: false, 
+        res.status(500).json({
+            status: false,
             message: 'Error adding category',
             error: error.message
         });
     }
 },
 
-  editCategory: async (req, res) => {
-   try {
+editCategory: async (req, res) => {
+    try {
         const categoryId = req.params.id;
-        const { categoryName} = req.body;
+        const { categoryName } = req.body;
+
       
-        console.log('Category ID:', categoryId);
-        console.log('Request Body:', req.body);
+        const existingCategory = await category.findOne({
+            categoryName: { $regex: new RegExp(`^${categoryName}$`, 'i') },
+            _id: { $ne: categoryId }
+        });
+
+        if (existingCategory) {
+            return res.status(400).json({
+                status: false,
+                message: 'A category with this name already exists'
+            });
+        }
 
         const updateCategory = await category.findByIdAndUpdate(
             categoryId,
             {
-               categoryName: categoryName,
+                categoryName: categoryName,
             },
             { new: true }
         );
-        
-      
-        console.log('Updated Category:', updateCategory);
-      
+
         if (!updateCategory) {
-            return res.status(404).json({ 
-                status: false, 
-                message: "Product not found" 
+            return res.status(404).json({
+                status: false,
+                message: "Category not found"
             });
         }
 
-        return res.status(200).json({ status: true, message: "Category updated Successfully!" })
+        return res.status(200).json({
+            status: true,
+            message: "Category updated successfully!"
+        });
+
     } catch (error) {
-      
-        console.error('Error details:', error);
         console.error('Error updating category:', {
             message: error.message,
             stack: error.stack
         });
-        res.status(500).json({ 
-            status: false, 
+        res.status(500).json({
+            status: false,
             message: "Server error",
-            error: error.message 
-        })
+            error: error.message
+        });
     }
 },
     blockCategory:async (req, res) => {

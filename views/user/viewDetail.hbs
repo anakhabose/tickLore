@@ -1,0 +1,419 @@
+    <header class="bg-black text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="/images/logo.png" alt="Logo" class="h-8">
+        <nav class="space-x-6 hidden md:flex">
+          <a href="/user/home" class="hover:text-yellow-500">Home</a>
+         <a href="/user/shop" class="hover:text-yellow-500">Shop</a>
+          <a href="#" class="hover:text-yellow-500">About</a>
+          <a href="#" class="hover:text-yellow-500">Contact</a>
+        </nav>
+      </div>
+      <div class="flex space-x-4 items-center">
+  <input type="text" placeholder="What are you looking for?" class="p-2 rounded-lg">
+
+
+
+  {{#if user}}
+      <a href="/user/profile" class="hover:text-yellow-500">
+        <i class="fas fa-user mr-2"></i> 
+      </a>
+       <a href="#" class="hover:text-yellow-500"><i class="fas fa-heart"></i></a>
+       <a href="#" class="hover:text-yellow-500"><i class="fas fa-shopping-cart"></i></a>
+
+      <a href="/user/logout" class="hover:text-yellow-500">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+
+  {{else}}
+    <a href="/user/login" class="hover:text-yellow-500">LOGIN</a>
+    <a href="/user/signup" class="hover:text-yellow-500">SIGNUP</a>
+  {{/if}}
+</div>
+    </div>
+  </header>
+  <div class="w-full min-h-screen bg-gray-100 py-12">
+    
+    <div class="max-w-6xl mx-auto p-10 bg-white shadow rounded-lg">
+      <!-- Add button at the top -->
+      <div class="flex justify-end mb-8">
+        <button id="downloadInvoiceBtn" data-orderid="{{order._id}}" 
+          class="px-4 py-2 bg-blue-500 text-white text-lg font-semibold rounded-lg 
+          shadow-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-400">
+          Download Invoice
+        </button>
+      </div>
+
+      <!-- Order Summary Section -->
+      
+      <div class="mb-12">
+        <h2 class="text-2xl font-semibold mb-8">Order Summary</h2>
+        
+        <div class="grid grid-cols-12 gap-8 items-start">
+          {{#each order.items}}
+            <div class="col-span-4">
+                <img src="{{product.images.[0]}}" alt="Product Name" class="w-48 h-48 object-cover rounded-lg shadow-md">
+            </div>
+            <div class="col-span-8">
+                <h3 class="text-xl font-semibold">{{product.name}}</h3>
+                <p class="text-md text-gray-700 mt-4">Price: ₹{{subtotal}}</p>
+                <p class="text-md text-gray-700">Quantity: {{quantity}}</p>
+            </div>
+         {{/each}} 
+        </div>
+
+        <!-- Add Total Amount -->
+        <div class="mt-8 text-right">
+          <p class="text-xl font-semibold">Total Amount: ₹{{order.total}}</p>
+        </div>
+      </div>
+  
+      <!-- Shipping Address Section -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-semibold mb-8">Shipping Address</h2>
+        <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
+          <p class="text-lg text-gray-800 font-medium">{{order.address.name}}</p>
+          <p class="text-lg text-gray-600">{{order.address.addressLine1}}</p>
+          <p class="text-lg text-gray-600">{{order.address.addressLine2}}</p>
+          <p class="text-lg text-gray-600">{{order.address.city}}, {{order.address.state}}, {{order.address.pincode}}</p>
+          <p class="text-lg text-gray-600">{{order.address.country}}</p>
+          <p class="text-lg text-gray-600">Phone:  {{order.address.phoneNumber}}</p>
+        </div>
+      </div>
+  
+      <!-- Order Tracking Section -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-semibold mb-8">Order Tracking</h2>
+        <div class="relative px-8">
+          <div class="absolute inset-0 h-1 bg-gray-300"></div>
+          <div class="flex justify-between items-center relative z-10">
+            <!-- Pending -->
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                {{#if (eq order.status 'Pending') }}bg-yellow-500
+                {{else}}bg-gray-400{{/if}} text-white text-xl">
+                ✓
+              </div>
+              <span class="mt-4 text-lg font-medium">Pending</span>
+              <span class="text-sm text-gray-500">{{formatDate order.createdAt}}</span>
+            </div>
+
+            <!-- Shipped -->
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                {{#if (or (eq order.status 'Shipped') (eq order.status 'Out for Delivery') (eq order.status 'Delivered') (eq order.status 'Returned'))}}
+                  bg-blue-500
+                {{else}}
+                  bg-gray-400
+                {{/if}} text-white text-xl">
+                ✓
+              </div>
+              <span class="mt-4 text-lg font-medium">Shipped</span>
+              <span class="text-sm text-gray-500">
+                {{#if order.shippedAt}}
+                  {{formatDate order.shippedAt}}
+                {{else}}
+                  --
+                {{/if}}
+              </span>
+            </div>
+
+            <!-- Out for Delivery -->
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                {{#if (or (eq order.status 'Out for Delivery') (eq order.status 'Delivered') (eq order.status 'Returned'))}}
+                  bg-yellow-500
+                {{else}}
+                  bg-gray-400
+                {{/if}} text-white text-xl">
+                ✓
+              </div>
+              <span class="mt-4 text-lg font-medium">Out for Delivery</span>
+              <span class="text-sm text-gray-500">
+                {{#if order.outForDeliveryAt}}
+                  {{formatDate order.outForDeliveryAt}}
+                {{else}}
+                  --
+                {{/if}}
+              </span>
+            </div>
+
+            <!-- Delivered/Returned -->
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                {{#if (eq order.status 'Delivered') }}bg-green-500
+                {{else if (eq order.status 'Returned') }}bg-red-500
+                {{else}}bg-gray-400{{/if}} text-white text-xl">
+                {{#if (eq order.status 'Returned') }}R
+                {{else if (or (eq order.status 'Delivered') (eq order.status 'Returned')) }}✓
+                {{else}}•{{/if}}
+              </div>
+              <span class="mt-4 text-lg font-medium">
+                {{#if (eq order.status 'Returned') }}Returned{{else}}Delivered{{/if}}
+              </span>
+              <span class="text-sm text-gray-500">
+                {{#if (eq order.status 'Returned')}}
+                  {{formatDate order.returnedAt}}
+                {{else if order.deliveredAt}}
+                  {{formatDate order.deliveredAt}}
+                {{else}}
+                  --
+                {{/if}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Additional Order Details Section -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-semibold mb-8">Order Details</h2>
+        <div class="text-lg text-gray-700">
+          <p>Order Date: {{order.createdAt}}</p>
+          <p>Payment Method: {{order.paymentMethod}}</p>
+          <p>Order ID: {{order._id}}</p>
+        </div>
+      </div>
+  
+      <div class="text-center">
+        {{#if (eq order.status "Delivered")}}         
+            <button id="returnOrderBtn" data-orderid="{{order._id}}" class="px-4 py-2 bg-red-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400">
+                Return Order
+            </button>
+        {{else if (eq order.status "Cancelled")}}
+            <span class="px-4 py-2 bg-red-100 text-red-600 text-xl font-bold rounded-lg inline-block">Order Cancelled</span>
+        {{else if (eq order.status "Returned")}}
+            <span class="px-4 py-2 bg-red-50 text-red-600 text-xl font-bold rounded-lg inline-block">Order Returned</span>
+        {{else}}
+            <button id="cancelOrderBtn" data-orderid="{{order._id}}" class="px-4 py-2 bg-red-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400">
+                Cancel Order
+            </button>
+            
+        {{/if}}
+      </div>
+    </div>
+  </div>
+   <footer class="bg-black text-white py-10">
+    <div class="container mx-auto grid md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="font-bold text-lg mb-4">Exclusive</h3>
+        <p>Get 10% off your first order</p>
+        <input type="email" placeholder="Enter your email" class="mt-2 p-2 rounded-lg w-full">
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Support</h3>
+        <p>111 Kochi,Kerala</p>
+        <p>ticklore@gmail.com</p>
+        <p>+88015-88888-9999</p>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Account</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">My Account</a></li>
+          <li><a href="/user/login" class="hover:text-yellow-500">Login </a></li>
+            <li><a href="/user/signup" class="hover:text-yellow-500">Signup</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Cart</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Wishlist</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-4">Quick Link</h3>
+        <ul>
+          <li><a href="#" class="hover:text-yellow-500">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Terms Of Use</a></li>
+          <li><a href="#" class="hover:text-yellow-500">FAQ</a></li>
+          <li><a href="#" class="hover:text-yellow-500">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-8 text-center">
+      <img src="/images/logo.png" alt="Footer Logo" class="mx-auto h-12">
+      <p class="text-gray-600 mt-4">&copy; Copyright tickLore 2024. All rights reserved</p>
+    </div>
+  </footer>
+
+  <!-- Add this modal HTML before the closing body tag -->
+  <div id="returnModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+      <h2 class="text-2xl font-bold mb-4">Return Order</h2>
+      <form id="returnForm">
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="returnReason">
+            Reason for Return
+          </label>
+          <select id="returnReason" name="returnReason" class="w-full p-2 border rounded" required>
+            <option value="">Select a reason</option>
+            <option value="Damaged in Transit">Damaged in Transit</option>
+            <option value="Defective Product">Defective Product</option>
+            <option value="Not as Described">Not as Described</option>
+            <option value="Changed Mind">Changed Mind</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="comments">
+            Additional Comments
+          </label>
+          <textarea id="comments" name="comments" class="w-full p-2 border rounded" rows="3"></textarea>
+        </div>
+        <div class="flex justify-end gap-4">
+          <button type="button" id="cancelReturn" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+            Submit Return
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const cancelBtn = document.getElementById('cancelOrderBtn');
+      const returnBtn = document.getElementById('returnOrderBtn');
+      const returnModal = document.getElementById('returnModal');
+      const cancelReturnBtn = document.getElementById('cancelReturn');
+      const returnForm = document.getElementById('returnForm');
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+          const orderId = this.getAttribute('data-orderid');
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, cancel it!'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch(`/user/cancelOrder/${orderId}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              })
+              .then(response => response.json())
+              .then(data => {
+                Swal.fire({
+                  title: 'Cancelled!',
+                  text: data.message,
+                  icon: 'success'
+                }).then(() => {
+                  window.location.reload();
+                });
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                  title: 'Error!',
+                  text: 'Something went wrong while cancelling the order.',
+                  icon: 'error'
+                });
+              });
+            }
+          });
+        });
+      }
+
+      if (returnBtn) {
+        returnBtn.addEventListener('click', function() {
+          returnModal.classList.remove('hidden');
+          returnModal.classList.add('flex');
+        });
+      }
+
+      if (cancelReturnBtn) {
+        cancelReturnBtn.addEventListener('click', function() {
+          returnModal.classList.add('hidden');
+          returnModal.classList.remove('flex');
+        });
+      }
+
+      if (returnForm) {
+        returnForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const orderId = returnBtn.getAttribute('data-orderid');
+          const returnReason = document.getElementById('returnReason').value;
+          const comments = document.getElementById('comments').value;
+
+          fetch(`/user/returnOrder/${orderId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              reason: returnReason,
+              comments: comments
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            returnModal.classList.add('hidden');
+            returnModal.classList.remove('flex');
+            
+            Swal.fire(
+              'Return Requested!',
+              data.message,
+              'success'
+            ).then(() => {
+              window.location.reload();
+            });
+          })
+          .catch(error => {
+            Swal.fire(
+              'Error!',
+              'Something went wrong.',
+              'error'
+            );
+          });
+        });
+      }
+
+      document.getElementById('downloadInvoiceBtn').addEventListener('click', function() {
+        const orderId = this.getAttribute('data-orderid');
+        
+        // Show loading state
+        Swal.fire({
+          title: 'Generating Invoice...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        fetch(`/user/download-invoice/${orderId}`)
+          .then(response => response.blob())
+          .then(blob => {
+            // Create blob link to download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoice-${orderId}.pdf`;
+            
+            // Append to html link element page
+            document.body.appendChild(a);
+            
+            // Start download
+            a.click();
+            
+            // Clean up and remove the link
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            
+            Swal.close();
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Failed to download invoice!'
+            });
+          });
+      });
+    });
+  </script>

@@ -158,6 +158,24 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('change', function() {
       const file = this.files[0];
       if (file) {
+        // Add format validation here
+        const allowedFormats = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedFormats.includes(file.type)) {
+          showError('Please upload images in JPG, JPEG, PNG, or WEBP format only');
+          this.value = ''; // Clear the input
+          previewContainers[index].style.display = 'none'; // Hide the preview
+          return;
+        }
+
+        // Check file size
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+          showError('Image size should not exceed 5MB');
+          this.value = ''; // Clear the input
+          previewContainers[index].style.display = 'none'; // Hide the preview
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(e) {
           previewContainers[index].src = e.target.result;
@@ -245,7 +263,11 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     
-    if (!validateForm()) return;
+    // Run validation first
+    if (!validateForm()) {
+      // validateForm already shows the Swal error message
+      return;
+    }
 
     const formData = new FormData(form);
     
@@ -274,10 +296,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     } catch (error) {
+      console.error('Form submission error:', error); // Add error logging
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Something went wrong! Please try again.'
+        text: 'Network error or server not responding. Please try again.'
       });
     }
   });
@@ -314,13 +337,29 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
-
+    // Add allowed image formats
+    const allowedFormats = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+   
+    // Image validation
     let imageCount = 0;
-    imageInputs.forEach(input => {
+    for (const input of imageInputs) {
       if (input.files && input.files[0]) {
+        // Check file format
+        if (!allowedFormats.includes(input.files[0].type)) {
+          showError('Please upload images in JPG, JPEG, PNG, or WEBP format only');
+          return false;
+        }
+
+        // Check file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (input.files[0].size > maxSize) {
+          showError('Image size should not exceed 5MB');
+          return false;
+        }
+
         imageCount++;
       }
-    });
+    }
 
     if (imageCount !== 4) {
       showError('Please upload exactly 4 images');

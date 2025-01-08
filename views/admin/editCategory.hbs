@@ -70,45 +70,144 @@
 </footer>
 
 <script>
- document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   const imageInput = document.getElementById('image1');
   const imagePreview = document.getElementById('preview1');
   const categoryForm = document.getElementById('category-form');
+  const categoryNameInput = document.getElementById('categoryName');
 
+  // Function to validate the category name
+  function validateCategoryName(name) {
+    // Remove leading/trailing whitespace
+    const trimmedName = name.trim();
+    
+    // Check if empty
+    if (!trimmedName) {
+      return {
+        isValid: false,
+        message: 'Category name is required'
+      };
+    }
+    
+    // Check minimum length (2 characters)
+    if (trimmedName.length < 2) {
+      return {
+        isValid: false,
+        message: 'Category name must be at least 2 characters long'
+      };
+    }
+    
+    // Check maximum length (50 characters)
+    if (trimmedName.length > 50) {
+      return {
+        isValid: false,
+        message: 'Category name cannot exceed 50 characters'
+      };
+    }
+    
+    // Check for valid characters (letters, numbers, spaces, and hyphens)
+    const validNameRegex = /^[a-zA-Z0-9\s-]+$/;
+    if (!validNameRegex.test(trimmedName)) {
+      return {
+        isValid: false,
+        message: 'Category name can only contain letters, numbers, spaces, and hyphens'
+      };
+    }
+    
+    return {
+      isValid: true,
+      message: ''
+    };
+  }
+
+  // Function to validate the image
+  function validateImage(file, existingImage) {
+    // If there's no new file but an existing image exists, that's valid
+    if (!file && existingImage && existingImage.src && !existingImage.src.includes('hidden')) {
+      return {
+        isValid: true,
+        message: ''
+      };
+    }
+    
+    // If there's no file and no existing image, that's invalid
+    if (!file) {
+      return {
+        isValid: false,
+        message: 'Category image is required'
+      };
+    }
+    
+    // Check file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      return {
+        isValid: false,
+        message: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP)'
+      };
+    }
+    
+    // Check file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      return {
+        isValid: false,
+        message: 'Image size should not exceed 5MB'
+      };
+    }
+    
+    return {
+      isValid: true,
+      message: ''
+    };
+  }
+
+  // Image preview handler
   imageInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
-      
       const reader = new FileReader();
-      
       reader.onload = (e) => {
-        
         imagePreview.src = e.target.result;
         imagePreview.classList.remove('hidden');
         imagePreview.classList.add('block');
       };
-      
-    
       reader.readAsDataURL(file);
     } else {
-      
       imagePreview.src = '';
       imagePreview.classList.remove('block');
       imagePreview.classList.add('hidden');
     }
   });
 
-  g
+  // Form submission handler
   categoryForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const form = event.target;
-    const formData = new FormData(form);
-    
-    
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
+    // Validate category name
+    const categoryNameValidation = validateCategoryName(categoryNameInput.value);
+    if (!categoryNameValidation.isValid) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Category Name',
+        text: categoryNameValidation.message
+      });
+      return;
     }
+
+    // Validate image
+    const imageValidation = validateImage(imageInput.files[0], imagePreview);
+    if (!imageValidation.isValid) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Image',
+        text: imageValidation.message
+      });
+      return;
+    }
+
+    // If validation passes, proceed with form submission
+    const formData = new FormData(categoryForm);
 
     try {
       const response = await fetch(`/admin/editCategory/${formData.get('_id')}`, {
@@ -116,22 +215,27 @@
         body: formData,
       });
 
-      const data = await response.json();
-
-      if (data.status) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Category Updated',
-          text: data.message,
-        }).then(() => {
-          window.location.href = '/admin/category';
-        });
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        
+        if (data.status) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Category Updated',
+            text: data.message,
+          }).then(() => {
+            window.location.href = '/admin/category';
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Something went wrong!',
+          });
+        }
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: data.message || 'Something went wrong!',
-        });
+        window.location.href = '/admin/category';
       }
     } catch (error) {
       console.error(error);
@@ -143,5 +247,4 @@
     }
   });
 });
-
 </script>  
