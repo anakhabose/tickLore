@@ -16,7 +16,7 @@ const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const path = require('path');
 const connectDB = require('./db/connectDB');
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 
 
@@ -80,7 +80,6 @@ hbs.registerHelper('range', function(start, end) {
 
 
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 
 app.use(express.json());

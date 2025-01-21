@@ -8,23 +8,42 @@ module.exports={
             if (!admin) {
                 return res.redirect('/admin/login');
             }    
+
+            
+            const page = parseInt(req.query.page) || 1;
+            const limit = 6; 
+            const skip = (page - 1) * limit;
             const search = req.query.search || '';
-    
-      
+
             const searchQuery = {
                 couponName: { $regex: search, $options: 'i' }
             };
-    
-           
+
+          
+            const totalCoupons = await Coupon.countDocuments(searchQuery);
+            const totalPages = Math.ceil(totalCoupons / limit);
+
+   
             const coupons = await Coupon.find(searchQuery)
-                .sort({ createdAt: -1 });
-    
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
             res.render('admin/coupons', { 
                 coupons,
                 search,
+                currentPage: page,
+                prevPage: page - 1,
+                nextPage: page + 1,
+                hasPrevPage: page > 1,
+                hasNextPage: skip + limit < totalCoupons,
+                totalCoupons,
+                totalPages,
+                startIndex: skip + 1,
+                endIndex: Math.min(skip + limit, totalCoupons),
                 currentPath: '/admin/coupons'
             });
-    
+
         } catch (error) {
             console.error('Error loading coupons:', error);
             res.status(500).send('Error loading coupons');

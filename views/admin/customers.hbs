@@ -79,6 +79,37 @@
 </tbody>
 
 </table>
+
+<div class="p-4 flex items-center justify-between border-t border-gray-200">
+  <div class="flex items-center">
+    <p class="text-sm text-gray-700">
+      Showing <span class="font-medium">{{startIndex}}</span> to <span class="font-medium">{{endIndex}}</span> of
+      <span class="font-medium">{{totalCustomers}}</span> customers
+    </p>
+  </div>
+  <div class="flex justify-end space-x-2">
+    {{#if hasPrevPage}}
+      <a href="/admin/customers?page={{prevPage}}{{#if search}}&search={{search}}{{/if}}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+        Previous
+      </a>
+    {{/if}}
+    
+    {{#each (range 1 totalPages)}}
+      <a href="/admin/customers?page={{this}}{{#if ../search}}&search={{../search}}{{/if}}"
+         class="px-3 py-1 rounded-md {{#if (eq this ../currentPage)}}bg-yellow-500 text-white{{else}}bg-gray-200 text-gray-700 hover:bg-gray-300{{/if}}">
+        {{this}}
+      </a>
+    {{/each}}
+    
+    {{#if hasNextPage}}
+      <a href="/admin/customers?page={{nextPage}}{{#if search}}&search={{search}}{{/if}}" 
+         class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+        Next
+      </a>
+    {{/if}}
+  </div>
+</div>
 </div>
 
 

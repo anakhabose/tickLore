@@ -1,4 +1,3 @@
-
 <style>
   .sticky-sidebar {
     position: sticky;
@@ -30,6 +29,9 @@
     class="p-2 rounded-lg text-black bg-white"
     value="{{searchQuery}}"
   >
+  {{#if selectedCategory}}
+  <input type="hidden" name="category" value="{{selectedCategory}}">
+  {{/if}}
   <button type="submit" class="ml-2 p-2 hover:text-yellow-500">
     <i class="fas fa-search"></i>
   </button>
@@ -104,9 +106,10 @@
             </div>
           
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-     {{#each data}}
-        <div class="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center hover:shadow-2xl transition-all duration-300 relative opacity-0 translate-y-10 cursor-pointer transform hover:scale-105 active:scale-95 scroll-card"
-             onclick="handleCardClick(this)">
+    {{#if data.length}}
+        {{#each data}}
+            <div class="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center hover:shadow-2xl transition-all duration-300 relative opacity-0 translate-y-10 cursor-pointer transform hover:scale-105 active:scale-95 scroll-card"
+                 onclick="handleCardClick(this)">
    <button 
     class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors duration-300 text-xl hover:scale-110 wishlist-btn"
     onclick="toggleWishlist('{{this._id}}', this)"
@@ -128,7 +131,19 @@
             
             <!-- Product Details -->
             <h2 class="text-xl font-semibold text-center text-gray-800 mb-2">{{this.name}}</h2>
-            <p class="text-lg font-bold text-center text-gray-700 mb-4">Rs.{{this.price}}</p>
+            <div class="text-center mb-4">
+                {{#if this.discountedPrice}}
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-semibold text-green-600">₹{{this.discountedPrice}}</span>
+                            <span class="text-black font-semibold line-through">₹{{this.price}}</span>
+                        </div>
+        
+                    </div>
+                {{else}}
+                    <span class="text-xl font-semibold text-black">₹{{this.price}}</span>
+                {{/if}}
+            </div>
             
             <!-- Add to Cart Button -->
             <button 
@@ -148,7 +163,12 @@
     {{/if}}
 </button>
         </div>
-    {{/each}}
+        {{/each}}
+    {{else}}
+        <div class="col-span-3 text-center py-8">
+            <p class="text-gray-500">No products found</p>
+        </div>
+    {{/if}}
 </div>
 
         </div>

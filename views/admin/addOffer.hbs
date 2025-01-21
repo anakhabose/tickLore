@@ -53,7 +53,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium">Discount Value (%)</label>
+            <label class="block text-sm font-medium">Discount Value</label>
             <input type="number" id="discountValue" name="discountValue" placeholder="Discount Value in Percentage..." class="w-full border p-2 rounded">
           </div>
 
@@ -117,12 +117,12 @@ document.getElementById('addOfferForm').addEventListener('submit', async (e) => 
         formData.categoryId = document.getElementById('categoryId').value;
     }
 
-    // Validation
-    if (!formData.offerTitle) {
+    // Enhanced validations
+    if (!formData.offerTitle || formData.offerTitle.length < 3 || formData.offerTitle.length > 30) {
         Swal.fire({
             icon: 'error',
             title: 'Validation Error',
-            text: 'Please enter an offer title'
+            text: 'Offer title must be between 3 and 30 characters'
         });
         return;
     }
@@ -136,7 +136,27 @@ document.getElementById('addOfferForm').addEventListener('submit', async (e) => 
         return;
     }
 
-    if (!formData.discountValue || formData.discountValue < 1 || formData.discountValue > 90) {
+    // Validate product/category selection based on offer type
+    if (formData.offerType === 'product' && !formData.productId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please select a product'
+        });
+        return;
+    }
+
+    if (formData.offerType === 'category' && !formData.categoryId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please select a category'
+        });
+        return;
+    }
+
+    if (!formData.discountValue || isNaN(formData.discountValue) || 
+        formData.discountValue < 1 || formData.discountValue > 90) {
         Swal.fire({
             icon: 'error',
             title: 'Validation Error',
@@ -150,6 +170,29 @@ document.getElementById('addOfferForm').addEventListener('submit', async (e) => 
             icon: 'error',
             title: 'Validation Error',
             text: 'Please select both start and end dates'
+        });
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(formData.endDate);
+
+    if (startDate < today) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Start date cannot be in the past'
+        });
+        return;
+    }
+
+    if (endDate <= startDate) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'End date must be after start date'
         });
         return;
     }
@@ -174,10 +217,15 @@ document.getElementById('addOfferForm').addEventListener('submit', async (e) => 
                 window.location.href = '/admin/offers';
             });
         } else {
+            // Enhanced error handling
+            const errorMessage = data.message === "An offer with this name already exists" 
+                ? "This offer name already exists. Please choose a different name."
+                : data.message || 'An error occurred while adding the offer';
+                
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: data.message || 'An error occurred while adding the offer'
+                text: errorMessage
             });
         }
     } catch (error) {
@@ -187,6 +235,27 @@ document.getElementById('addOfferForm').addEventListener('submit', async (e) => 
             title: 'Error',
             text: 'An error occurred while adding the offer'
         });
+    }
+});
+
+const offerTitleInput = document.getElementById('offerTitle');
+const maxLength = 30;
+
+offerTitleInput.addEventListener('input', function() {
+    if (this.value.length > maxLength) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: `Offer title must not exceed ${maxLength} characters`
+        });
+        this.value = this.value.substring(0, maxLength);
+    }
+});
+
+// Prevent spaces at the beginning
+offerTitleInput.addEventListener('keypress', function(e) {
+    if (this.value.length === 0 && e.key === ' ') {
+        e.preventDefault();
     }
 });
 </script>  

@@ -16,7 +16,7 @@ const walletController = require('../controller/walletController');
 
 router.get('/checkout', userAuth.checkSession, checkoutController.loadCheckout);
 
-router.get('/home',userAuth.checkSession,userController.loadHome);
+router.get('/home',userController.loadHome);
 
 
 router.get('/signup',userController.loadSignup);
@@ -32,6 +32,8 @@ router.post('/login',userController.login);
 router.get('/shop',userAuth.checkSession, shopController.loadShop);
 router.get('/shop/search',userAuth.checkSession, shopController.searchProduct);
 
+router.get('/viewProducts/:id',userAuth.checkSession,userController.loadViewProducts);
+
 router.get('/profile',userAuth.checkSession,userController.loadProfile);
 router.patch('/editProfile',upload.single('profileImage'),userController.editProfile);
 
@@ -39,6 +41,7 @@ router.get('/cart',userAuth.checkSession,cartController.loadCart);
 router.post('/addToCart',userAuth.checkSession,cartController.addToCart);
 router.post('/updateCart',userAuth.checkSession, cartController.updateCart);
 router.delete('/removeFromCart/:productId',userAuth.checkSession,cartController.removeFromCart);
+router.post('/verify-stock', cartController.verifyStock);
 
 router.get('/address',userAuth.checkSession,userController.loadAddress);
 router.post('/addAddress',userAuth.checkSession,addressController.addAddress);
@@ -84,7 +87,7 @@ router.post('/apply-coupon', userAuth.checkSession, checkoutController.applyCoup
 
 router.get('/logout',userAuth.checkSession,userController.logout);
 
-router.get('/viewProducts/:id',userAuth.checkSession,userController.loadViewProducts);
+
 
 
 router.get('/auth/google', 

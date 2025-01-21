@@ -62,18 +62,23 @@ router.post('/editOffers/:id',adminAuth.checkSession,offerController.editOffer);
 router.patch('/blockOffer/:id', adminAuth.checkSession, offerController.blockOffer);
 router.patch('/unblockOffer/:id',adminAuth.checkSession, offerController.unblockOffer);
 
+
+router.patch('/orderDetail/:id/status', adminController.updateOrderStatus);
+
+router.post('/orders/:id/status', adminController.updateOrderStatus);
+
+router.get('/salesReport',adminAuth.checkSession,adminController.loadSalesReport);
+
 router.post('/filter-orders', adminAuth.checkSession, adminController.filterOrders);
 router.get('/sales-data', adminAuth.checkSession, adminController.getSalesData);
 
 router.get('/export-sales-pdf', adminController.exportSalesReportPDF);
 router.get('/export-sales-excel', adminController.exportSalesReportExcel);
 
+router.get('/reset-sales-counts', adminController.resetSalesCounts);
 
 router.get('/logout',adminAuth.checkSession,adminController.logout);
 
-router.patch('/orderDetail/:id/status', adminController.updateOrderStatus);
-
-router.post('/orders/:id/status', adminController.updateOrderStatus);
 
 
 module.exports = router;

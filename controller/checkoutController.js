@@ -34,14 +34,14 @@ const checkoutController = {
                             model: 'offer',
                             select: 'discountValue'
                         },
-                        {
-                            path: 'category',
-                            select: 'name offer',
-                            populate: {
-                                path: 'offer',
-                                select: 'discountValue'
-                            }
-                        }
+                        // {
+                        //     path: 'category',
+                        //     select: 'name offer',
+                        //     populate: {
+                        //         path: 'offer',
+                        //         select: 'discountValue'
+                        //     }
+                        // }
                     ]
                 });
 
@@ -61,11 +61,11 @@ const checkoutController = {
                     hasOffer = true;
                 }
 
-                if (item.productId.category && item.productId.category.offer && 
-                    item.productId.category.offer.discountValue) {
-                    appliedDiscount = Math.max(appliedDiscount, item.productId.category.offer.discountValue);
-                    hasOffer = true;
-                }
+                // if (item.productId.category && item.productId.category.offer && 
+                //     item.productId.category.offer.discountValue) {
+                //     appliedDiscount = Math.max(appliedDiscount, item.productId.category.offer.discountValue);
+                //     hasOffer = true;
+                // }
 
                 if (hasOffer) {
                     effectivePrice = effectivePrice - (effectivePrice * (appliedDiscount / 100));
@@ -118,13 +118,15 @@ const checkoutController = {
                 minPurchaseAmount: { $lte: subtotal }
             });
 
-  
+            console.log('Available Coupons:', availableCoupons);
+
             const validCoupons = await Promise.all(availableCoupons.map(async (coupon) => {
                 const canUse = await coupon.canUserUse(userId);
                 return canUse ? coupon : null;
             }));
 
             const filteredCoupons = validCoupons.filter(coupon => coupon !== null);
+            console.log('Filtered Coupons:', filteredCoupons);
 
      
             const addresses = await Address.find({ userId });
@@ -223,10 +225,15 @@ const checkoutController = {
         }
 
        
-        for (const item of cart.items) {
+        for (const item of orderItems) {
             await productSchema.findByIdAndUpdate(
-                item.productId._id,
-                { $inc: { stock: -item.quantity } }
+                item.product,
+                { 
+                    $inc: { 
+                        stock: -item.quantity,
+                        salesCount: item.quantity
+                    } 
+                }
             );
         }
 
@@ -261,7 +268,12 @@ cancelOrder: async (req, res) => {
         for (const item of order.items) {
             await productSchema.findByIdAndUpdate(
                 item.product._id,
-                { $inc: { stock: item.quantity } }
+                { 
+                    $inc: { 
+                        stock: item.quantity,
+                        salesCount: -item.quantity
+                    } 
+                }
             );
         }
 
@@ -318,7 +330,12 @@ cancelOrder: async (req, res) => {
             for (const item of order.items) {
                 await productSchema.findByIdAndUpdate(
                     item.product._id,
-                    { $inc: { stock: item.quantity } }
+                    { 
+                        $inc: { 
+                            stock: item.quantity,
+                            salesCount: -item.quantity
+                        } 
+                    }
                 );
             }
 
@@ -633,6 +650,19 @@ createPendingOrder: async (req, res) => {
         });
 
         await newOrder.save();
+
+        // After saving the order, update salesCount for each product
+        for (const item of orderItems) {
+            await productSchema.findByIdAndUpdate(
+                item.product,
+                { 
+                    $inc: { 
+                        stock: -item.quantity,
+                        salesCount: item.quantity
+                    } 
+                }
+            );
+        }
 
         // Clear cart
         await Cart.findByIdAndDelete(cart._id);

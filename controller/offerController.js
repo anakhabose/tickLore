@@ -6,27 +6,45 @@ const mongoose = require('mongoose');
 module.exports = {
     loadOffers: async (req, res) => {
         try {
-          
             const admin = req.session.admin;
             if (!admin) {
                 return res.redirect('/admin/login');
             }
 
+            // Pagination setup
+            const page = parseInt(req.query.page) || 1;
+            const limit = 5; // Number of offers per page
+            const skip = (page - 1) * limit;
             const search = req.query.search || '';
 
             const searchQuery = {
                 offerTitle: { $regex: search, $options: 'i' }
             };
 
-         
+            // Get total count for pagination
+            const totalOffers = await offerSchema.countDocuments(searchQuery);
+            const totalPages = Math.ceil(totalOffers / limit);
+
+            // Fetch offers with pagination
             const offers = await offerSchema.find(searchQuery)
                 .populate('productId', 'name')
                 .populate('categoryId', 'name')
-                .sort({ createdAt: -1 });
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
 
             res.render('admin/offers', { 
                 offers,
                 search,
+                currentPage: page,
+                prevPage: page - 1,
+                nextPage: page + 1,
+                hasPrevPage: page > 1,
+                hasNextPage: skip + limit < totalOffers,
+                totalOffers,
+                totalPages,
+                startIndex: skip + 1,
+                endIndex: Math.min(skip + limit, totalOffers),
                 currentPath: '/admin/offers'
             });
 
@@ -79,11 +97,29 @@ module.exports = {
                 endDate
             } = req.body;
 
-           
+            // Check for existing offer with same title
+            const existingOffer = await offerSchema.findOne({ 
+                offerTitle: { $regex: new RegExp(`^${offerTitle}$`, 'i') }
+            });
+
+            if (existingOffer) {
+                return res.status(400).json({
+                    status: false,
+                    message: "An offer with this name already exists"
+                });
+            }
+
             if (!offerTitle || !offerType || !discountValue || !startDate || !endDate) {
                 return res.status(400).json({
                     status: false,
                     message: "All required fields must be filled"
+                });
+            }
+
+            if (!offerTitle || offerTitle.length < 3 || offerTitle.length > 30) {
+                return res.status(400).json({
+                    status: false,
+                    message: "Offer title must be between 3 and 30 characters"
                 });
             }
 
@@ -187,10 +223,9 @@ module.exports = {
             }
 
             const products = await Product.find({ deleted: false })
-                .select('productName price');
             
             const categories = await Category.find({ status: true })
-                .select('categoryName');
+                
 
             const formattedOffer = {
                 _id: offer._id,
@@ -232,6 +267,19 @@ module.exports = {
                 endDate
             } = req.body;
 
+            // Check for existing offer with same title (excluding current offer)
+            const existingOffer = await offerSchema.findOne({ 
+                _id: { $ne: offerId }, // Exclude current offer
+                offerTitle: { $regex: new RegExp(`^${offerTitle}$`, 'i') }
+            });
+
+            if (existingOffer) {
+                return res.status(400).json({
+                    status: false,
+                    message: "An offer with this name already exists"
+                });
+            }
+
             if (!offerId || !mongoose.Types.ObjectId.isValid(offerId)) {
                 return res.status(400).json({
                     status: false,
@@ -268,7 +316,7 @@ module.exports = {
                 {
                     offerTitle,
                     offerType,
-                    ...(offerType === 'product' ? { productId: mongoose.Types.ObjectId(productId) } : { categoryId: mongoose.Types.ObjectId(categoryId) }),
+                    ...(offerType === 'product' ? { productId } : { categoryId }),
                     discountValue: Number(discountValue),
                     minimumPrice: Number(minimumPrice) || 0,
                     startDate: new Date(startDate),
@@ -286,6 +334,14 @@ module.exports = {
 
         
             if (offerType === 'product') {
+                const product = await Product.findById(productId);
+                if (!product) {
+                    return res.status(404).json({
+                        status: false,
+                        message: "Product not found"
+                    });
+                }
+
                 await Product.findByIdAndUpdate(
                     productId,
                     { 

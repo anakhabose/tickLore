@@ -44,13 +44,14 @@ module.exports ={
                 return res.redirect('/admin/login');
             }
 
-        
+            const totalCustomers = await userModel.countDocuments({ status: true });
+
             const orders = await orderModel.find({
                 status: { $nin: ['Cancelled', 'Returned'] }
             }).populate('userId', 'name')
               .populate('items.product', 'productName price');
 
-    
+        
             const totalOrders = orders.length;
             
      
@@ -107,19 +108,205 @@ module.exports ={
                 statusCounts
             });
 
-            res.render('admin/dashboard', { 
-                currentPath: '/admin/dashboard',
-                orders: processedOrders,
-                summary,
-                statistics: {
-                    totalOrders,
-                    totalRevenue,    
-                    totalDiscount,   
-                    netRevenue,      
-                    todayOrders: todayOrders.length,
-                    statusCounts
+            
+            const currentDate = new Date();
+            const startDate = new Date(currentDate);
+            startDate.setDate(currentDate.getDate() - 6);
+
+            const chartOrders = await orderModel.find({
+                createdAt: { $gte: startDate, $lte: currentDate },
+                status: { $nin: ['Cancelled', 'Returned'] }
+            }).sort('createdAt');
+
+            const chartData = processOrdersForChart(chartOrders, 'weekly', startDate, currentDate);
+
+              const topProducts = await productModel.aggregate([
+    { 
+        $match: { 
+            deleted: false 
+        } 
+    },
+    {
+        $lookup: {
+            from: 'orders',
+            let: { productId: '$_id' },
+            pipeline: [
+                {
+                    $unwind: '$items'
+                },
+                {
+                    $match: {
+                        $expr: { 
+                            $eq: ['$items.product', '$$productId'] 
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalQuantity: { $sum: '$items.quantity' }
+                    }
                 }
-            });
+            ],
+            as: 'salesData'
+        }
+    },
+    {
+        $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryInfo'
+        }
+    },
+    {
+        $addFields: {
+            salesCount: {
+                $ifNull: [
+                    { $first: '$salesData.totalQuantity' },
+                    0
+                ]
+            },
+            categoryName: {
+                $ifNull: [
+                    { $first: '$categoryInfo.categoryName' },
+                    'Uncategorized'
+                ]
+            }
+        }
+    },
+    {
+        $project: {
+            productName: 1,
+            price: 1,
+            salesCount: 1,
+            categoryName: 1,
+            images: 1
+        }
+    },
+    {
+        $sort: { salesCount: -1 }
+    },
+    {
+        $limit: 10
+    }
+]);
+
+console.log('Top Products:', JSON.stringify(topProducts, null, 2));
+
+        // Fetch top 10 categories by aggregating product sales
+        const topCategories = await categoryModel.aggregate([
+            // Match active categories
+            { 
+                $match: { 
+                    status: true 
+                } 
+            },
+            // Lookup products in this category
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: 'category',
+                    as: 'products'
+                }
+            },
+            // Lookup orders for these products
+            {
+                $lookup: {
+                    from: 'orders',
+                    let: { 
+                        productIds: '$products._id' 
+                    },
+                    pipeline: [
+                        { 
+                            $unwind: '$items' 
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $in: ['$items.product', '$$productIds']
+                                }
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                totalSales: { $sum: '$items.quantity' },
+                                totalRevenue: {
+                                    $sum: { 
+                                        $multiply: ['$items.price', '$items.quantity'] 
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    as: 'orderStats'
+                }
+            },
+            // Add computed fields
+            {
+                $addFields: {
+                    totalSales: {
+                        $ifNull: [
+                            { $first: '$orderStats.totalSales' },
+                            0
+                        ]
+                    },
+                    totalRevenue: {
+                        $ifNull: [
+                            { $first: '$orderStats.totalRevenue' },
+                            0
+                        ]
+                    }
+                }
+            },
+            // Project final fields
+            {
+                $project: {
+                    categoryName: 1,
+                    images: 1,
+                    totalSales: 1,
+                    totalRevenue: 1
+                }
+            },
+            // Sort by total sales
+            { 
+                $sort: { 
+                    totalSales: -1 
+                } 
+            },
+            // Limit to top 10
+            { 
+                $limit: 10 
+            }
+        ]);
+        
+          console.log('Top Categories:', JSON.stringify(topCategories, null, 2)); // Debug log
+          
+            const renderData = {
+            currentPath: '/admin/dashboard',
+            orders: processedOrders,
+            summary,
+            statistics: {
+                totalOrders,
+                totalRevenue,
+                totalDiscount,
+                netRevenue,
+                todayOrders: todayOrders.length,
+                statusCounts,
+                totalCustomers
+            },
+            chartData,
+            topProducts,
+            topCategories,
+           
+        };
+
+        console.log('Render Data:', renderData); // Debug log
+
+        res.render('admin/dashboard', renderData);
+
         } catch (error) {
             console.error('Dashboard Error:', error);
             res.status(500).send('Error loading dashboard');
@@ -127,46 +314,64 @@ module.exports ={
     },
    
     loadCustomers: async (req, res) => {
-    try {
-        
-        const admin = req.session.admin;
-        if (!admin) {
-            return res.redirect('/admin/login');
-        }
+        try {
+            const admin = req.session.admin;
+            if (!admin) {
+                return res.redirect('/admin/login');
+            }
 
-        
-        const search = req.query.search || '';
+            // Pagination setup
+            const page = parseInt(req.query.page) || 1;
+            const limit = 6; // Number of customers per page
+            const skip = (page - 1) * limit;
+            const search = req.query.search || '';
 
-        
-        const userDetails = await userModel.find(
-            {
+            // Search query
+            const searchQuery = {
                 $or: [
                     { name: { $regex: search, $options: 'i' } }, 
                     { email: { $regex: search, $options: 'i' } } 
                 ]
-            },
-            'name email status _id' 
-        );
+            };
 
-        
-        const users = userDetails.map((detail) => ({
-            name: detail.name,
-            email: detail.email,
-            _id: detail._id,
-            status: detail.status,
-        }));
+            // Get total count for pagination
+            const totalCustomers = await userModel.countDocuments(searchQuery);
+            const totalPages = Math.ceil(totalCustomers / limit);
 
-       
-        res.render('admin/customers', {
-            users,
-            currentPath: '/admin/customers', 
-            search, 
-        });
-    } catch (error) {
-        console.error('Error loading customers:', error);
-        res.status(500).send('Server Error');
-    }
-},
+            // Fetch customers with pagination
+            const userDetails = await userModel.find(
+                searchQuery,
+                'name email status _id'
+            )
+            .skip(skip)
+            .limit(limit);
+
+            const users = userDetails.map((detail) => ({
+                name: detail.name,
+                email: detail.email,
+                _id: detail._id,
+                status: detail.status,
+            }));
+
+            res.render('admin/customers', {
+                users,
+                currentPath: '/admin/customers',
+                search,
+                currentPage: page,
+                prevPage: page - 1,
+                nextPage: page + 1,
+                hasPrevPage: page > 1,
+                hasNextPage: skip + limit < totalCustomers,
+                totalCustomers,
+                totalPages,
+                startIndex: skip + 1,
+                endIndex: Math.min(skip + limit, totalCustomers)
+            });
+        } catch (error) {
+            console.error('Error loading customers:', error);
+            res.status(500).send('Server Error');
+        }
+    },
 
     blockUser:async (req, res) => {
        const userId = req.params.id;
@@ -250,35 +455,45 @@ loadProducts: async (req, res) => {
         res.status(500).send('Error loading products');
     }
 },
-    loadAddProducts:async(req,res)=>{
-        try{
+    loadAddProducts: async (req, res) => {
+        try {
+            // Check admin session
             const admin = req.session.admin;
-        if (!admin) {
-            return res.redirect('/admin/login');
-        }
-        const category = await categoryModel.find({status:true});
-        res.render('admin/products-add',{category});
+            if (!admin) {
+                return res.redirect('/admin/login');
+            }
+
+            // Fetch active categories from database
+            const category = await categoryModel.find({ status: true });
+
+            // Render the page with categories
+            res.render('admin/products-add', { category });
             
-        }catch{
+        } catch (error) {
+            console.error('Error loading add products page:', error);
             res.status(500).send('Server Error');
         }
     },
-    loadEditProducts:async(req,res)=>{
-         try {
+    loadEditProducts: async (req, res) => {
+        try {
             const admin = req.session.admin;
             if (!admin) {
-            return res.redirect('/admin/login');
+                return res.redirect('/admin/login');
             }
-            const productId=req.params.id;
-            const products= await productModel.findById(productId);
+            const productId = req.params.id;
+            const products = await productModel.findById(productId);
+            const categories = await categoryModel.find({ status: true });
 
-            if(!products){
+            if (!products) {
                 return res.status(404).send("Product not found")
             }
-            res.render('admin/editProducts',{products});
+            res.render('admin/editProducts', { 
+                products,
+                categories
+            });
         } catch (error) {
             console.error(error);
-            res.status(500).send("Error Occured")
+            res.status(500).send("Error Occurred")
         }
     },
     
@@ -435,9 +650,98 @@ loadViewDetailAdmin: async (req, res) => {
         res.status(500).send('Error loading order details');
     }
 },
+loadSalesReport: async (req, res) => {
+        try {
+            const admin = req.session.admin;
+            if (!admin) {
+                return res.redirect('/admin/login');
+            }
+
+        
+            const orders = await orderModel.find({
+                status: { $nin: ['Cancelled', 'Returned'] }
+            }).populate('userId', 'name')
+              .populate('items.product', 'productName price');
+
+    
+            const totalOrders = orders.length;
+            
+     
+            const processedOrders = orders.map(order => {
+            
+                const originalTotal = order.items.reduce((sum, item) => {
+                    return sum + (item.product.price * item.quantity);
+                }, 0);
+
+             
+                const discountAmount = originalTotal - order.total;
+
+                return {
+                    ...order.toObject(),
+                    originalAmount: originalTotal,
+                    offerDiscount: discountAmount,
+                    couponDiscount: 0,
+                    finalAmount: order.total
+                };
+            });
+
+           const summary = processedOrders.reduce((acc, order) => ({
+                totalOriginal: acc.totalOriginal + order.originalAmount,
+                totalOfferDiscount: acc.totalOfferDiscount + order.offerDiscount,
+                totalCouponDiscount: acc.totalCouponDiscount + order.couponDiscount,
+                totalNet: acc.totalNet + order.finalAmount
+            }), {
+                totalOriginal: 0,
+                totalOfferDiscount: 0,
+                totalCouponDiscount: 0,
+                totalNet: 0
+            });
+
+     
+            const totalRevenue = summary.totalOriginal; 
+            const totalDiscount = summary.totalOfferDiscount + summary.totalCouponDiscount;
+            const netRevenue = summary.totalNet;
+
+      
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayOrders = processedOrders.filter(order => order.createdAt >= today);
+
+           
+            const statusCounts = processedOrders.reduce((acc, order) => {
+                acc[order.status] = (acc[order.status] || 0) + 1;
+                return acc;
+            }, {});
+
+            console.log('Final statistics:', {
+                totalOrders,
+                totalRevenue,
+                todayOrders: todayOrders.length,
+                statusCounts
+            });
+
+            res.render('admin/salesReport', { 
+                currentPath: '/admin/salesReport',
+                orders: processedOrders,
+                summary,
+                statistics: {
+                    totalOrders,
+                    totalRevenue,    
+                    totalDiscount,   
+                    netRevenue,      
+                    todayOrders: todayOrders.length,
+                    statusCounts
+                }
+            });
+        } catch (error) {
+            console.error('Dashboard Error:', error);
+            res.status(500).send('Error loading sales report');
+        }
+    },
+   
     logout:(req,res)=>{
         try{
-           req.session.destroy();
+           req.session.admin=null;
             res.redirect('/admin/login');
         }catch{
             res.status(500).send('Error')
@@ -768,6 +1072,15 @@ loadViewDetailAdmin: async (req, res) => {
         } catch (error) {
             console.error('Excel Export Error:', error);
             res.status(500).send('Error generating Excel file');
+        }
+    },
+
+    resetSalesCounts: async (req, res) => {
+        try {
+            await recalculateProductSalesCounts();
+            res.json({ success: true, message: 'Sales counts recalculated successfully' });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Error recalculating sales counts' });
         }
     }
 }

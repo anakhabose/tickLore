@@ -1,0 +1,79 @@
+<header class="bg-black text-white shadow-sm border-b border-gray-800 h-20">
+  <div class="container mx-auto px-4 h-full">
+    <div class="flex justify-between items-center h-full">
+      <!-- Logo -->
+      <div class="flex items-center w-1/4">
+        <a href="/user/home">
+          <img src="/images/tick1.png" alt="Logo" class="w-64 h-64">
+        </a>
+      </div>
+
+      <!-- Center Navigation and Search -->
+      <div class="flex-1 flex justify-center items-center gap-8">
+        <!-- Navigation with proper spacing -->
+        <nav class="hidden md:flex items-center gap-6">
+          <a href="/user/home" class="text-sm font-medium hover:text-yellow-500 transition-colors duration-200">Home</a>
+          <a href="/user/shop" class="text-sm font-medium hover:text-yellow-500 transition-colors duration-200">Shop</a>
+          <a href="#" class="text-sm font-medium hover:text-yellow-500 transition-colors duration-200">About</a>
+          <a href="#" class="text-sm font-medium hover:text-yellow-500 transition-colors duration-200">Contact</a>
+        </nav>
+
+        <!-- Search input -->
+        <input 
+          type="text" 
+          placeholder="What are you looking for?" 
+          class="px-4 py-2 rounded-lg w-64 text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        >
+      </div>
+
+      <!-- User controls -->
+      <div class="w-1/4 flex justify-end">
+        {{#if user}}
+          <nav>
+            <ul class="flex items-center space-x-8 text-sm font-medium">
+              <li>
+                <a href="/user/profile" class="hover:text-yellow-500 transition-colors duration-200">
+                  <i class="fas fa-user text-lg"></i>
+                </a>
+              </li>
+              <li>
+                <a href="/user/wishlist" class="hover:text-yellow-500 transition-colors duration-200">
+                  <i class="fas fa-heart text-lg"></i>
+                </a>
+              </li>
+              <li>
+                <a href="/user/cart" class="hover:text-yellow-500 transition-colors duration-200">
+                  <i class="fas fa-shopping-cart text-lg"></i>
+                </a>
+              </li>
+              <li>
+                <a href="/user/logout" class="hover:text-yellow-500 transition-colors duration-200">
+                  <i class="fas fa-sign-out-alt text-lg"></i>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        {{else}}
+          <nav>
+            <ul class="flex items-center space-x-8 text-sm font-medium">
+              <li>
+                <a href="/user/login" class="text-white hover:text-yellow-500 transition-colors duration-200">
+                  LOGIN
+                </a>
+              </li>
+              <li>
+                <a href="/user/signup" class="text-yellow-300 hover:text-yellow-500 transition-colors duration-200">
+                  SIGNUP
+                </a>
+              </li>
+            </ul>
+          </nav>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</header>
+
+
+
+

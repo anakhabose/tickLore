@@ -72,19 +72,14 @@
     id="category" 
     name="category"
     class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+    required
   >
-    <!-- If a category exists, show it as the first option -->
-    <option value="" disabled {{#unless products.category}}selected{{/unless}}>
-      {{#if products.category}}
-        {{products.category}} <!-- Show current category -->
-      {{else}}
-        Select category
-      {{/if}}
-    </option>
-    <!-- Static category options -->
-    <option value="analog" {{#if (eq products.category "analog")}}selected{{/if}}>Analog</option>
-    <option value="digital" {{#if (eq products.category "digital")}}selected{{/if}}>Digital</option>
-    <option value="smart" {{#if (eq products.category "smart")}}selected{{/if}}>Smart</option>
+    <option value="" disabled>Select category</option>
+    {{#each categories}}
+      <option value="{{this._id}}" {{#if (eq ../products.category this._id)}}selected{{/if}}>
+        {{this.categoryName}}
+      </option>
+    {{/each}}
   </select>
 </div>
 
@@ -154,45 +149,43 @@
  </div>
 <script>
  document.getElementById('product-form').addEventListener('submit', async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const form = event.target;
-  const formData = new FormData(form);
-  for (let [key, value] of formData.entries()) {
-  console.log(`${key}: ${value}`);
-}
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch(`/admin/editProducts/${formData.get('_id')}`, {
+            method: 'POST',
+            body: formData,
+        });
+ 
+ 
+        const data = await response.json();
 
-  try {
-    const response = await fetch(`/admin/editProducts/${formData.get('_id')}`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (data.status) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Product Updated',
-        text: data.message,
-      }).then(() => {
-        window.location.href = '/admin/products';
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: data.message || 'Something went wrong!',
-      });
+        if (data.status) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Product Updated',
+                text: data.message,
+            }).then(() => {
+                window.location.href = '/admin/products';
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Something went wrong!',
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Failed to update product.',
+        });
     }
-  } catch (error) {
-    console.error(error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Server Error',
-      text: 'Failed to update product.',
-    });
-  }
 });
 
 </script>  

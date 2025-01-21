@@ -283,7 +283,7 @@ module.exports={
                 return res.redirect('/user/login'); 
             }
 
-            res.render('user/profile', { users: userData });
+            res.render('user/profile', { currentPath: '/user/profile',  users: userData });
         } catch (error) {
             console.error('Error in loadProfile:', error);
             res.status(500).send('Error Occurred');
@@ -377,23 +377,24 @@ module.exports={
     },
      loadChangePassword : async (req, res) => {
         try {
-            
             const userSession = req.session.user;
 
             if (!userSession) {
                 return res.redirect('/user/login'); 
             }
 
-        
             const userData = await userSchema.findOne({ email: userSession.email });
 
             if (!userData) {
                 return res.redirect('/user/login'); 
             }
 
-            res.render('user/changePassword', { users: userData });
+            res.render('user/changePassword', { 
+                users: userData,
+                currentPath: '/user/changePassword'
+            });
         } catch (error) {
-            console.error('Error in loadProfile:', error);
+            console.error('Error in loadChangePassword:', error);
             res.status(500).send('Error Occurred');
         }
     },

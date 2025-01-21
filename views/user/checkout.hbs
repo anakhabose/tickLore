@@ -535,8 +535,11 @@ function removeCoupon() {
         couponButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
     }
 
-    // Enable coupon select
-    if (couponSelect) couponSelect.disabled = false;
+    // Reset coupon select to default option
+    if (couponSelect) {
+        couponSelect.value = '';  // Reset to default option
+        couponSelect.disabled = false;
+    }
 
     // Reset variables
     currentDiscount = 0;

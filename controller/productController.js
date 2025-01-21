@@ -1,11 +1,16 @@
-
 const Product = require("../model/productModel");
+const categoryModel = require("../model/categoryModel");
 
 module.exports = {
  addProducts: async (req, res) => {
     try {
+      console.log('Raw request body:', req.body);
+      console.log('Files:', req.files);
+      
       const { productName, price, description, category, stock } = req.body;
       
+      console.log('Category value:', category);
+      console.log('Category type:', typeof category);
     
       if (!productName || !price || !description || !category) {
         return res.status(400).json({ 
@@ -33,6 +38,17 @@ module.exports = {
 
       const images = req.files.map((file) => file.path);
      
+      console.log('Searching for category with ID:', category);
+      const categoryExists = await categoryModel.findById(category);
+      console.log('Found category:', categoryExists);
+      
+      if (!categoryExists) {
+        return res.status(400).json({
+          status: false,
+          message: 'Invalid category selected'
+        });
+      }
+
       const product = new Product({
         productName, 
         price, 
@@ -70,12 +86,12 @@ module.exports = {
 editProducts: async (req, res) => {
     try {
         const productId = req.params.id;
-        const { productName, description, category, brand, stock, price } = req.body;
+        const { productName, description, category, stock, price } = req.body;
 
         console.log('Product ID:', productId);
         console.log('Request Body:', req.body);
 
-       
+        // Check for duplicate product name
         if (productName) {
             const existingProduct = await Product.findOne({
                 _id: { $ne: productId },
@@ -90,29 +106,46 @@ editProducts: async (req, res) => {
             }
         }
 
-        const updateProduts = await Product.findByIdAndUpdate(
+        // Validate if category exists using the category ID
+        const categoryExists = await categoryModel.findById(category);
+
+        if (!categoryExists) {
+            return res.status(400).json({
+                status: false,
+                message: "Invalid category selected"
+            });
+        }
+
+        const updateProduct = await Product.findByIdAndUpdate(
             productId,
             {
-                productName: productName,
-                description: description,
-                category: category,
-                brand: brand,
-                stock: stock,
-                price: price
+                $set: {
+                    productName,
+                    description,
+                    category,
+                    stock,
+                    price
+                }
             },
-            { new: true }
+            { 
+                new: true,
+                runValidators: true
+            }
         );
 
-        console.log('Updated Product:', updateProduts);
+        console.log('Updated Product:', updateProduct);
 
-        if (!updateProduts) {
+        if (!updateProduct) {
             return res.status(404).json({
                 status: false,
                 message: "Product not found"
             });
         }
 
-        return res.status(200).json({ status: true, message: "Product updated successfully!" });
+        return res.status(200).json({ 
+            status: true, 
+            message: "Product updated successfully!" 
+        });
     } catch (error) {
         console.error('Error details:', error);
         return res.status(500).json({

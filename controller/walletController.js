@@ -36,6 +36,7 @@ module.exports = {
                 const paginatedTransactions = wallet.transactions.slice(startIndex, endIndex);
                 
                 res.render('user/wallet', {
+                    currentPath: '/user/wallet',
                     user: userData,
                     wallet: {
                         ...wallet.toObject(),
@@ -51,6 +52,7 @@ module.exports = {
                 });
             } else {
                 res.render('user/wallet', {
+                    currentPath: '/user/wallet',
                     user: userData,
                     wallet: { balance: 0, transactions: [] },
                     pagination: {

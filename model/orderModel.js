@@ -1,4 +1,5 @@
 const mongoose=require("mongoose");
+const productModel = require('./productModel');
 
 const orderSchema=new mongoose.Schema({
     userId: { 
@@ -70,5 +71,22 @@ const orderSchema=new mongoose.Schema({
         razorpay_signature: String
     }
 })
+
+orderSchema.pre('save', async function(next) {
+  if (this.isNew) { // Only run this when creating a new order
+    try {
+      // Update salesCount for each product in the order
+      for (const item of this.items) {
+        await productModel.findByIdAndUpdate(
+          item.product,
+          { $inc: { salesCount: item.quantity } }
+        );
+      }
+    } catch (error) {
+      console.error('Error updating product sales count:', error);
+    }
+  }
+  next();
+});
 
 module.exports=mongoose.model("Orders",orderSchema)

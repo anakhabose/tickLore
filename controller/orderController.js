@@ -65,7 +65,7 @@ loadOrders: async (req, res) => {
         res.render("user/orders", {
             user,
             orders: populatedOrders,
-            currentPath: '/orders',
+            currentPath: '/user/orders',
             pagination: {
                 page,
                 totalPages,
@@ -79,7 +79,7 @@ loadOrders: async (req, res) => {
         res.render("user/orders", {
             user: req.session.user,
             orders: [],
-            currentPath: '/orders',
+            currentPath: '/user/orders',
             pagination: {
                 page: 1,
                 totalPages: 1,

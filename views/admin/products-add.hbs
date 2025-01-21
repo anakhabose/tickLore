@@ -62,10 +62,11 @@
                 id="category"
                 name="category"
                 class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
+                required
               >
                 <option value="" disabled selected>Select category</option>
                 {{#each category}}
-                <option value="{{this.categoryName}}">{{this.categoryName}}</option>
+                <option value="{{this._id}}">{{this.categoryName}}</option>
                 {{/each}}
               </select>
             </div>
@@ -258,53 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-
- 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    
-    // Run validation first
-    if (!validateForm()) {
-      // validateForm already shows the Swal error message
-      return;
-    }
-
-    const formData = new FormData(form);
-    
-    try {
-      const response = await fetch('/admin/products-add', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-      
-      if (data.status) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: data.message || 'Product added successfully!',
-          confirmButtonText: 'OK'
-        }).then(() => {
-          window.location.href = '/admin/products';
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: data.message || 'Something went wrong!'
-        });
-      }
-    } catch (error) {
-      console.error('Form submission error:', error); // Add error logging
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Network error or server not responding. Please try again.'
-      });
-    }
-  });
-
   function validateForm() {
     const productName = document.getElementById('productName').value;
     const price = document.getElementById('price').value;
@@ -377,4 +331,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+ 
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    // Run validation first
+    if (!validateForm()) {
+      // validateForm already shows the Swal error message
+      return;
+    }
+
+    const formData = new FormData(form);
+    
+    try {
+      const response = await fetch('/admin/products-add', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (data.status) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: data.message || 'Product added successfully!',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          window.location.href = '/admin/products';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message || 'Something went wrong!'
+        });
+      }
+    } catch (error) {
+      console.error('Form submission error:', error); // Add error logging
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Network error or server not responding. Please try again.'
+      });
+    }
+  });
+
 </script>  

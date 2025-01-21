@@ -17,9 +17,8 @@ const productSchema = new mongoose.Schema({
     min: 0
   },
    category: {
-    type:String,
-    //type: Schema.Types.ObjectId,
-    //ref: 'category', 
+    type: Schema.Types.ObjectId,
+    ref: 'category', 
     required: true
   },
   stock: {
@@ -42,6 +41,10 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: null
   },
+  salesCount: {
+    type: Number,
+    default: 0
+  }
 }, {
   timestamps: true 
 });
