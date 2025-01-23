@@ -1,4 +1,3 @@
-
 const category = require("../model/categoryModel");
 
 module.exports = {
@@ -46,8 +45,17 @@ editCategory: async (req, res) => {
     try {
         const categoryId = req.params.id;
         const { categoryName } = req.body;
+        
+        // Create update object
+        const updateData = {
+            categoryName: categoryName,
+        };
 
-      
+        // Add image to update data if a new file was uploaded
+        if (req.file) {
+            updateData.images = req.file.path;
+        }
+
         const existingCategory = await category.findOne({
             categoryName: { $regex: new RegExp(`^${categoryName}$`, 'i') },
             _id: { $ne: categoryId }
@@ -62,9 +70,7 @@ editCategory: async (req, res) => {
 
         const updateCategory = await category.findByIdAndUpdate(
             categoryId,
-            {
-                categoryName: categoryName,
-            },
+            updateData,
             { new: true }
         );
 

@@ -1,9 +1,124 @@
 const Cart = require("../model/cartModel");
 const Product = require('../model/productModel');
 const userSchema = require('../model/userModel')
+const Wishlist = require('../model/wishlistModel');
 
 
 module.exports = {
+  loadCart: async (req, res) => {
+  try {
+    const userId = req.session.user._id; 
+    const userData = await userSchema.findOne({ _id: userId }); 
+
+    const cart = await Cart.findOne({ userId: userId })
+      .populate({
+        path: 'items.productId',
+        model: 'products', 
+        select: 'productName images price deleted discountedPrice offer',
+        populate: [
+          {
+            path: 'offer',
+            model: 'offer',
+            select: 'discountValue'
+          },
+          // {
+          //   path: 'category',
+          //   select: 'name offer',
+          //   populate: {
+          //     path: 'offer',
+          //     select: 'discountValue'
+          //   }
+          // }
+        ]
+      });
+
+    if (!cart) {
+      return res.render('user/cart', { 
+        cartItems: [], 
+        subtotal: 0,
+        deliveryCharges: 0, 
+        totalAmount: 0 
+      });
+    }
+
+    const activeCartItems = cart.items.filter(item => 
+      item.productId && !item.productId.deleted
+    ).map(item => {
+      
+      let effectivePrice = item.productId.price;
+      let appliedDiscount = 0;
+
+  
+      if (item.productId.offer && item.productId.offer.discountValue) {
+        appliedDiscount = Math.max(appliedDiscount, item.productId.offer.discountValue);
+      }
+
+    
+      // if (item.productId.category && item.productId.category.offer && 
+      //     item.productId.category.offer.discountValue) {
+      //   appliedDiscount = Math.max(appliedDiscount, item.productId.category.offer.discountValue);
+      // }
+
+    
+      if (appliedDiscount > 0) {
+        effectivePrice = item.productId.price - (item.productId.price * (appliedDiscount / 100));
+      }
+
+    
+      item.salePrice = effectivePrice;
+      item.totalPrice = effectivePrice * item.quantity;
+      
+      return item;
+    });
+
+    const subtotal = activeCartItems.reduce((total, item) => {
+      return total + item.totalPrice;
+    }, 0);
+
+    const calculateDeliveryCharges = (totalAmount) => {
+      if (totalAmount >= 2000) return 0;        
+      if (totalAmount >= 1000) return 30;      
+      return 50;
+    };
+
+    const deliveryCharges = calculateDeliveryCharges(subtotal);
+    const totalAmount = subtotal + deliveryCharges;
+
+   
+    cart.items = activeCartItems;
+    cart.totalCartPrice = subtotal;
+    cart.deliveryCharges = deliveryCharges;
+    cart.finalAmount = totalAmount;
+    await cart.save();
+
+    // Get cart count
+    const cartCount = cart ? cart.items.length : 0;
+    
+    // Modified wishlist count query to use 'user' field instead of 'userId'
+    const wishlistCount = await Wishlist.countDocuments({ user: userId });
+    console.log('User ID:', userId);
+    console.log('Wishlist count:', wishlistCount);
+
+    res.render('user/cart', {
+      user: req.session.user,
+      users: userData,
+      cartItems: activeCartItems,
+      subtotal: subtotal.toFixed(2), 
+      deliveryCharges: deliveryCharges.toFixed(2),
+      totalAmount: totalAmount.toFixed(2),
+      cartCount,
+      wishlistCount
+    });
+
+  } catch (error) {
+    console.error('Error loading cart:', error);
+    console.error('Specific error:', error.message);
+    res.status(500).render('error', { 
+      message: 'Error loading cart', 
+      error: error 
+    });
+  }
+},
 addToCart: async (req, res) => {
   try {
     const { productId, quantity = 1 } = req.body;
@@ -95,108 +210,6 @@ cart.finalAmount = cart.totalCartPrice + cart.deliveryCharges;
   } catch (error) {
     console.error("Error adding to cart:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  }
-},
-loadCart: async (req, res) => {
-  try {
-    const userId = req.session.user._id; 
-    const userData = await userSchema.findOne({ _id: userId }); 
-
-    const cart = await Cart.findOne({ userId: userId })
-      .populate({
-        path: 'items.productId',
-        model: 'products', 
-        select: 'productName images price deleted discountedPrice offer',
-        populate: [
-          {
-            path: 'offer',
-            model: 'offer',
-            select: 'discountValue'
-          },
-          // {
-          //   path: 'category',
-          //   select: 'name offer',
-          //   populate: {
-          //     path: 'offer',
-          //     select: 'discountValue'
-          //   }
-          // }
-        ]
-      });
-
-    if (!cart) {
-      return res.render('user/cart', { 
-        cartItems: [], 
-        subtotal: 0,
-        deliveryCharges: 0, 
-        totalAmount: 0 
-      });
-    }
-
-    const activeCartItems = cart.items.filter(item => 
-      item.productId && !item.productId.deleted
-    ).map(item => {
-      
-      let effectivePrice = item.productId.price;
-      let appliedDiscount = 0;
-
-  
-      if (item.productId.offer && item.productId.offer.discountValue) {
-        appliedDiscount = Math.max(appliedDiscount, item.productId.offer.discountValue);
-      }
-
-    
-      // if (item.productId.category && item.productId.category.offer && 
-      //     item.productId.category.offer.discountValue) {
-      //   appliedDiscount = Math.max(appliedDiscount, item.productId.category.offer.discountValue);
-      // }
-
-    
-      if (appliedDiscount > 0) {
-        effectivePrice = item.productId.price - (item.productId.price * (appliedDiscount / 100));
-      }
-
-    
-      item.salePrice = effectivePrice;
-      item.totalPrice = effectivePrice * item.quantity;
-      
-      return item;
-    });
-
-    const subtotal = activeCartItems.reduce((total, item) => {
-      return total + item.totalPrice;
-    }, 0);
-
-    const calculateDeliveryCharges = (totalAmount) => {
-      if (totalAmount >= 2000) return 0;        
-      if (totalAmount >= 1000) return 30;      
-      return 50;
-    };
-
-    const deliveryCharges = calculateDeliveryCharges(subtotal);
-    const totalAmount = subtotal + deliveryCharges;
-
-   
-    cart.items = activeCartItems;
-    cart.totalCartPrice = subtotal;
-    cart.deliveryCharges = deliveryCharges;
-    cart.finalAmount = totalAmount;
-    await cart.save();
-
-    res.render('user/cart', {
-      users: userData,
-      cartItems: activeCartItems,
-      subtotal: subtotal.toFixed(2), 
-      deliveryCharges: deliveryCharges.toFixed(2),
-      totalAmount: totalAmount.toFixed(2)
-    });
-
-  } catch (error) {
-    console.error('Error loading cart:', error);
-    res.status(500).render('error', { 
-      message: 'Error loading cart', 
-      error: error 
-    });
   }
 },
 updateCart: async (req, res) => {

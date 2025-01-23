@@ -1,145 +1,221 @@
+<style>
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-  <!-- Header -->
- {{>header}}
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
 
-  <!-- Hero Section -->
-  <section class="container mx-auto px-4 bg-black text-yellow-500 h-[300px]">
-    <div class="grid md:grid-cols-2 gap-8 items-center">
-      <div>
-        <h1 class="text-4xl md:text-6xl font-bold mb-4">
-          Find Your Timeless Companion
-        </h1>
-        <p class="text-gray-400 mb-8">
-          Discover our collection of luxury timepieces that blend elegance with precision. 
-          Each watch tells a unique story of craftsmanship and style.
-        </p>
-        <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg">
-          Shop Now
-        </button>
-      </div>
-      <div class="relative h-[60px] md:h-[120px]">
-        <img
-          src="/images/watch.jpeg"
-          alt="Luxury Watch"
-          class="object-cover rounded-lg w-[200px] h-[200px]"
-        />
-      </div>
+  /* Existing styles */
+  .bg-fixed {
+    background-attachment: fixed;
+    background-size: cover !important;
+    background-position: center !important;
+    height: 100vh;
+    width: 100%;
+  }
+  
+  /* For mobile devices */
+  @media (max-width: 768px) {
+    .bg-fixed {
+      background-attachment: scroll;
+      background-size: cover !important;
+      background-position: center !important;
+    }
+  }
+
+  /* Animation for marquee */
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  
+  @keyframes marquee-reverse {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+  }
+  
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+  
+  .animate-marquee2 {
+    animation: marquee 30s linear infinite;
+    animation-delay: 15s;
+  }
+  
+  .animate-marquee-reverse {
+    animation: marquee-reverse 30s linear infinite;
+  }
+  
+  .animate-marquee2-reverse {
+    animation: marquee-reverse 30s linear infinite;
+    animation-delay: 15s;
+  }
+
+  /* Add specific text color styles */
+  .text-white {
+    color: white !important;
+  }
+
+  .text-black {
+    color: black !important;
+  }
+</style>
+
+{{>header}}
+
+<!-- Video Section -->
+<section class="container mx-auto px-4 bg-black">
+  <div class="relative h-[400px]">
+    <video 
+      src="/images/homeVideo.mp4"
+      class="w-full h-full object-cover"
+      autoplay
+      loop
+      muted
+      playsinline
+    ></video>
+    <!-- Overlay Content -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-40">
+      <h1 class="text-4xl md:text-6xl font-bold mb-4 text-center">
+        Timeless Masterpieces
+      </h1>
+      <p class="text-xl md:text-2xl mb-8 text-center max-w-2xl">
+       Elevate Your Style with Iconic Craftsmanship
+      </p>
+      <a href="/user/shop" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 transform hover:scale-105">
+        Shop Now
+      </a>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Top Brands Section -->
-  <section class="container mx-auto px-4 py-12 bg-white text-black">
-    <h2 class="text-3xl font-bold mb-8 text-center">TOP BRANDS</h2>
-    <div class="relative">
-      <div class="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
-        {{#each data}}
-        <a href="/user/viewProducts/{{this._id}}" class="flex-none min-w-[300px]">
-          <div class="group cursor-pointer">
-            <div class="relative h-72 mb-4">
-              <img
-                src="{{this.images.[0]}}"
-                alt="Luxury Watch"
-                class="object-cover rounded-lg group-hover:scale-105 transition-transform w-full h-full"
-              />
+<!-- Categories Section -->
+<section class="container mx-auto px-4 py-12">
+    <h2 class="text-3xl font-bold mb-8 text-center">Categories</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center max-w-6xl mx-auto">
+        {{#each categories}}
+        <a href="/user/shop?category={{this.category}}" class="group w-full max-w-[400px]">
+            <div class="relative overflow-hidden rounded-lg aspect-square">
+                <img 
+                    src="{{this.image}}" 
+                    alt="{{this.category}}" 
+                    class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                >
+                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                    <h3 class="text-white text-2xl font-bold text-center px-4">Shop</h3>
+                </div>
+              
             </div>
-            <h3 class="font-semibold text-lg">{{this.name}}</h3>
-            <p class="text-gray-600 text-base">Rs.{{this.price}}</p>
-          </div>
+                <!-- Category name below image -->
+                <h3 class="text-xl font-bold text-gray-800 mt-4 text-center">{{this.category}}</h3>
         </a>
         {{/each}}
-      </div>
     </div>
-  </section>
+</section>
 
-  <!-- Main Content -->
-  <main class="container mx-auto py-10">
-    <div class="max-w-7xl mx-auto p-6">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Trending products</h1>
-       
-      </div>
-     
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-  {{#each data}}
-  <a href="/user/viewProducts/{{this._id}}" class="no-underline group">
-    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow hover:shadow-md transition-shadow duration-300">
-      <!-- Product Image -->
-      <div class="relative">
-        <img 
-          src="{{this.images.[0]}}" 
-          alt="{{this.name}}" 
-          class="h-56 w-full object-cover"
-        >
-      </div>
-      <!-- Product Details -->
-      <div class="p-4">
-        <h3 class="text-base font-semibold text-gray-900 truncate group-hover:text-blue-500 transition-colors">
-          {{this.name}}
-        </h3>
-       
-        <div class="flex justify-between items-center mt-4">
-          <p class="text-lg font-bold text-gray-800">Rs.{{this.price}}</p>
+<!-- Latest Releases Section -->
+<section class="py-16 bg-gray-100">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-12">Latest Releases</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {{#each latestProducts}}
+            <div class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-[400px]">
+                <!-- Image Container with Zoom Effect -->
+                <div class="relative h-[280px] overflow-hidden">
+                    <img 
+                        src="{{this.images.[0]}}" 
+                        alt="{{this.name}}" 
+                        class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                    >
+                    <!-- Hover Overlay with View Button -->
+                    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <a href="/user/viewProducts/{{this._id}}" class="bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transform hover:scale-105 transition-all">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                <!-- Product Info -->
+                <div class="p-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2 truncate">{{this.name}}</h3>
+                    <div class="flex justify-between items-center">
+                        <p class="text-lg font-bold text-gray-900">₹{{this.price}}</p>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</section>
+
+<!-- First Text Section -->
+<section class="relative min-h-screen w-full flex items-center justify-center bg-white"> 
+    <div class="relative z-20 text-center px-4">
+        <h2 class="text-4xl md:text-6xl font-bold mb-4 text-black !important leading-tight">
          
-        </div>
-      </div>
+"Time flows, but style stays eternal.<br> Wear your legacy on your wrist."
+        </h2>
     </div>
-  </a>
-  {{/each}}
-</div>
+</section>
 
+<!-- Third Parallax Section -->
+<section class="relative min-h-screen w-full bg-fixed bg-center bg-no-repeat bg-cover flex items-center justify-center" 
+    style="background-image: url('../images/scroll3.png'); background-size: cover; background-position: center;">
+    <div class="absolute inset-0 bg-white/10"></div>
+    <div class="relative z-20 text-center px-4">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 text-black !important">Exclusive Design</h2>
+        <p class="text-xl md:text-2xl text-black !important">Where Style Meets Innovation</p>
     </div>
-  </main>
+</section>
 
-    <!-- Testimonials Section -->
-    <div class="max-w-7xl mx-auto px-6 py-12">
-        <!-- Section Header -->
-        <div class="text-center mb-8">
-          <button class="bg-yellow-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-yellow-600">
-            View More
-          </button>
-          <p class="text-yellow-500 mt-2">Here are some of the best clients.</p>
-          <h2 class="text-3xl font-bold text-gray-800 mt-2">What People Say About Us</h2>
-        </div>
-    
-        <!-- Testimonials -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Testimonial 1 -->
-          <div class="bg-white shadow-md rounded-lg p-6 flex items-center">
-            {{!-- <img src="https://via.placeholder.com/100" alt="Client 1" class="rounded-full h-20 w-20 mr-6"> --}}
-            <div>
-              <h3 class="text-lg font-semibold text-gray-800">Anakha Bose</h3>
-              <p class="text-gray-600 mt-2">
-                Don’t waste time, just order! This is the best website to purchase smart watches.
-              </p>
-              <div class="flex mt-3">
-                <span class="text-yellow-500 text-xl">★★★★★</span>
-              </div>
+<!-- Main Content -->
+<main class="container mx-auto py-10">
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">latestProducts</h1>
+     
+    </div>
+   
+   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {{#each latestProducts}}
+            <div class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-[400px]">
+                <!-- Image Container with Zoom Effect -->
+                <div class="relative h-[280px] overflow-hidden">
+                    <img 
+                        src="{{this.images.[0]}}" 
+                        alt="{{this.name}}" 
+                        class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                    >
+                    <!-- Hover Overlay with View Button -->
+                    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <a href="/user/viewProducts/{{this._id}}" class="bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transform hover:scale-105 transition-all">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                <!-- Product Info -->
+                <div class="p-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2 truncate">{{this.name}}</h3>
+                    <div class="flex justify-between items-center">
+                        <p class="text-lg font-bold text-gray-900">₹{{this.price}}</p>
+                    </div>
+                </div>
             </div>
-          </div>
-    
-          <!-- Testimonial 2 -->
-          <div class="bg-white shadow-md rounded-lg p-6 flex items-center">
-            {{!-- <img src="https://via.placeholder.com/100" alt="Client 2" class="rounded-full h-20 w-20 mr-6"> --}}
-            <div>
-              <h3 class="text-lg font-semibold text-gray-800">Ayisha</h3>
-              <p class="text-gray-600 mt-2">
-                I’ve been purchasing smart watches of Mohid for a long time. All the products are good quality.
-              </p>
-              <div class="flex mt-3">
-                <span class="text-yellow-500 text-xl">★★★★★</span>
-              </div>
-            </div>
-          </div>
+            {{/each}}
         </div>
-    
-        <!-- Carousel Indicators -->
-        <div class="flex justify-center mt-6">
-          <button class="w-3 h-3 bg-gray-300 rounded-full mx-1"></button>
-          <button class="w-3 h-3 bg-gray-300 rounded-full mx-1"></button>
-          <button class="w-3 h-3 bg-gray-300 rounded-full mx-1"></button>
-          <button class="w-3 h-3 bg-yellow-500 rounded-full mx-1"></button>
+        <div class="text-center mt-12">
+            <a href="/user/shop" 
+               class="inline-block bg-black text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-gray-800 transform hover:scale-105 transition-all duration-300 shadow-md">
+                View More Products
+            </a>
         </div>
-      </div>
+  </div>
+</main>
 
 
      <!-- Services Section -->
@@ -185,45 +261,7 @@
 
 
   <!-- Footer -->
-  <footer class="bg-black text-white py-10">
-    <div class="container mx-auto grid md:grid-cols-4 gap-8">
-      <div>
-        <h3 class="font-bold text-lg mb-4">Exclusive</h3>
-        <p>Get 10% off your first order</p>
-        <input type="email" placeholder="Enter your email" class="mt-2 p-2 rounded-lg w-full">
-      </div>
-      <div>
-        <h3 class="font-bold text-lg mb-4">Support</h3>
-        <p>111 Kochi,Kerala</p>
-        <p>ticklore@gmail.com</p>
-        <p>+88015-88888-9999</p>
-      </div>
-      <div>
-        <h3 class="font-bold text-lg mb-4">Account</h3>
-        <ul>
-          <li><a href="#" class="hover:text-yellow-500">My Account</a></li>
-          <li><a href="/user/login" class="hover:text-yellow-500">Login </a></li>
-            <li><a href="/user/signup" class="hover:text-yellow-500">Signup</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Cart</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Wishlist</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Shop</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="font-bold text-lg mb-4">Quick Link</h3>
-        <ul>
-          <li><a href="#" class="hover:text-yellow-500">Privacy Policy</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Terms Of Use</a></li>
-          <li><a href="#" class="hover:text-yellow-500">FAQ</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Contact</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="mt-8 text-center">
-      <img src="/images/logo.png" alt="Footer Logo" class="mx-auto h-12">
-      <p class="text-gray-600 mt-4">&copy; Copyright tickLore 2024. All rights reserved</p>
-    </div>
-  </footer>
+  {{>userFooter}}
 
 
 
@@ -250,22 +288,5 @@ if (window.location.search.includes('error')) {
         window.location.reload();
     });
 </script>
-
-
-
-<style>
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-  }
-</style>
-
-
 
 

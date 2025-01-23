@@ -14,7 +14,6 @@ const wishlistController = require('../controller/wishlistController');
 const walletController = require('../controller/walletController');
 
 
-router.get('/checkout', userAuth.checkSession, checkoutController.loadCheckout);
 
 router.get('/home',userController.loadHome);
 
@@ -86,8 +85,6 @@ router.post('/apply-coupon', userAuth.checkSession, checkoutController.applyCoup
 
 
 router.get('/logout',userAuth.checkSession,userController.logout);
-
-
 
 
 router.get('/auth/google', 

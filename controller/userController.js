@@ -9,28 +9,67 @@ const saltrounds=10;
 let otpStore = {};  
 const PDFDocument = require('pdfkit');
 const Order = require('../model/orderModel');
+const Cart = require('../model/cartModel');
+const Wishlist = require('../model/wishlistModel');
+const Category = require('../model/categoryModel');
 
 
 module.exports={
 
     loadHome:async (req,res)=>{
              try {
-            const products= await productSchema.find({deleted:false})
-            const Obj=products.map((data)=>{
-                return{
-                    _id: data._id,
-                    name:data.productName,
-                    description:data.description,
-                    category:data.category,
-                    brand:data.brand,
-                    price:data.price,
-                    images:data.images
-                }
-            })
+            const products = await productSchema.find({deleted: false});
+            const Obj = products.map((data) => ({
+                _id: data._id,
+                name: data.productName,
+                description: data.description,
+                category: data.category,
+                brand: data.brand,
+                price: data.price,
+                images: data.images
+            }));
+
+            // Get active categories with their images
+            const categories = await Category.find({ status: true }).select('categoryName images');
+            const categoriesFormatted = categories.map(cat => ({
+                category: cat.categoryName,
+                image: cat.images[0] // Using the first image from the images array
+            }));
+
             const user = req.session.user || null;
-            res.render("user/home",{data:Obj,user})
+            let counts = { cartCount: 0, wishlistCount: 0 };
+            
+            if (user) {
+                counts = await getCounts(user._id);
+            }
+            
+            // Fetch latest 10 products
+            const latestProducts = await productSchema.find({ deleted: false })
+                .sort({ createdAt: -1 })  // Sort by creation date, newest first
+                .limit(5)
+                .select('_id productName description category brand price images');
+
+            const latestObj = latestProducts.map((data) => ({
+                _id: data._id,
+                name: data.productName,
+                description: data.description,
+                category: data.category,
+                brand: data.brand,
+                price: data.price,
+                images: data.images,
+            }));
+
+            res.render("user/home", {
+                data: Obj,
+                categories: categoriesFormatted,
+                user,
+                cartCount: counts.cartCount,
+                wishlistCount: counts.wishlistCount,
+                latestProducts: latestObj
+            });
         } catch (error) {
-            res.status(500).send("Error Occured")
+            console.error("Error in loadHome:", error);
+            res.status(500).send("Error Occurred");
         }
     },
     
@@ -267,23 +306,34 @@ module.exports={
             user
         });
     },
-    loadProfile : async (req, res) => {
+    loadProfile: async (req, res) => {
         try {
-            
             const userSession = req.session.user;
 
             if (!userSession) {
                 return res.redirect('/user/login'); 
             }
 
-        
             const userData = await userSchema.findOne({ email: userSession.email });
 
             if (!userData) {
                 return res.redirect('/user/login'); 
             }
 
-            res.render('user/profile', { currentPath: '/user/profile',  users: userData });
+            // Get cart count
+            const cartCount = await Cart.findOne({ userId: userSession._id })
+                .then(cart => cart ? cart.items.length : 0);
+
+            // Get wishlist count
+            const wishlistCount = await Wishlist.countDocuments({ user: userSession._id });
+
+            res.render('user/profile', { 
+                currentPath: '/user/profile',  
+                users: userData,
+                user: userSession, // Add this to show logged-in header
+                cartCount,
+                wishlistCount
+            });
         } catch (error) {
             console.error('Error in loadProfile:', error);
             res.status(500).send('Error Occurred');
@@ -750,4 +800,26 @@ function sendOtpEmail(email, otp) {
     });
     
 }
+
+const getCounts = async (userId) => {
+    try {
+        const cartItems = await Cart.findOne({ userId: userId });
+        const wishlistCount = await Wishlist.countDocuments({ user: userId });
+        
+        console.log('Cart Items:', cartItems);
+        console.log('Wishlist Count:', wishlistCount);
+        
+        const cartCount = cartItems ? cartItems.items.length : 0;
+        
+        console.log('Final Counts:', { cartCount, wishlistCount });
+        
+        return {
+            cartCount: cartCount,
+            wishlistCount: wishlistCount
+        };
+    } catch (error) {
+        console.error('Error getting counts:', error);
+        return { cartCount: 0, wishlistCount: 0 };
+    }
+};
 

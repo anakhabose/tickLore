@@ -107,6 +107,11 @@ app.use(passport.session());
 app.use('/user',userRoutes);
 app.use('/admin',adminRoutes);
 
+app.get('/', (req, res) => {
+    res.redirect('/user/home');
+});
+
+
 app.use((req, res, next) => {
     res.status(404).render('404', { msg: 'Page Not Found' });
 });

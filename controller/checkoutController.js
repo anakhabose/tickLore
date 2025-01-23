@@ -6,6 +6,7 @@ const orderSchema = require('../model/orderModel')
 const Coupon = require('../model/couponModel');
 const Wallet = require('../model/walletModel');
 const razorpay = require('../config/razorpay');
+const Wishlist = require('../model/wishlistModel');
 
 const checkoutController = {
     loadCheckout: async (req, res) => {
@@ -131,8 +132,15 @@ const checkoutController = {
      
             const addresses = await Address.find({ userId });
 
+            // Get cart count
+            const cartCount = cart ? cart.items.length : 0;
+
+            // Get wishlist count
+            const wishlistCount = await Wishlist.countDocuments({ user: userId });
+
             return res.render('user/checkout', {
-                user: userData,
+                user: req.session.user,
+                users: userData,
                 cartItems: activeCartItems,
                 subtotal: Math.round(subtotal).toFixed(2),
                 deliveryCharges: deliveryCharges.toFixed(2),
@@ -141,7 +149,9 @@ const checkoutController = {
                 hasOfferProducts,
                 hasCoupons: filteredCoupons.length > 0 && !hasOfferProducts,
                 availableCoupons: filteredCoupons,
-                isCodAvailable
+                isCodAvailable,
+                cartCount,
+                wishlistCount
             });
 
         } catch (error) {

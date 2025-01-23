@@ -10,39 +10,58 @@ module.exports = {
             console.log("1. Starting shop load...");
             const sortOption = req.query.sort || "default"; 
             const selectedCategory = req.query.category;
-            const userId = req.session.user;
+            const userId = req.session.user._id;
             
             console.log("2. User ID:", userId);
             let user = null;
+            let wishlistCount = 0;
+            let cartCount = 0;
+
             if (userId) {
-                user = await userSchema.findById(userId);
-                console.log("3. Found user:", user ? "yes" : "no");
+                const cartItems = await Cart.find({ 
+                    userId: userId,
+                    status: { $ne: 'placed' }
+                });
+                console.log("Cart items found:", cartItems);
+
+                [user, wishlistCount, cartCount] = await Promise.all([
+                    userSchema.findById(userId),
+                    Wishlist.countDocuments({ user: userId }),
+                    Cart.countDocuments({ 
+                        userId: userId,
+                        status: { $ne: 'placed' }
+                    })
+                ]);
+
+                if (cartItems.length > 0) {
+                    cartCount = cartItems.reduce((total, cart) => total + cart.items.length, 0);
+                }
+
+                console.log("3. Detailed cart information:");
+                console.log("- Raw cart items:", cartItems);
+                console.log("- Cart count:", cartCount);
+                console.log("- Cart items length:", cartItems.length);
             }
 
-            // Get all categories
             const categories = await Category.find({status:true})
                 .sort({ categoryName: 1 });
 
-            // Build query
             let query = { deleted: false };
             if (selectedCategory) {
-                // Find the category document first
                 const category = await Category.findOne({ 
                     categoryName: selectedCategory ,
                     status:true
-                     // Match exact category name
                 });
                 
-                console.log("Selected category:", category); // Debug log
+                console.log("Selected category:", category); 
 
                 if (category) {
-                    query.category = category._id;  // Use the category's _id in the product query
+                    query.category = category._id;  
                 }
             }
 
-            console.log("Product query:", query); // Debug log
+            console.log("Product query:", query); 
 
-            // Define sort criteria
             let sortCriteria = {};
             if (sortOption === "priceAsc") {
                 sortCriteria = { price: 1 };
@@ -56,14 +75,13 @@ module.exports = {
                 sortCriteria = { productName: -1 };
             }
 
-            // Fetch products
+     
             console.log("7. Fetching products...");
             const products = await Product
                 .find(query)
-                .populate('category')  // First populate all categories
+                .populate('category') 
                 .sort(sortOption === "default" ? {} : sortCriteria);
 
-            // Filter products to only include those with active categories
             const filteredProducts = products.filter(product => 
                 product.category && product.category.status === true
             );
@@ -106,7 +124,9 @@ module.exports = {
                 user, 
                 sortOption, 
                 categories: categories.map(cat => cat.categoryName),
-                selectedCategory 
+                selectedCategory,
+                wishlistCount,
+                cartCount
             });
 
         } catch (error) {
@@ -118,6 +138,8 @@ module.exports = {
                 sortOption: "default", 
                 categories: [], 
                 selectedCategory: null,
+                wishlistCount: 0,
+                cartCount: 0,
                 errorMessage: "An error occurred while loading the shop"
             });
         }
@@ -128,6 +150,19 @@ module.exports = {
             const selectedCategory = req.query.category;
             const userId = req.session.user;
             
+            // Get user, wishlist count, and cart count
+            let user = null;
+            let wishlistCount = 0;
+            let cartCount = 0;
+
+            if (userId) {
+                [user, wishlistCount, cartCount] = await Promise.all([
+                    userSchema.findById(userId),
+                    Wishlist.countDocuments({ user: userId }),
+                    Cart.countDocuments({ user: userId })
+                ]);
+            }
+
             // Get all categories
             const categories = await Category.find({ status: true })
                 .sort({ categoryName: 1 });
@@ -188,9 +223,11 @@ module.exports = {
             res.render('user/shop', {
                 data: Obj,
                 searchQuery,
-                user: userId,
+                user,
                 categories: categories.map(cat => cat.categoryName),
-                selectedCategory
+                selectedCategory,
+                wishlistCount,
+                cartCount
             });
         } catch (error) {
             console.error('Search error:', error);
@@ -199,6 +236,8 @@ module.exports = {
                 searchQuery: '',
                 user: null,
                 categories: [],
+                wishlistCount: 0,
+                cartCount: 0,
                 errorMessage: 'Error processing search'
             });
         }
