@@ -21,14 +21,7 @@ module.exports = {
             model: 'offer',
             select: 'discountValue'
           },
-          // {
-          //   path: 'category',
-          //   select: 'name offer',
-          //   populate: {
-          //     path: 'offer',
-          //     select: 'discountValue'
-          //   }
-          // }
+        
         ]
       });
 
@@ -91,10 +84,10 @@ module.exports = {
     cart.finalAmount = totalAmount;
     await cart.save();
 
-    // Get cart count
+  
     const cartCount = cart ? cart.items.length : 0;
     
-    // Modified wishlist count query to use 'user' field instead of 'userId'
+
     const wishlistCount = await Wishlist.countDocuments({ user: userId });
     console.log('User ID:', userId);
     console.log('Wishlist count:', wishlistCount);
@@ -328,7 +321,7 @@ verifyStock : async (req, res) => {
     try {
         const { items } = req.body;
         
-        // Verify each item's stock
+    
         for (const item of items) {
             const product = await Product.findById(item.productId);
             if (!product) {
@@ -346,7 +339,7 @@ verifyStock : async (req, res) => {
             }
         }
         
-        // If all stock checks pass
+      
         res.json({
             success: true
         });

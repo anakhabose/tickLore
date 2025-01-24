@@ -35,14 +35,7 @@ const checkoutController = {
                             model: 'offer',
                             select: 'discountValue'
                         },
-                        // {
-                        //     path: 'category',
-                        //     select: 'name offer',
-                        //     populate: {
-                        //         path: 'offer',
-                        //         select: 'discountValue'
-                        //     }
-                        // }
+                     
                     ]
                 });
 
@@ -132,10 +125,10 @@ const checkoutController = {
      
             const addresses = await Address.find({ userId });
 
-            // Get cart count
+       
             const cartCount = cart ? cart.items.length : 0;
 
-            // Get wishlist count
+           
             const wishlistCount = await Wishlist.countDocuments({ user: userId });
 
             return res.render('user/checkout', {
@@ -494,7 +487,7 @@ handleRepayment: async (req, res) => {
         const { orderId } = req.params;
         const userId = req.session.user._id;
 
-        // Find the original order
+       
         const order = await orderSchema.findOne({ 
             _id: orderId,
             userId: userId
@@ -514,10 +507,10 @@ handleRepayment: async (req, res) => {
             });
         }
 
-        // Generate a shorter receipt ID
+       
         const shortReceiptId = `re_${Date.now().toString().slice(-8)}`;
 
-        // Create new Razorpay order with shorter receipt
+        
         const options = {
             amount: Math.round(order.total * 100),
             currency: "INR",
@@ -561,7 +554,7 @@ handleRepayment: async (req, res) => {
     }
 },
 
-// Add a new method to verify repayment
+
 verifyRepayment: async (req, res) => {
     try {
         const {
@@ -571,7 +564,6 @@ verifyRepayment: async (req, res) => {
             orderId
         } = req.body;
 
-        // Verify payment signature
         const crypto = require('crypto');
         const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
         hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
@@ -584,7 +576,6 @@ verifyRepayment: async (req, res) => {
             });
         }
 
-        // Update only payment-related fields
         const updatedOrder = await orderSchema.findByIdAndUpdate(
             orderId,
             {
@@ -626,25 +617,24 @@ createPendingOrder: async (req, res) => {
         const userId = req.session.user._id;
         const { address, couponId, discountAmount, finalAmount } = req.body;
 
-        // Get cart items
+    
         const cart = await Cart.findOne({ userId }).populate('items.productId');
         if (!cart) {
             return res.status(404).json({ success: false, message: "Cart not found" });
         }
 
-        // Create order items
         const orderItems = cart.items.map(item => ({
             product: item.productId._id,
             quantity: item.quantity,
             subtotal: item.productId.price * item.quantity
         }));
 
-        // Calculate totals
+    
         const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
         const discount = parseFloat(discountAmount) || 0;
         const total = parseFloat(finalAmount) || (subtotal - discount);
 
-        // Create new order with correct status values
+      
         const newOrder = new orderSchema({
             userId,
             address,
@@ -661,7 +651,7 @@ createPendingOrder: async (req, res) => {
 
         await newOrder.save();
 
-        // After saving the order, update salesCount for each product
+     
         for (const item of orderItems) {
             await productSchema.findByIdAndUpdate(
                 item.product,
@@ -674,7 +664,7 @@ createPendingOrder: async (req, res) => {
             );
         }
 
-        // Clear cart
+   
         await Cart.findByIdAndDelete(cart._id);
 
         res.status(200).json({

@@ -29,11 +29,11 @@ module.exports={
                 images: data.images
             }));
 
-            // Get active categories with their images
+        
             const categories = await Category.find({ status: true }).select('categoryName images');
             const categoriesFormatted = categories.map(cat => ({
                 category: cat.categoryName,
-                image: cat.images[0] // Using the first image from the images array
+                image: cat.images[0] 
             }));
 
             const user = req.session.user || null;
@@ -43,9 +43,9 @@ module.exports={
                 counts = await getCounts(user._id);
             }
             
-            // Fetch latest 10 products
+     
             const latestProducts = await productSchema.find({ deleted: false })
-                .sort({ createdAt: -1 })  // Sort by creation date, newest first
+                .sort({ createdAt: -1 })  
                 .limit(5)
                 .select('_id productName description category brand price images');
 
@@ -181,16 +181,16 @@ module.exports={
                 return res.redirect('/user/signup?error=No email associated with Google account');
             }
 
-            // Check if user exists
+          
             const existingUser = await userSchema.findOne({ email: email });
             
             if (existingUser) {
-                // If user exists, log them in directly
+            
                 req.session.user = existingUser;
                 return res.redirect('/user/home');
             }
 
-            // If we get here, we know the user doesn't exist, so create new user
+         
             const newUser = new userSchema({
                 email,
                 name,
@@ -320,17 +320,17 @@ module.exports={
                 return res.redirect('/user/login'); 
             }
 
-            // Get cart count
+          
             const cartCount = await Cart.findOne({ userId: userSession._id })
                 .then(cart => cart ? cart.items.length : 0);
 
-            // Get wishlist count
+         
             const wishlistCount = await Wishlist.countDocuments({ user: userSession._id });
 
             res.render('user/profile', { 
                 currentPath: '/user/profile',  
                 users: userData,
-                user: userSession, // Add this to show logged-in header
+                user: userSession, 
                 cartCount,
                 wishlistCount
             });
@@ -339,6 +339,7 @@ module.exports={
             res.status(500).send('Error Occurred');
         }
     },
+    
     editProfile:async(req,res)=>{
             
         try {
@@ -379,8 +380,8 @@ module.exports={
             return res.status(500).json({ message: 'Server error' });
         }
     },
-    loadAddress:async(req,res)=>{
-          try {
+    loadAddress: async (req, res) => {
+    try {
         const userSession = req.session.user;
         
         if (!userSession) {
@@ -393,19 +394,28 @@ module.exports={
             return res.redirect('/user/login');
         }
 
+    
+        const cartCount = await Cart.findOne({ userId: userSession._id })
+            .then(cart => cart ? cart.items.length : 0);
+
+  
+        const wishlistCount = await Wishlist.countDocuments({ user: userSession._id });
         
         const userAddresses = await addressSchema.find({ userId: userData._id });
         
         res.render('user/address', {
-            users: userData,
             currentPath: '/user/address',
+            users: userData,
+            user: userSession, 
+            cartCount,
+            wishlistCount,
             addresses: userAddresses  
         });
     } catch (error) {
         console.error('Error in loading address page:', error);
         res.status(500).send('Error Occurred');
     }
-    },
+},
     loadCart:async(req,res)=>{
         try {
      
@@ -426,28 +436,38 @@ module.exports={
     }
     },
      loadChangePassword : async (req, res) => {
-        try {
-            const userSession = req.session.user;
+    try {
+        const userSession = req.session.user;
 
-            if (!userSession) {
-                return res.redirect('/user/login'); 
-            }
-
-            const userData = await userSchema.findOne({ email: userSession.email });
-
-            if (!userData) {
-                return res.redirect('/user/login'); 
-            }
-
-            res.render('user/changePassword', { 
-                users: userData,
-                currentPath: '/user/changePassword'
-            });
-        } catch (error) {
-            console.error('Error in loadChangePassword:', error);
-            res.status(500).send('Error Occurred');
+        if (!userSession) {
+            return res.redirect('/user/login'); 
         }
-    },
+
+        const userData = await userSchema.findOne({ email: userSession.email });
+
+        if (!userData) {
+            return res.redirect('/user/login'); 
+        }
+
+       
+        const cartCount = await Cart.findOne({ userId: userSession._id })
+            .then(cart => cart ? cart.items.length : 0);
+
+        
+        const wishlistCount = await Wishlist.countDocuments({ user: userSession._id });
+
+        res.render('user/changePassword', { 
+            users: userData,
+            user: userSession, 
+            cartCount,
+            wishlistCount,
+            currentPath: '/user/changePassword'
+        });
+    } catch (error) {
+        console.error('Error in loadChangePassword:', error);
+        res.status(500).send('Error Occurred');
+    }
+},
     changePassword: async (req, res) => {
         try {
             const { currentPassword, newPassword } = req.body;

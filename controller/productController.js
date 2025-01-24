@@ -92,7 +92,7 @@ editProducts: async (req, res) => {
         console.log('Product ID:', productId);
         console.log('Request Body:', req.body);
 
-        // Check for duplicate product name
+     
         if (productName) {
             const existingProduct = await Product.findOne({
                 _id: { $ne: productId },
@@ -107,7 +107,7 @@ editProducts: async (req, res) => {
             }
         }
 
-        // Validate if category exists using the category ID
+     
         const categoryExists = await categoryModel.findById(category);
 
         if (!categoryExists) {

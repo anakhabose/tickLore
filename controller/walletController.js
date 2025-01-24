@@ -4,71 +4,82 @@ require('dotenv').config();
 const crypto = require('crypto');
 const razorpay = require('../config/razorpay');
 const userSchema = require('../model/userModel');
+const Cart = require('../model/cartModel');
+const Wishlist = require('../model/wishlistModel')
 
 module.exports = {
-    loadWallet: async (req, res) => {
-        try {
-            const userSession = req.session.user;
-            if (!userSession) {
-                return res.redirect('/user/login');
-            }
-
-            // Get page from query params, default to page 1
-            const page = parseInt(req.query.page) || 1;
-            const limit = 10; // Number of transactions per page
-
-            const [userData, wallet] = await Promise.all([
-                userSchema.findOne({ email: userSession.email }),
-                Wallet.findOne({ userId: userSession._id })
-            ]);
-
-            // Sort transactions if wallet exists
-            if (wallet && wallet.transactions) {
-                wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                // Calculate pagination values
-                const totalTransactions = wallet.transactions.length;
-                const totalPages = Math.ceil(totalTransactions / limit);
-                const startIndex = (page - 1) * limit;
-                const endIndex = startIndex + limit;
-                
-                // Get paginated transactions
-                const paginatedTransactions = wallet.transactions.slice(startIndex, endIndex);
-                
-                res.render('user/wallet', {
-                    currentPath: '/user/wallet',
-                    user: userData,
-                    wallet: {
-                        ...wallet.toObject(),
-                        transactions: paginatedTransactions
-                    },
-                    pagination: {
-                        currentPage: page,
-                        totalPages,
-                        hasNext: page < totalPages,
-                        hasPrev: page > 1
-                    },
-                    razorpayKey: process.env.RAZORPAY_KEY_ID
-                });
-            } else {
-                res.render('user/wallet', {
-                    currentPath: '/user/wallet',
-                    user: userData,
-                    wallet: { balance: 0, transactions: [] },
-                    pagination: {
-                        currentPage: 1,
-                        totalPages: 1,
-                        hasNext: false,
-                        hasPrev: false
-                    },
-                    razorpayKey: process.env.RAZORPAY_KEY_ID
-                });
-            }
-        } catch (error) {
-            console.error('Error loading wallet:', error);
-            res.status(500).render('error', { message: 'Error loading wallet' });
+   loadWallet: async (req, res) => {
+    try {
+        const userSession = req.session.user;
+        if (!userSession) {
+            return res.redirect('/user/login');
         }
-    },
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; 
+
+   
+        const cartCount = await Cart.findOne({ userId: userSession._id })
+            .then(cart => cart ? cart.items.length : 0);
+
+     
+        const wishlistCount = await Wishlist.countDocuments({ user: userSession._id });
+
+        const [userData, wallet] = await Promise.all([
+            userSchema.findOne({ email: userSession.email }),
+            Wallet.findOne({ userId: userSession._id })
+        ]);
+
+        if (wallet && wallet.transactions) {
+            wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const totalTransactions = wallet.transactions.length;
+            const totalPages = Math.ceil(totalTransactions / limit);
+            const startIndex = (page - 1) * limit;
+            const endIndex = startIndex + limit;
+            
+            const paginatedTransactions = wallet.transactions.slice(startIndex, endIndex);
+            
+            res.render('user/wallet', {
+                currentPath: '/user/wallet',
+                user: userSession, 
+                users: userData,
+                wallet: {
+                    ...wallet.toObject(),
+                    transactions: paginatedTransactions
+                },
+                cartCount,
+                wishlistCount,
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    hasNext: page < totalPages,
+                    hasPrev: page > 1
+                },
+                razorpayKey: process.env.RAZORPAY_KEY_ID
+            });
+        } else {
+            res.render('user/wallet', {
+                currentPath: '/user/wallet',
+                user: userSession, 
+                users: userData,
+                wallet: { balance: 0, transactions: [] },
+                cartCount,
+                wishlistCount,
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 1,
+                    hasNext: false,
+                    hasPrev: false
+                },
+                razorpayKey: process.env.RAZORPAY_KEY_ID
+            });
+        }
+    } catch (error) {
+        console.error('Error loading wallet:', error);
+        res.status(500).render('error', { message: 'Error loading wallet' });
+    }
+},
 
     addMoney: async (req, res) => {
         try {

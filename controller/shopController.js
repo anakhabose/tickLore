@@ -7,12 +7,16 @@ const Category = require('../model/categoryModel');
 module.exports = {
     loadShop: async (req, res) => {
         try {
-            console.log("1. Starting shop load...");
+          
             const sortOption = req.query.sort || "default"; 
             const selectedCategory = req.query.category;
             const userId = req.session.user._id;
             
-            console.log("2. User ID:", userId);
+          
+            const page = parseInt(req.query.page) || 1;
+            const limit = 9; 
+            const skip = (page - 1) * limit;
+           
             let user = null;
             let wishlistCount = 0;
             let cartCount = 0;
@@ -22,8 +26,7 @@ module.exports = {
                     userId: userId,
                     status: { $ne: 'placed' }
                 });
-                console.log("Cart items found:", cartItems);
-
+        
                 [user, wishlistCount, cartCount] = await Promise.all([
                     userSchema.findById(userId),
                     Wishlist.countDocuments({ user: userId }),
@@ -37,10 +40,7 @@ module.exports = {
                     cartCount = cartItems.reduce((total, cart) => total + cart.items.length, 0);
                 }
 
-                console.log("3. Detailed cart information:");
-                console.log("- Raw cart items:", cartItems);
-                console.log("- Cart count:", cartCount);
-                console.log("- Cart items length:", cartItems.length);
+             
             }
 
             const categories = await Category.find({status:true})
@@ -49,8 +49,8 @@ module.exports = {
             let query = { deleted: false };
             if (selectedCategory) {
                 const category = await Category.findOne({ 
-                    categoryName: selectedCategory ,
-                    status:true
+                    categoryName: selectedCategory,
+                    status: true
                 });
                 
                 console.log("Selected category:", category); 
@@ -59,6 +59,10 @@ module.exports = {
                     query.category = category._id;  
                 }
             }
+
+        
+            const totalProducts = await Product.countDocuments(query);
+            const totalPages = Math.ceil(totalProducts / limit);
 
             console.log("Product query:", query); 
 
@@ -76,29 +80,31 @@ module.exports = {
             }
 
      
-            console.log("7. Fetching products...");
+           
             const products = await Product
                 .find(query)
                 .populate('category') 
-                .sort(sortOption === "default" ? {} : sortCriteria);
+                .sort(sortOption === "default" ? {} : sortCriteria)
+                .skip(skip)
+                .limit(limit);
 
             const filteredProducts = products.filter(product => 
                 product.category && product.category.status === true
             );
             
-            console.log("8. Products found:", filteredProducts.length);
+         
 
             let wishlistItems = [];
             let cartItems = [];
             if (userId) {
-                console.log("9. Fetching wishlist and cart...");
+             
                 [wishlistItems, cartItems] = await Promise.all([
                     Wishlist.find({ user: userId }),
                     Cart.find({ user: userId })
                 ]);
             }
 
-            console.log("10. Mapping products...");
+       
             const Obj = products
                 .filter(product => product.category && product.category.status === true)  
                 .map((data) => ({
@@ -109,6 +115,7 @@ module.exports = {
                     brand: data.brand,
                     price: data.price,
                     discountedPrice: data.discountedPrice,
+                    isDiscounted: data.discountedPrice && data.discountedPrice < data.price,
                     images: data.images,
                     isInWishlist: wishlistItems.some(item => 
                         item.product.toString() === data._id.toString()
@@ -118,7 +125,7 @@ module.exports = {
                     )
                 }));
 
-            console.log("11. Rendering shop page...");
+       
             res.render("user/shop", { 
                 data: Obj, 
                 user, 
@@ -126,7 +133,16 @@ module.exports = {
                 categories: categories.map(cat => cat.categoryName),
                 selectedCategory,
                 wishlistCount,
-                cartCount
+                cartCount,
+                pagination: {
+                    page,
+                    totalPages,
+                    hasNextPage: page < totalPages,
+                    hasPrevPage: page > 1,
+                    nextPage: page + 1,
+                    prevPage: page - 1,
+                    lastPage: totalPages
+                }
             });
 
         } catch (error) {
@@ -150,7 +166,7 @@ module.exports = {
             const selectedCategory = req.query.category;
             const userId = req.session.user;
             
-            // Get user, wishlist count, and cart count
+          
             let user = null;
             let wishlistCount = 0;
             let cartCount = 0;
@@ -163,11 +179,11 @@ module.exports = {
                 ]);
             }
 
-            // Get all categories
+  
             const categories = await Category.find({ status: true })
                 .sort({ categoryName: 1 });
 
-            // Build search query
+       
             let query = {
                 deleted: false,
                 $or: [
@@ -176,7 +192,7 @@ module.exports = {
                 ]
             };
 
-            // Add category filter if selected
+   
             if (selectedCategory) {
                 const category = await Category.findOne({ 
                     categoryName: selectedCategory,
@@ -187,7 +203,7 @@ module.exports = {
                 }
             }
 
-            // Get wishlist and cart items if user is logged in
+  
             let [wishlistItems, cartItems] = [[], []];
             if (userId) {
                 [wishlistItems, cartItems] = await Promise.all([
@@ -196,7 +212,7 @@ module.exports = {
                 ]);
             }
 
-            // Fetch and map products
+   
             const products = await Product
                 .find(query)
                 .populate('category');

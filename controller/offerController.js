@@ -11,9 +11,9 @@ module.exports = {
                 return res.redirect('/admin/login');
             }
 
-            // Pagination setup
+          
             const page = parseInt(req.query.page) || 1;
-            const limit = 5; // Number of offers per page
+            const limit = 5; 
             const skip = (page - 1) * limit;
             const search = req.query.search || '';
 
@@ -21,11 +21,11 @@ module.exports = {
                 offerTitle: { $regex: search, $options: 'i' }
             };
 
-            // Get total count for pagination
+           
             const totalOffers = await offerSchema.countDocuments(searchQuery);
             const totalPages = Math.ceil(totalOffers / limit);
 
-            // Fetch offers with pagination
+          
             const offers = await offerSchema.find(searchQuery)
                 .populate('productId', 'name')
                 .populate('categoryId', 'name')
@@ -97,7 +97,7 @@ module.exports = {
                 endDate
             } = req.body;
 
-            // Check for existing offer with same title
+       
             const existingOffer = await offerSchema.findOne({ 
                 offerTitle: { $regex: new RegExp(`^${offerTitle}$`, 'i') }
             });
@@ -267,9 +267,9 @@ module.exports = {
                 endDate
             } = req.body;
 
-            // Check for existing offer with same title (excluding current offer)
+       
             const existingOffer = await offerSchema.findOne({ 
-                _id: { $ne: offerId }, // Exclude current offer
+                _id: { $ne: offerId }, 
                 offerTitle: { $regex: new RegExp(`^${offerTitle}$`, 'i') }
             });
 

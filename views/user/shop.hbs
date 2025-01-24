@@ -87,13 +87,16 @@
             <h2 class="text-xl font-semibold text-center text-gray-800 mb-2">{{this.name}}</h2>
             <div class="text-center mb-4">
                 {{#if this.discountedPrice}}
-                    <div class="flex flex-col items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xl font-semibold text-green-600">₹{{this.discountedPrice}}</span>
-                            <span class="text-black font-semibold line-through">₹{{this.price}}</span>
+                    {{#if this.isDiscounted}}
+                        <div class="flex flex-col items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl font-semibold text-green-600">₹{{this.discountedPrice}}</span>
+                                <span class="text-black font-semibold line-through">₹{{this.price}}</span>
+                            </div>
                         </div>
-        
-                    </div>
+                    {{else}}
+                        <span class="text-xl font-semibold text-black">₹{{this.price}}</span>
+                    {{/if}}
                 {{else}}
                     <span class="text-xl font-semibold text-black">₹{{this.price}}</span>
                 {{/if}}
@@ -124,6 +127,37 @@
         </div>
     {{/if}}
 </div>
+
+{{#if data.length}}
+    <!-- Pagination -->
+    <div class="flex justify-center items-center space-x-2 mt-8 mb-4">
+        {{#if pagination.hasPrevPage}}
+            <a href="/user/shop?page=1{{#if selectedCategory}}&category={{selectedCategory}}{{/if}}{{#if sortOption}}&sort={{sortOption}}{{/if}}" 
+               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                First
+            </a>
+            <a href="/user/shop?page={{pagination.prevPage}}{{#if selectedCategory}}&category={{selectedCategory}}{{/if}}{{#if sortOption}}&sort={{sortOption}}{{/if}}" 
+               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Previous
+            </a>
+        {{/if}}
+
+        <span class="px-4 py-2 text-sm font-medium text-gray-700">
+            Page {{pagination.page}} of {{pagination.totalPages}}
+        </span>
+
+        {{#if pagination.hasNextPage}}
+            <a href="/user/shop?page={{pagination.nextPage}}{{#if selectedCategory}}&category={{selectedCategory}}{{/if}}{{#if sortOption}}&sort={{sortOption}}{{/if}}" 
+               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Next
+            </a>
+            <a href="/user/shop?page={{pagination.lastPage}}{{#if selectedCategory}}&category={{selectedCategory}}{{/if}}{{#if sortOption}}&sort={{sortOption}}{{/if}}" 
+               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Last
+            </a>
+        {{/if}}
+    </div>
+{{/if}}
 
         </div>
     </div>
@@ -184,6 +218,34 @@ document.querySelectorAll('.scroll-card').forEach((card, index) => {
     
     console.log('Submitting search:', query); // Add this to debug
   });
+  document.addEventListener('DOMContentLoaded', function() {
+    // Find the search input by its name attribute
+    const searchInput = document.querySelector('input[name="query"]');
+    const searchForm = document.querySelector('form[action="/user/shop/search"]');
+
+    if (searchInput && searchForm) {
+        // Optional: Add input validation
+        searchInput.addEventListener('input', function(e) {
+            console.log('Search input:', e.target.value);
+        });
+
+        searchForm.addEventListener('submit', function(e) {
+            const query = searchInput.value.trim();
+            
+            if (!query) {
+                e.preventDefault(); // Prevent empty search
+                return;
+            }
+            
+            console.log('Submitting search:', query);
+        });
+    } else {
+        console.error('Search elements not found', {
+            searchInput, 
+            searchForm
+        });
+    }
+});
   
 // Add this to your existing JavaScript
 async function handleCartAction(productId, button) {

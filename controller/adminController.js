@@ -194,15 +194,15 @@ module.exports ={
 
 console.log('Top Products:', JSON.stringify(topProducts, null, 2));
 
-        // Fetch top 10 categories by aggregating product sales
+       
         const topCategories = await categoryModel.aggregate([
-            // Match active categories
+         
             { 
                 $match: { 
                     status: true 
                 } 
             },
-            // Lookup products in this category
+        
             {
                 $lookup: {
                     from: 'products',
@@ -211,7 +211,7 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                     as: 'products'
                 }
             },
-            // Lookup orders for these products
+          
             {
                 $lookup: {
                     from: 'orders',
@@ -244,7 +244,7 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                     as: 'orderStats'
                 }
             },
-            // Add computed fields
+      
             {
                 $addFields: {
                     totalSales: {
@@ -261,7 +261,7 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                     }
                 }
             },
-            // Project final fields
+      
             {
                 $project: {
                     categoryName: 1,
@@ -270,19 +270,19 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                     totalRevenue: 1
                 }
             },
-            // Sort by total sales
+     
             { 
                 $sort: { 
                     totalSales: -1 
                 } 
             },
-            // Limit to top 10
+        
             { 
                 $limit: 10 
             }
         ]);
         
-          console.log('Top Categories:', JSON.stringify(topCategories, null, 2)); // Debug log
+          console.log('Top Categories:', JSON.stringify(topCategories, null, 2));
           
             const renderData = {
             currentPath: '/admin/dashboard',
@@ -303,7 +303,7 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
            
         };
 
-        console.log('Render Data:', renderData); // Debug log
+        console.log('Render Data:', renderData); 
 
         res.render('admin/dashboard', renderData);
 
@@ -320,13 +320,12 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                 return res.redirect('/admin/login');
             }
 
-            // Pagination setup
+       
             const page = parseInt(req.query.page) || 1;
-            const limit = 6; // Number of customers per page
+            const limit = 6; 
             const skip = (page - 1) * limit;
             const search = req.query.search || '';
 
-            // Search query
             const searchQuery = {
                 $or: [
                     { name: { $regex: search, $options: 'i' } }, 
@@ -334,11 +333,11 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                 ]
             };
 
-            // Get total count for pagination
+  
             const totalCustomers = await userModel.countDocuments(searchQuery);
             const totalPages = Math.ceil(totalCustomers / limit);
 
-            // Fetch customers with pagination
+      
             const userDetails = await userModel.find(
                 searchQuery,
                 'name email status _id'
@@ -457,16 +456,16 @@ loadProducts: async (req, res) => {
 },
     loadAddProducts: async (req, res) => {
         try {
-            // Check admin session
+      
             const admin = req.session.admin;
             if (!admin) {
                 return res.redirect('/admin/login');
             }
 
-            // Fetch active categories from database
+       
             const category = await categoryModel.find({ status: true });
 
-            // Render the page with categories
+      
             res.render('admin/products-add', { category });
             
         } catch (error) {
@@ -567,16 +566,16 @@ loadOrders: async (req, res) => {
             return res.redirect('/admin/login');
         }
 
-        // Pagination setup
+    
         const page = parseInt(req.query.page) || 1;
-        const limit = 10; // Number of orders per page
+        const limit = 10; 
         const skip = (page - 1) * limit;
 
-        // Get total count for pagination
+  
         const totalOrders = await orderModel.countDocuments();
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Generate array of page numbers (show 5 pages around current page)
+
         const pages = [];
         const startPage = Math.max(1, page - 2);
         const endPage = Math.min(totalPages, page + 2);
@@ -584,7 +583,7 @@ loadOrders: async (req, res) => {
             pages.push(i);
         }
 
-        // Fetch orders with pagination
+   
         const orders = await orderModel.find()
             .populate({
                 path: 'userId',
