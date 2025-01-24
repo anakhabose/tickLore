@@ -1,14 +1,13 @@
 <div class="flex min-h-screen flex-col">
-<header class="bg-black text-white p-4 flex justify-between items-center">
-   <img src="/images/logo.png" alt="Logo" class="h-8">
-  
+ <header class="bg-black text-white p-4 flex justify-between items-center h-16 relative">
+    <img src="/images/logo.png" alt="Logo" class="h-48 absolute top-1/2 transform -translate-y-1/2">
   </header>
 <div class="flex flex-1">
     {{>sidebar}}
  <main class="flex-1 p-6 bg-white">
       <div class="max-w-4xl mx-auto bg-grey-100 p-6 rounded-lg">
         <h2 class="text-2xl font-bold mb-6">Add Product</h2>
-        <form class="space-y-6" method="post" action="/admin/products-add">
+        <form class="space-y-6">
            <input type="text" id="message" value="{{{message}}}" name="message" hidden >
           <!-- Product Name and Price -->
           <div class="grid grid-cols-2 gap-6">
@@ -258,7 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-
   function validateForm() {
     const productName = document.getElementById('productName').value;
     const price = document.getElementById('price').value;
@@ -330,27 +328,44 @@ document.addEventListener('DOMContentLoaded', () => {
       text: message
     });
   }
-});
 
- 
+  // Move the form submit handler inside DOMContentLoaded
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     
-    // Run validation first
     if (!validateForm()) {
-      // validateForm already shows the Swal error message
       return;
     }
 
     const formData = new FormData(form);
     
+    // Clear any existing 'images' fields
+    for (const pair of formData.entries()) {
+      if (pair[0] === 'images') {
+        formData.delete(pair[0]);
+      }
+    }
+
+    // Add images with correct field name
+    const imageInputs = document.querySelectorAll('input[type="file"]');
+    imageInputs.forEach((input) => {
+      if (input.files[0]) {
+        formData.append('images', input.files[0]); // Make sure this matches Multer config
+      }
+    });
+
     try {
       const response = await fetch('/admin/products-add', {
         method: 'POST',
-        body: formData
+        body: formData  // Don't set Content-Type header - let browser set it
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Response data:', data);
       
       if (data.status) {
         Swal.fire({
@@ -369,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     } catch (error) {
-      console.error('Form submission error:', error); // Add error logging
+      console.error('Form submission error:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -377,5 +392,5 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
-
+}); // End of DOMContentLoaded
 </script>  

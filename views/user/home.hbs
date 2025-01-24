@@ -122,8 +122,8 @@
 <!-- Latest Releases Section -->
 <section class="py-16 bg-gray-100">
     <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-center mb-12">Latest Releases</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <h2 class="text-4xl font-bold text-center mb-12">Top Products</h2>
+        {{!-- <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {{#each latestProducts}}
             <div class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-[400px]">
                 <!-- Image Container with Zoom Effect -->
@@ -132,6 +132,7 @@
                         src="{{this.images.[0]}}" 
                         alt="{{this.name}}" 
                         class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
                     >
                     <!-- Hover Overlay with View Button -->
                     <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -149,7 +150,7 @@
                 </div>
             </div>
             {{/each}}
-        </div>
+        </div> --}}
     </div>
 </section>
 

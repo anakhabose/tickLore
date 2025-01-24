@@ -7,7 +7,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 max-w-7xl mx-auto">
         {{#each wishlistItems}}
         {{#if this.product}}
-        <div class="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center hover:shadow-2xl transition-all duration-300 relative opacity-0 translate-y-10 cursor-pointer transform hover:scale-105 active:scale-95 scroll-card mx-auto w-full max-w-sm">
+        <div class="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center hover:shadow-2xl transition-all duration-300 relative cursor-pointer transform hover:scale-105 active:scale-95 scroll-card mx-auto w-full max-w-sm">
             <!-- Wishlist Button -->
             <button onclick="removeFromWishlist(event, '{{this.product._id}}')"
                 class="absolute top-4 right-4 text-red-500 hover:text-red-600 transition-colors duration-300 text-xl hover:scale-110">
@@ -36,7 +36,7 @@
         {{/if}}
         {{/each}}
     </div>
-    <div class="mt-8 flex justify-center items-center space-x-4"></div>
+    <div class="mt-8 flex justify-center items-center space-x-4">
         {{#if pagination.hasPrevPage}}
             <a href="?page={{subtract pagination.currentPage 1}}" 
                class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors">
@@ -69,47 +69,7 @@
     </div>
     {{/if}}
 </div>
-
-
-<footer class="bg-black text-white py-10">
-    <div class="container mx-auto grid md:grid-cols-4 gap-8">
-        <div>
-            <h3 class="font-bold text-lg mb-4">Exclusive</h3>
-            <p>Get 10% off your first order</p>
-            <input type="email" placeholder="Enter your email" class="mt-2 p-2 rounded-lg w-full">
-        </div>
-        <div>
-            <h3 class="font-bold text-lg mb-4">Support</h3>
-            <p>111 Kochi,Kerala</p>
-            <p>ticklore@gmail.com</p>
-            <p>+88015-88888-9999</p>
-        </div>
-        <div>
-            <h3 class="font-bold text-lg mb-4">Account</h3>
-            <ul>
-                <li><a href="#" class="hover:text-yellow-500">My Account</a></li>
-                <li><a href="/user/login" class="hover:text-yellow-500">Login </a></li>
-                <li><a href="/user/signup" class="hover:text-yellow-500">Signup</a></li>
-                <li><a href="#" class="hover:text-yellow-500">Cart</a></li>
-                <li><a href="#" class="hover:text-yellow-500">Wishlist</a></li>
-                <li><a href="#" class="hover:text-yellow-500">Shop</a></li>
-            </ul>
-        </div>
-        <div>
-            <h3 class="font-bold text-lg mb-4">Quick Link</h3>
-            <ul>
-                <li><a href="#" class="hover:text-yellow-500">Privacy Policy</a></li>
-                <li><a href="#" class="hover:text-yellow-500">Terms Of Use</a></li>
-                <li><a href="#" class="hover:text-yellow-500">FAQ</a></li>
-                <li><a href="#" class="hover:text-yellow-500">Contact</a></li>
-            </ul>
-        </div>
-    </div>
-    <div class="mt-8 text-center">
-        <img src="/images/logo.png" alt="Footer Logo" class="mx-auto h-12">
-        <p class="text-gray-600 mt-4">&copy; Copyright tickLore 2024. All rights reserved</p>
-    </div>
-</footer>
+    {{>userFooter}}
 </body>
 <script>
     // Get the search input element

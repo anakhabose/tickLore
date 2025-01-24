@@ -4,6 +4,7 @@ const categoryModel = require("../model/categoryModel");
 module.exports = {
  addProducts: async (req, res) => {
     try {
+      console.log('Headers:', req.headers);
       console.log('Raw request body:', req.body);
       console.log('Files:', req.files);
       
