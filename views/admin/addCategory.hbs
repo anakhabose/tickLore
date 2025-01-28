@@ -26,7 +26,7 @@
                 name="categoryName"
                 type="text"
                 class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
-                required
+               
               />
             </div>
            
@@ -40,7 +40,7 @@
   
   <div class="grid grid-cols-2 gap-4">
     <div class="space-y-2">
-      <input type="file" id="image1" name="images" accept="image/*" class="block w-full text-sm text-gray-500" required>
+      <input type="file" id="image1" name="images" accept="image/*" class="block w-full text-sm text-gray-500" >
       <img id="preview1" class="h-24 w-24 object-cover rounded-lg hidden">
     </div>
     
@@ -124,41 +124,89 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function validateForm() {
-    const categoryName = document.getElementById('categoryName').value;
-  
-    if (!categoryName.trim()) {
-      showError('Product name is required');
+    const categoryName = document.getElementById('categoryName').value.trim();
+    
+    // Category name validation
+    if (!categoryName) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Category name is required'
+      });
       return false;
     }
 
+    // Check length before proceeding with other validations
+    if (categoryName.length > 30) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Category name cannot exceed 30 characters'
+      });
+      return false;
+    }
+
+    if (categoryName.length < 3) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Category name must be at least 3 characters long'
+      });
+      return false;
+    }
+
+    // Check for special characters
+    if (!/^[a-zA-Z0-9\s]+$/.test(categoryName)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Category name can only contain letters, numbers and spaces'
+      });
+      return false;
+    }
+
+    // Image validation
     let imageCount = 0;
     const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
     
     for (const input of imageInputs) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
+        
+        // Check file format
         if (!allowedFormats.includes(file.type)) {
-          showError('Please upload only image files (JPEG, PNG, JPG, WEBP)');
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid File Format',
+            text: 'Please upload only image files (JPEG, PNG, JPG, WEBP)'
+          });
           return false;
         }
+
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          Swal.fire({
+            icon: 'error',
+            title: 'File Too Large',
+            text: 'Image size should not exceed 5MB'
+          });
+          return false;
+        }
+
         imageCount++;
       }
     }
 
     if (imageCount !== 1) {
-      showError('Please upload an image');
+      Swal.fire({
+        icon: 'error',
+        title: 'Image Required',
+        text: 'Please upload one category image'
+      });
       return false;
     }
 
     return true;
-  }
-
-  function showError(message) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation Error',
-      text: message
-    });
   }
 });
 </script>  

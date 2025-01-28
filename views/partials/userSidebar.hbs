@@ -17,10 +17,12 @@
                     class="p-2 rounded {{#if (eq currentPath '/user/wallet')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-wallet"></i> My Wallet
                 </a>
+                {{#if user.password}}
                 <a href="/user/changePassword"
                     class="p-2 rounded {{#if (eq currentPath '/user/changePassword')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-key"></i> Change Password
                 </a>
+                {{/if}}
                 <a href="/user/logout"
                     class="p-2 rounded {{#if (eq currentPath '/user/logout')}}bg-yellow-500 text-white{{else}}text-black hover:bg-yellow-200 hover:text-white{{/if}}">
                     <i class="fas fa-sign-out-alt"></i> Logout

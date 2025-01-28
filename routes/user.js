@@ -13,7 +13,7 @@ const shopController = require('../controller/shopController');
 const wishlistController = require('../controller/wishlistController');
 const walletController = require('../controller/walletController');
 
-
+router.use(userAuth.checkBlockStatus);
 
 router.get('/home',userController.loadHome);
 

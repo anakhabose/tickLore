@@ -77,10 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to validate the category name
   function validateCategoryName(name) {
-    // Remove leading/trailing whitespace
     const trimmedName = name.trim();
     
-    // Check if empty
     if (!trimmedName) {
       return {
         isValid: false,
@@ -88,28 +86,26 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
     
-    // Check minimum length (2 characters)
-    if (trimmedName.length < 2) {
+    if (trimmedName.length < 3) {
       return {
         isValid: false,
-        message: 'Category name must be at least 2 characters long'
+        message: 'Category name must be at least 3 characters long'
       };
     }
     
-    // Check maximum length (50 characters)
-    if (trimmedName.length > 50) {
+    if (trimmedName.length > 30) {
       return {
         isValid: false,
-        message: 'Category name cannot exceed 50 characters'
+        message: 'Category name cannot exceed 30 characters'
       };
     }
     
-    // Check for valid characters (letters, numbers, spaces, and hyphens)
-    const validNameRegex = /^[a-zA-Z0-9\s-]+$/;
+    // Updated regex to match addCategory validation
+    const validNameRegex = /^[a-zA-Z0-9\s]+$/;
     if (!validNameRegex.test(trimmedName)) {
       return {
         isValid: false,
-        message: 'Category name can only contain letters, numbers, spaces, and hyphens'
+        message: 'Category name can only contain letters, numbers and spaces'
       };
     }
     
@@ -133,21 +129,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) {
       return {
         isValid: false,
-        message: 'Category image is required'
+        message: 'Please upload one category image'
       };
     }
     
     // Check file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
+    const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedFormats.includes(file.type)) {
       return {
         isValid: false,
-        message: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP)'
+        message: 'Please upload only image files (JPEG, PNG, JPG, WEBP)'
       };
     }
     
     // Check file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       return {
         isValid: false,
@@ -188,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!categoryNameValidation.isValid) {
       Swal.fire({
         icon: 'error',
-        title: 'Invalid Category Name',
+        title: 'Validation Error',
         text: categoryNameValidation.message
       });
       return;
@@ -199,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!imageValidation.isValid) {
       Swal.fire({
         icon: 'error',
-        title: 'Invalid Image',
+        title: 'Validation Error',
         text: imageValidation.message
       });
       return;

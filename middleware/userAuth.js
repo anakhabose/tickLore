@@ -6,7 +6,25 @@ const checkSession = (req,res,next)=>{
     }else{
         res.redirect('/user/login')
     }
-}
+};
+ const checkBlockStatus= async (req, res, next) => {
+        try {
+            if (req.session && req.session.user) {
+                const user = await userSchema.findById(req.session.user);
+                
+                if (user && !user.status) {
+                    delete req.session.user;
+                    return res.redirect('/user/login');
+                }
+                next();
+            } else {
+                next();
+            }
+        } catch (error) {
+            console.error("Block status check error:", error);
+            next();
+        }
+    };
 
 const isLogin = (req,res,next)=>{
     if(req.session.user){
@@ -16,4 +34,4 @@ const isLogin = (req,res,next)=>{
     }
 }
 
-module.exports = {checkSession,isLogin};
+module.exports = {checkSession,isLogin,checkBlockStatus};

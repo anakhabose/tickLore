@@ -153,23 +153,25 @@
                 return regex.test(email);
             }
     function isValidPassword(password) {
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#$])[A-Za-z\d@$!%*?&#$]{8,}$/;
-    if (!strongPasswordRegex.test(password)) {
-        Swal.fire({
-            title: 'Invalid Password',
-            html: 'Password must contain:<br>' +
-                  '- At least 8 characters<br>' +
-                  '- At least one uppercase letter<br>' +
-                  '- At least one lowercase letter<br>' +
-                  '- At least one number<br>' +
-                  '- At least one special character (@$!%*?&)',
-            icon: 'warning',
-            confirmButtonText: 'OK'
-        });
-        return false;
+        // Modified regex to be more permissive with special characters
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
+
+        if (!strongPasswordRegex.test(password)) {
+            Swal.fire({
+                title: 'Invalid Password',
+                html: 'Password must contain:<br>' +
+                      '- At least 8 characters<br>' +
+                      '- At least one uppercase letter<br>' +
+                      '- At least one lowercase letter<br>' +
+                      '- At least one number<br>' +
+                      '- At least one special character',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return false;
+        }
+        return true;
     }
-    return true;
-}
 
      fetch('/user/signup',{
                 headers: {

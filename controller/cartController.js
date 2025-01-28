@@ -343,43 +343,50 @@ cart.finalAmount = cart.totalCartPrice + cart.deliveryCharges;
       res.status(500).json({ message: 'Error removing item from cart', error: error.message });
     }
   },
-  verifyStock : async (req, res) => {
-      try {
-          const { items } = req.body;
-          
-      
-          for (const item of items) {
-              const product = await Product.findById(item.productId);
-              if (!product) {
-                  return res.json({
-                      success: false,
-                      message: 'One or more products not found'
-                  });
-              }
-              
-          if (product.stock === 0) {
-              return res.status(400).json({ message: `Product ${product.productName} is out of stock` });
-          }
-              
-              if (product.stock < item.quantity) {
-                  return res.json({
-                      success: false,
-                      message: `Only ${product.stock} units available for ${product.productName}`
-                  });
-              }
-          }
-          
+  verifyStock: async (req, res) => {
+    try {
+        const { items } = req.body;
         
-          res.json({
-              success: true
-          });
-      } catch (error) {
-          console.error('Stock verification error:', error);
-          res.json({
-              success: false,
-              message: 'Error verifying stock availability'
-          });
-      }
+        for (const item of items) {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                return res.json({
+                    success: false,
+                    message: 'One or more products not found'
+                });
+            }
+            
+            if (product.deleted) {
+                return res.json({
+                    success: false,
+                    message: `Product ${product.productName} is no longer available`
+                });
+            }
+            
+            if (product.stock === 0) {
+                return res.status(400).json({ 
+                    message: `Product ${product.productName} is out of stock` 
+                });
+            }
+            
+            if (product.stock < item.quantity) {
+                return res.json({
+                    success: false,
+                    message: `Only ${product.stock} units available for ${product.productName}`
+                });
+            }
+        }
+        
+        res.json({
+            success: true
+        });
+    } catch (error) {
+        console.error('Stock verification error:', error);
+        res.json({
+            success: false,
+            message: 'Error verifying stock availability'
+        });
+    }
   },
 
 }

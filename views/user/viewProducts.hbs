@@ -18,135 +18,135 @@
   </nav>
 </div>
 
-<div class="grid gap-10 md:grid-cols-2">
-<div class="relative flex bg-white p-1 -mt-2">
-    <!-- Small Images Container -->
-    <div class="flex flex-col justify-center ml-4 gap-4">
-        <img 
-            src="{{product.images.[0]}}" 
-            alt="Small Image 1" 
-            class="object-contain h-20 w-20 cursor-pointer" 
-            onclick="changeImage('{{product.images.[0]}}')" 
-        />
-        <img 
-            src="{{product.images.[1]}}" 
-            alt="Small Image 2" 
-            class="object-contain h-20 w-20 cursor-pointer" 
-            onclick="changeImage('{{product.images.[1]}}')" 
-        />
-        <img 
-            src="{{product.images.[2]}}" 
-            alt="Small Image 3" 
-            class="object-contain h-20 w-20 cursor-pointer" 
-            onclick="changeImage('{{product.images.[2]}}')" 
-        />
-        <img 
-            src="{{product.images.[3]}}" 
-            alt="Small Image 4" 
-            class="object-contain h-20 w-20 cursor-pointer" 
-            onclick="changeImage('{{product.images.[3]}}')" 
-        />
-    </div>
-
-    <!-- Big Image Container with Zoom Effect -->
-    <div class="flex justify-center items-center flex-grow">
-        <div class="zoom-container relative overflow-hidden">
+    <div class="grid gap-10 md:grid-cols-2">
+    <div class="relative flex bg-white p-1 -mt-2">
+        <!-- Small Images Container -->
+        <div class="flex flex-col justify-center ml-4 gap-4">
             <img 
-                id="bigImage" 
                 src="{{product.images.[0]}}" 
-                alt="Apple Smart Watch" 
-                class="object-contain h-96 w-85 transition-transform duration-200 ease-in-out" 
+                alt="Small Image 1" 
+                class="object-contain h-20 w-20 cursor-pointer" 
+                onclick="changeImage('{{product.images.[0]}}')" 
             />
-            <div 
-                class="zoom-lens absolute border-2 border-black bg-black bg-opacity-20 cursor-crosshair hidden"
-                style="width: 100px; height: 100px;">
+            <img 
+                src="{{product.images.[1]}}" 
+                alt="Small Image 2" 
+                class="object-contain h-20 w-20 cursor-pointer" 
+                onclick="changeImage('{{product.images.[1]}}')" 
+            />
+            <img 
+                src="{{product.images.[2]}}" 
+                alt="Small Image 3" 
+                class="object-contain h-20 w-20 cursor-pointer" 
+                onclick="changeImage('{{product.images.[2]}}')" 
+            />
+            <img 
+                src="{{product.images.[3]}}" 
+                alt="Small Image 4" 
+                class="object-contain h-20 w-20 cursor-pointer" 
+                onclick="changeImage('{{product.images.[3]}}')" 
+            />
+        </div>
+
+        <!-- Big Image Container with Zoom Effect -->
+        <div class="flex justify-center items-center flex-grow">
+            <div class="zoom-container relative overflow-hidden">
+                <img 
+                    id="bigImage" 
+                    src="{{product.images.[0]}}" 
+                    alt="Apple Smart Watch" 
+                    class="object-contain h-96 w-85 transition-transform duration-200 ease-in-out" 
+                />
+                <div 
+                    class="zoom-lens absolute border-2 border-black bg-black bg-opacity-20 cursor-crosshair hidden"
+                    style="width: 100px; height: 100px;">
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
- 
+     
             <!-- Product Details -->
             
-  <div class="space-y-8">
-    <div>
-        <h1 class="text-3xl font-bold text-gray-800">{{product.productName}}</h1>
-        
-    </div>
-     <!-- Display average rating -->
-  <div class="flex items-center mt-2">
-    <span class="text-yellow-500 text-lg">★★★★☆</span>
-    <p class="ml-2 text-gray-700">(4.5 out of 5)</p>
-    <p class="ml-2 text-gray-600">| Based on 120 reviews</p>
+      <div class="space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">{{product.productName}}</h1>
+            
+        </div>
+         <!-- Display average rating -->
+      <div class="flex items-center mt-2">
+        <span class="text-yellow-500 text-lg">★★★★☆</span>
+        <p class="ml-2 text-gray-700">(4.5 out of 5)</p>
+        <p class="ml-2 text-gray-600">| Based on 120 reviews</p>
+      </div>
+
+        <div class="mt-4">
+            {{#if product.discountedPrice}}
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-semibold text-red-600">₹{{product.discountedPrice}}</span>
+                        <span class="text-gray-400 font-semibold line-through">₹{{product.price}}</span>
+                    </div>
+                   
+                    <div class="flex items-center gap-2">
+                        <span class="bg-green-200 text-green-800 font-semibold text-xs px-2 py-1 rounded-lg">
+                            Special Offer: {{calculateDiscount product.price product.discountedPrice}}% OFF
+                        </span>
+                    </div>
+                </div>
+            {{else}}
+                <span class="text-2xl font-semibold text-red-600">₹{{product.price}}</span>
+            {{/if}}
+        </div>
+
+        <p class="text-xl font-bold text-gray-900">Description</p>
+        <div class="text-gray-700 space-y-4">
+            <p>{{product.description}}</p>
+        </div>
+         <div class="mt-4">
+            {{#if (eq product.stock 0)}}
+                <div class="bg-red-100 text-red-800 font-semibold px-3 py-1 rounded-lg inline-flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    Out of Stock
+                </div>
+            {{else if (lte product.stock 10)}}
+                <div class="bg-yellow-100 text-yellow-800 font-semibold px-3 py-1 rounded-lg inline-flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Low Stock - Only {{product.stock}} left
+                </div>
+            {{/if}}
+        </div>
+         
+
+
+        <!-- Quantity Section -->
+      <div class="flex items-center space-x-6">
+          <!-- Label -->
+          <label for="quantity" class="text-lg font-semibold text-yellow-500">Quantity:</label>
+
+          <!-- Quantity Controller -->
+          <div class="flex items-center border border-yellow-500 rounded-full shadow-lg overflow-hidden">
+    <!-- Decrease Button -->
+    <button id="decrease" 
+        class="bg-yellow-500 text-black px-4 py-2 font-bold hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
+        -
+    </button>
+    <!-- Input Field -->
+    <input id="quantity" 
+        type="number" 
+        value="1" 
+        min="1" 
+        max="4"
+        class="w-16 text-center bg-white text-black font-medium focus:ring-0 focus:outline-none border-none" />
+    <!-- Increase Button -->
+    <button id="increase" 
+        class="bg-yellow-500 text-black px-4 py-2 font-bold hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
+        +
+    </button>
   </div>
 
-    <div class="mt-4">
-        {{#if product.discountedPrice}}
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl font-semibold text-red-600">₹{{product.discountedPrice}}</span>
-                    <span class="text-gray-400 font-semibold line-through">₹{{product.price}}</span>
-                </div>
-               
-                <div class="flex items-center gap-2">
-                    <span class="bg-green-200 text-green-800 font-semibold text-xs px-2 py-1 rounded-lg">
-                        Special Offer: {{calculateDiscount product.price product.discountedPrice}}% OFF
-                    </span>
-                </div>
-            </div>
-        {{else}}
-            <span class="text-2xl font-semibold text-red-600">₹{{product.price}}</span>
-        {{/if}}
     </div>
-
-    <p class="text-xl font-bold text-gray-900">Description</p>
-    <div class="text-gray-700 space-y-4">
-        <p>{{product.description}}</p>
-    </div>
-     <div class="mt-4">
-        {{#if (eq product.stock 0)}}
-            <div class="bg-red-100 text-red-800 font-semibold px-3 py-1 rounded-lg inline-flex items-center">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                Out of Stock
-            </div>
-        {{else if (lte product.stock 10)}}
-            <div class="bg-yellow-100 text-yellow-800 font-semibold px-3 py-1 rounded-lg inline-flex items-center">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                Low Stock - Only {{product.stock}} left
-            </div>
-        {{/if}}
-    </div>
-     
-
-
-    <!-- Quantity Section -->
-  <div class="flex items-center space-x-6">
-      <!-- Label -->
-      <label for="quantity" class="text-lg font-semibold text-yellow-500">Quantity:</label>
-
-      <!-- Quantity Controller -->
-      <div class="flex items-center border border-yellow-500 rounded-full shadow-lg overflow-hidden">
-  <!-- Decrease Button -->
-  <button id="decrease" 
-      class="bg-yellow-500 text-black px-4 py-2 font-bold hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
-      -
-  </button>
-  <!-- Input Field -->
-  <input id="quantity" 
-      type="number" 
-      value="1" 
-      min="1" 
-      max="4"
-      class="w-16 text-center bg-white text-black font-medium focus:ring-0 focus:outline-none border-none" />
-  <!-- Increase Button -->
-  <button id="increase" 
-      class="bg-yellow-500 text-black px-4 py-2 font-bold hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
-      +
-  </button>
-</div>
-
-  </div>
 
 
  <button
@@ -161,86 +161,88 @@
     Add to Wishlist
 </button>
 
-<!-- Write a review -->
-   {{!-- <div class="mt-4">
-    <label for="reviewText" class="block text-lg font-semibold text-gray-800">Write a Review:</label>
-    <textarea
-      id="reviewText"
-      rows="4"
-      placeholder="Share your thoughts about the product"
-      class="w-full p-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"></textarea>
-    <div class="flex items-center space-x-2 mt-2">
-      <label class="text-lg font-semibold text-gray-800">Your Rating:</label>
-      <div class="flex space-x-1">
-        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
-        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
-        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
-        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
-        <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
-      </div>
-    </div>
-    <button
-      id="submitReview"
-      class="bg-yellow-600 text-white px-4 py-2 mt-4 rounded-md hover:bg-yellow-500 transition">
-      Submit Review
-    </button>
-  </div> --}}
+   <!-- Write a review -->
+      {{!-- <div class="mt-4">
+       <label for="reviewText" class="block text-lg font-semibold text-gray-800">Write a Review:</label>
+       <textarea
+         id="reviewText"
+         rows="4"
+         placeholder="Share your thoughts about the product"
+         class="w-full p-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"></textarea>
+       <div class="flex items-center space-x-2 mt-2">
+         <label class="text-lg font-semibold text-gray-800">Your Rating:</label>
+         <div class="flex space-x-1">
+           <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+           <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+           <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+           <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+           <span class="text-gray-400 hover:text-yellow-500 cursor-pointer">★</span>
+         </div>
+       </div>
+       <button
+         id="submitReview"
+         class="bg-yellow-600 text-white px-4 py-2 mt-4 rounded-md hover:bg-yellow-500 transition">
+         Submit Review
+       </button>
+     </div> --}}
 
-  <!-- Review List -->
-  {{!-- <div class="mt-6">
-    <h3 class="text-lg font-bold text-gray-900">Recent Reviews:</h3>
-    <ul class="space-y-4 mt-4">
-      <li class="border-b border-gray-300 pb-4">
-        <div class="flex items-center justify-between">
-          <p class="font-semibold text-gray-800">John Doe</p>
-          <span class="text-yellow-500">★★★★★</span>
-        </div>
-        <p class="text-gray-700 mt-2">Great product! Highly recommend it.</p>
-      </li>
-      <li class="border-b border-gray-300 pb-4">
-        <div class="flex items-center justify-between">
-          <p class="font-semibold text-gray-800">Jane Smith</p>
-          <span class="text-yellow-500">★★★★☆</span>
-        </div>
-        <p class="text-gray-700 mt-2">Good quality but slightly expensive.</p>
-      </li>
-    </ul>
-  </div> --}}
+     <!-- Review List -->
+     {{!-- <div class="mt-6">
+       <h3 class="text-lg font-bold text-gray-900">Recent Reviews:</h3>
+       <ul class="space-y-4 mt-4">
+         <li class="border-b border-gray-300 pb-4">
+           <div class="flex items-center justify-between">
+             <p class="font-semibold text-gray-800">John Doe</p>
+             <span class="text-yellow-500">★★★★★</span>
+           </div>
+           <p class="text-gray-700 mt-2">Great product! Highly recommend it.</p>
+         </li>
+         <li class="border-b border-gray-300 pb-4">
+           <div class="flex items-center justify-between">
+             <p class="font-semibold text-gray-800">Jane Smith</p>
+             <span class="text-yellow-500">★★★★☆</span>
+           </div>
+           <p class="text-gray-700 mt-2">Good quality but slightly expensive.</p>
+         </li>
+       </ul>
+     </div> --}}
 
-</div> 
+   </div> 
 
-</div>
-<!-- Recommended Products Section -->
-<div class="max-w-7xl mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Recommended Products</h1>
-    </div>
+   </div>
+   <!-- Recommended Products Section -->
+   <div class="max-w-7xl mx-auto p-6">
+       <div class="flex justify-between items-center mb-6">
+           <h1 class="text-2xl font-bold">Recommended Products</h1>
+       </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {{#each recommendedProducts}}
-            <a href="/user/viewProducts/{{this._id}}" class="no-underline">
-                <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-center mb-4">
-                        <img 
-                            src="{{this.images.[0]}}" 
-                            alt="{{this.name}}" 
-                            class="h-48 object-contain"
-                        />
-                    </div>
-                    <h2 class="text-lg font-semibold text-center">{{this.productName}}</h2>
-                    <p class="text-lg font-bold text-center">Rs.{{this.price}}</p>
-                </div>
-            </a>
-        {{/each}}
-    </div>
-</div>
+       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+           {{#each recommendedProducts}}
+               {{#unless this.deleted}}
+               <a href="/user/viewProducts/{{this._id}}" class="no-underline">
+                   <div class="bg-white shadow rounded-lg p-4 flex flex-col items-center hover:shadow-lg transition-shadow">
+                       <div class="flex items-center justify-center mb-4">
+                           <img 
+                               src="{{this.images.[0]}}" 
+                               alt="{{this.name}}" 
+                               class="h-48 object-contain"
+                           />
+                       </div>
+                       <h2 class="text-lg font-semibold text-center">{{this.productName}}</h2>
+                       <p class="text-lg font-bold text-center">Rs.{{this.price}}</p>
+                   </div>
+               </a>
+               {{/unless}}
+           {{/each}}
+       </div>
+   </div>
 
 
 
-    </main>
+   </main>
 
-    <!-- Footer -->
-    {{>userFooter}}
+   <!-- Footer -->
+   {{>userFooter}}
 
 <script>
 

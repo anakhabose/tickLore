@@ -320,7 +320,6 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                 return res.redirect('/admin/login');
             }
 
-       
             const page = parseInt(req.query.page) || 1;
             const limit = 6; 
             const skip = (page - 1) * limit;
@@ -333,15 +332,14 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                 ]
             };
 
-  
             const totalCustomers = await userModel.countDocuments(searchQuery);
             const totalPages = Math.ceil(totalCustomers / limit);
 
-      
             const userDetails = await userModel.find(
                 searchQuery,
                 'name email status _id'
             )
+            .sort({ _id: -1 })
             .skip(skip)
             .limit(limit);
 

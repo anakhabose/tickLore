@@ -62,7 +62,7 @@ const AddressSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     required: true,
-    match: /^[6-9][0-9]{9}$/,
+    match: /^[1-9][0-9]{9}$/,
     minlength: 10,
     maxlength: 10, 
   },

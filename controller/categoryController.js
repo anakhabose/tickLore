@@ -6,7 +6,29 @@ addCategory: async (req, res) => {
         const { categoryName } = req.body;
         const images = req.file.path;
 
-        
+        if (!categoryName || categoryName.trim().length === 0) {
+            return res.status(400).json({
+                status: false,
+                message: 'Category name is required'
+            });
+        }
+
+        if (categoryName.length > 30) {
+            return res.status(400).json({
+                status: false,
+                message: 'Category name cannot exceed 30 characters'
+            });
+        }
+
+      
+        const categoryNameRegex = /^[a-zA-Z0-9\s]{2,}$/;
+        if (!categoryNameRegex.test(categoryName)) {
+            return res.status(400).json({
+                status: false,
+                message: 'Category name must contain only letters, numbers, and spaces, and be at least 2 characters long'
+            });
+        }
+
         const existingCategory = await category.findOne({
             categoryName: { $regex: new RegExp(`^${categoryName}$`, 'i') }
         });
@@ -46,16 +68,46 @@ editCategory: async (req, res) => {
         const categoryId = req.params.id;
         const { categoryName } = req.body;
         
-       
+        // Validation checks
+        if (!categoryName || categoryName.trim().length === 0) {
+            return res.status(400).json({
+                status: false,
+                message: 'Category name is required'
+            });
+        }
+
+        if (categoryName.length < 3) {  // Updated to match frontend validation
+            return res.status(400).json({
+                status: false,
+                message: 'Category name must be at least 3 characters long'
+            });
+        }
+
+        if (categoryName.length > 30) {
+            return res.status(400).json({
+                status: false,
+                message: 'Category name cannot exceed 30 characters'
+            });
+        }
+
+        const categoryNameRegex = /^[a-zA-Z0-9\s]+$/;  // Updated to match frontend validation
+        if (!categoryNameRegex.test(categoryName)) {
+            return res.status(400).json({
+                status: false,
+                message: 'Category name can only contain letters, numbers and spaces'
+            });
+        }
+
         const updateData = {
             categoryName: categoryName,
         };
 
-     
+        // Handle image upload
         if (req.file) {
             updateData.images = req.file.path;
         }
 
+        // Check for existing category with same name
         const existingCategory = await category.findOne({
             categoryName: { $regex: new RegExp(`^${categoryName}$`, 'i') },
             _id: { $ne: categoryId }

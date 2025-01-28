@@ -90,6 +90,7 @@ module.exports={
 
           
            sendOtpEmail(email, otp);
+           console.log(otp)
 
          
            return res.status(200).json({status:true,message:"OTP sent successfully",email:email})
@@ -349,7 +350,7 @@ module.exports={
             return res.status(404).json({ message: 'User not found' });
             }
 
-            const { name,gender,phoneNumber} = req.body;
+            const { name,gender} = req.body;
            
             const profileImage = req.file;
          
@@ -360,8 +361,7 @@ module.exports={
             
             user.name = name || user.name;  
             user.gender = gender || user.gender;
-            user.phoneNumber = phoneNumber || user.phoneNumber;
-    
+           
         
             await user.save();
 
@@ -371,7 +371,6 @@ module.exports={
               user: {
                 name: user.name,
                 gender: user.gender,
-                phoneNumber: user.phoneNumber,
                 profileImage: user.profileImage
             }
             });
@@ -449,11 +448,14 @@ module.exports={
             return res.redirect('/user/login'); 
         }
 
-       
+        // Redirect Google users if they try to access this page directly
+        if (!userData.password) {
+            return res.redirect('/user/profile');
+        }
+
         const cartCount = await Cart.findOne({ userId: userSession._id })
             .then(cart => cart ? cart.items.length : 0);
 
-        
         const wishlistCount = await Wishlist.countDocuments({ user: userSession._id });
 
         res.render('user/changePassword', { 
