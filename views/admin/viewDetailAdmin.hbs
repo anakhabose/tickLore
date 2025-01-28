@@ -1,274 +1,267 @@
- <header class="bg-black text-white p-4 flex justify-between items-center h-16 relative"></header>
-    <img src="/images/logo.png" alt="Logo" class="h-48 absolute top-1/2 transform -translate-y-1/2">
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Order Details</h1>
+        <div class="flex items-center space-x-4">
+          <span class="px-4 py-2 rounded-full text-sm font-semibold
+            {{#if (eq order.status 'Pending')}}bg-yellow-100 text-yellow-800
+            {{else if (eq order.status 'Shipped')}}bg-blue-100 text-blue-800
+            {{else if (eq order.status 'Out for Delivery')}}bg-purple-100 text-purple-800
+            {{else if (eq order.status 'Delivered')}}bg-green-100 text-green-800
+            {{else}}bg-red-100 text-red-800{{/if}}">
+            {{order.status}}
+          </span>
+        </div>
+      </div>
+    </div>
   </header>
 
-{{log order}}
-  <div class="w-full min-h-screen bg-gray-100 py-12">
-    <div class="max-w-6xl mx-auto p-10 bg-white shadow rounded-lg">
-      <!-- Order Summary Section -->
-      
-      <div class="mb-12">
-        <h2 class="text-2xl font-semibold mb-8">Order Summary</h2>
-        
-        <div class="grid grid-cols-12 gap-8 items-start">
-          {{#each order.items}}  
-            <div class="col-span-2 flex justify-center">
-                <img src="{{product.images.[0]}}" alt="Product Name" class="w-24 h-24 rounded-lg shadow-md">
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Order Info -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+      <div class="border-b pb-6 mb-6">
+        <h2 class="text-xl font-semibold">Order #{{order._id}}</h2>
+        <p class="text-sm text-gray-500 mt-1">Ordered on: {{formatDate order.createdAt}}</p>
+      </div>
+
+      <!-- Status Tracker -->
+      <div class="relative mb-8">
+        <!-- Progress Bar -->
+        <div class="h-1 bg-gray-200 absolute w-full top-5"></div>
+        <div class="h-1 bg-green-500 absolute transition-all duration-500
+          {{#if (eq order.status 'Delivered')}}w-full
+          {{else if (eq order.status 'Out for Delivery')}}w-3/4
+          {{else if (eq order.status 'Shipped')}}w-1/2
+          {{else}}w-1/4{{/if}}
+          top-5">
+        </div>
+
+        <!-- Status Steps -->
+        <div class="flex justify-between relative">
+          <!-- Ordered -->
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+              {{#if order.createdAt}}
+                bg-green-500 border-green-500 text-white
+              {{else}}
+                border-gray-300 bg-white text-gray-300
+              {{/if}}">
+              📦
             </div>
+            <p class="text-sm mt-2 font-medium">Ordered</p>
+            {{#if order.createdAt}}
+              <p class="text-xs text-gray-500">{{formatDate order.createdAt}}</p>
+            {{/if}}
+          </div>
 
-            <div class="col-span-8">
-                <h3 class="text-xl font-semibold">{{product.name}}</h3>
-                <p class="text-md text-gray-700 mt-4">Price: ₹{{subtotal}}</p>
-                <p class="text-md text-gray-700">Quantity: {{quantity}}</p>
+          <!-- Shipped -->
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+              {{#if order.shippedAt}}
+                bg-green-500 border-green-500 text-white
+              {{else}}
+                border-gray-300 bg-white text-gray-300
+              {{/if}}">
+              🚚
             </div>
-         {{/each}} 
+            <p class="text-sm mt-2 font-medium">Shipped</p>
+            {{#if order.shippedAt}}
+              <p class="text-xs text-gray-500">{{formatDate order.shippedAt}}</p>
+            {{/if}}
+          </div>
+
+          <!-- Out for Delivery -->
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+              {{#if order.outForDeliveryAt}}
+                bg-green-500 border-green-500 text-white
+              {{else}}
+                border-gray-300 bg-white text-gray-300
+              {{/if}}">
+              🛵
+            </div>
+            <p class="text-sm mt-2 font-medium">Out for Delivery</p>
+            {{#if order.outForDeliveryAt}}
+              <p class="text-xs text-gray-500">{{formatDate order.outForDeliveryAt}}</p>
+            {{/if}}
+          </div>
+
+          <!-- Delivered -->
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+              {{#if order.deliveredAt}}
+                bg-green-500 border-green-500 text-white
+              {{else}}
+                border-gray-300 bg-white text-gray-300
+              {{/if}}">
+              ✅
+            </div>
+            <p class="text-sm mt-2 font-medium">Delivered</p>
+            {{#if order.deliveredAt}}
+              <p class="text-xs text-gray-500">{{formatDate order.deliveredAt}}</p>
+            {{/if}}
+          </div>
         </div>
-      </div>
-  
-      <!-- Shipping Address Section -->
-      <div class="mb-12">
-        <h2 class="text-2xl font-semibold mb-8">Shipping Address</h2>
-        <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-          <p class="text-lg text-gray-800 font-medium">{{order.address.name}}</p>
-          <p class="text-lg text-gray-600">{{order.address.addressLine1}}</p>
-          <p class="text-lg text-gray-600">{{order.address.addressLine2}}</p>
-          <p class="text-lg text-gray-600">{{order.address.city}}, {{order.address.state}}, {{order.address.pincode}}</p>
-          <p class="text-lg text-gray-600">{{order.address.country}}</p>
-          <p class="text-lg text-gray-600">Phone:  {{order.address.phoneNumber}}</p>
-        </div>
-      </div>
-  
-      <!-- Order Tracking Section -->
-      <div class="mb-12">
-  <h2 class="text-2xl font-semibold mb-8">Order Tracking</h2>
-  <div class="relative px-8">
-    <div class="absolute inset-0 h-1 bg-gray-300"></div>
-    <div class="flex justify-between items-center relative z-10">
-      <!-- Pending -->
-      <div class="flex flex-col items-center">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center 
-          {{#if (eq order.status 'Pending') }}bg-yellow-500{{else}}bg-gray-400{{/if}} text-white text-xl">
-          ✓
-        </div>
-        <span class="mt-4 text-lg font-medium">Pending</span>
-        <span class="text-sm text-gray-500">{{ order.createdAt}}</span>
       </div>
 
-      <!-- Shipped -->
-      <div class="flex flex-col items-center">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center 
-          {{#if (eq order.status 'Shipped') }}bg-blue-500{{else}}bg-gray-400{{/if}} text-white text-xl">
-          ✓
+      <!-- Current Status Card -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+          <div class="mr-4">
+            {{#if (eq order.status 'Pending')}}🕒
+            {{else if (eq order.status 'Shipped')}}🚚
+            {{else if (eq order.status 'Out for Delivery')}}🛵
+            {{else if (eq order.status 'Delivered')}}✅
+            {{else}}❓{{/if}}
+          </div>
+          <div>
+            <h3 class="font-medium">Current Status</h3>
+            <p class="text-sm text-gray-600">
+              {{#if (eq order.status 'Pending')}}
+                Order is being processed
+              {{else if (eq order.status 'Shipped')}}
+                Order has been shipped
+              {{else if (eq order.status 'Out for Delivery')}}
+                Order is out for delivery
+              {{else if (eq order.status 'Delivered')}}
+                Order has been delivered
+              {{else}}
+                Status unknown
+              {{/if}}
+            </p>
+          </div>
         </div>
-        <span class="mt-4 text-lg font-medium">Shipped</span>
-        <span id="shipped-date" class="text-sm text-gray-500">
-          {{#if order.shippedAt}}
-            {{ order.shippedAt}}
-          {{else}}
-            --
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-4">
+        {{#unless (or (eq order.status 'Cancelled') (eq order.status 'Returned'))}}
+          {{#if (eq order.status 'Pending')}}
+            <button data-order-id="{{order._id}}" data-status-action="Shipped"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+              Ship Order
+            </button>
           {{/if}}
-        </span>
-      </div>
-
-      <!-- Out for Delivery -->
-      <div class="flex flex-col items-center">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center 
-          {{#if (eq order.status 'Out for Delivery') }}bg-yellow-500{{else}}bg-gray-400{{/if}} text-white text-xl">
-          •
-        </div>
-        <span class="mt-4 text-lg font-medium">Out for Delivery</span>
-        <span id="out-for-delivery-date" class="text-sm text-gray-500">
-          {{#if order.outForDeliveryAt}}
-            {{ order.outForDeliveryAt}}
-          {{else}}
-            --
+          
+          {{#if (eq order.status 'Shipped')}}
+            <button data-order-id="{{order._id}}" data-status-action="Out for Delivery"
+              class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+              Out for Delivery
+            </button>
           {{/if}}
-        </span>
-      </div>
-
-
-      <!-- Delivered -->
-      <div class="flex flex-col items-center">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center 
-          {{#if (eq order.status 'Delivered') }}bg-green-500
-          {{else if (eq order.status 'Returned') }}bg-red-500
-          {{else}}bg-gray-400{{/if}} text-white text-xl">
-          {{#if (eq order.status 'Returned') }}R
-          {{else}}•{{/if}}
-        </div>
-        <span class="mt-4 text-lg font-medium">
-          {{#if (eq order.status 'Returned') }}Returned{{else}}Delivered{{/if}}
-        </span>
-        <span id="delivered-date" class="text-sm text-gray-500">
-          {{#if order.deliveredAt}}
-            {{ order.deliveredAt}}
-          {{else}}
-            --
+          
+          {{#if (eq order.status 'Out for Delivery')}}
+            <button data-order-id="{{order._id}}" data-status-action="Delivered"
+              class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+              Mark as Delivered
+            </button>
           {{/if}}
-        </span>
+        {{/unless}}
       </div>
     </div>
-  </div>
-</div>
 
-      <div class="mt-8 flex">
-  <button 
-    onclick="updateOrderStatus('{{order._id}}', 'Shipped')" 
-    class="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 mr-3">
-    Mark as Shipped
-  </button>
-  <button 
-    onclick="updateOrderStatus('{{order._id}}', 'Out for Delivery')" 
-    class="px-4 py-2 bg-yellow-500 text-white rounded-md shadow hover:bg-yellow-600 mr-3">
-    Mark as Out for Delivery
-  </button>
-  <button 
-    onclick="updateOrderStatus('{{order._id}}', 'Delivered')" 
-    class="px-4 py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600 mr-3">
-    Mark as Delivered
-  </button>
-</div>
-  
-      <!-- Additional Order Details Section -->
-      <div class="mb-12 mt-10">
-        <h2 class="text-2xl font-semibold mb-8">Order Details</h2>
-        <div class="text-lg text-gray-700">
-          <p ><span class="font-semibold">Order Date :</span> {{ order.createdAt}}</p>
-          <p><span class="font-semibold">Payment Method :</span> {{order.paymentMethod}}</p>
-          <p><span class="font-semibold">Order ID :</span> {{order._id}}</p>
+    <!-- Order Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Products -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+        {{#each order.items}}
+          <div class="flex items-center space-x-4 py-4 {{#unless @last}}border-b{{/unless}}">
+            <img src="{{this.product.images.[0]}}" alt="{{this.product.name}}" 
+              class="w-16 h-16 object-cover rounded">
+            <div class="flex-1">
+              <h3 class="font-medium">{{this.product.name}}</h3>
+              <p class="text-sm text-gray-500">Quantity: {{this.quantity}}</p>
+              <p class="text-sm font-medium">₹{{this.subtotal}}</p>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+
+      <!-- Shipping Details -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Shipping Details</h2>
+        <div class="space-y-2">
+          <p class="font-medium">{{order.address.name}}</p>
+          <p class="text-gray-600">{{order.address.addressLine1}}</p>
+          {{#if order.address.addressLine2}}
+            <p class="text-gray-600">{{order.address.addressLine2}}</p>
+          {{/if}}
+          <p class="text-gray-600">
+            {{order.address.city}}, {{order.address.state}} {{order.address.pincode}}
+          </p>
+          <p class="text-gray-600">{{order.address.country}}</p>
+          <p class="text-gray-600 flex items-center mt-2">
+            <span class="mr-2">📞</span>
+            {{order.address.phoneNumber}}
+          </p>
         </div>
       </div>
     </div>
-  </div>
+  </main>
+</div>
 
-  <script>
-   const notyf = new Notyf({
-  duration: 3000,
-  position: { x: 'right', y: 'top' },
-  types: [
-    { type: 'success', background: 'green', duration: 3000 },
-    { type: 'error', background: 'red', duration: 3000 },
-    { type: 'info', background: 'blue', duration: 3000 },
-  ]
-});
-
-function formatDateToDDMMYY(dateString) {
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
-
-async function updateOrderStatus(orderId, status) {
-  try {
-    // Check if order is already delivered
-    const currentStatus = localStorage.getItem(`orderStatus_${orderId}`);
-    if (currentStatus === 'Delivered') {
-      notyf.error('This order has already been delivered!');
-      return;
-    }
-
-    const currentDate = new Date().toISOString();
-    const formattedDate = formatDateToDDMMYY(currentDate);
-
-    const response = await fetch(`/admin/orderDetail/${orderId}/status`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 
-        status,
-        date: currentDate
-      }),
+<script>
+function updateOrderStatus(orderId, newStatus) {
+    return fetch(`/admin/orderDetail/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to update status');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Show success message using Toastify
+            Toastify({
+                text: data.message,
+                duration: 3000,
+                gravity: "bottom",
+                position: "center",
+                backgroundColor: "#4CAF50",
+                className: "custom-toast",
+                stopOnFocus: true
+            }).showToast();
+            
+            // Reload page to show updated status
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            throw new Error(data.message);
+        }
+    })
+    .catch(error => {
+        // Show error message using Toastify
+        Toastify({
+            text: error.message || 'Something went wrong!',
+            duration: 3000,
+            gravity: "bottom",
+            position: "center",
+            backgroundColor: "#f44336",
+        }).showToast();
     });
-
-    const result = await response.json();
-    if (response.ok) {
-      notyf.success(result.message);
-      
-      // Update localStorage with proper template literals
-      localStorage.setItem(`orderStatus_${orderId}`, status);
-      
-      if (status === 'Shipped') {
-        document.getElementById('shipped-date').textContent = formattedDate;
-        localStorage.setItem(`shippedDate_${orderId}`, currentDate);
-      } else if (status === 'Out for Delivery') {
-        document.getElementById('out-for-delivery-date').textContent = formattedDate;
-        localStorage.setItem(`outForDeliveryDate_${orderId}`, currentDate);
-      } else if (status === 'Delivered') {
-        document.getElementById('delivered-date').textContent = formattedDate;
-        localStorage.setItem(`deliveredDate_${orderId}`, currentDate);
-      }
-
-      updateProgressBar(status);
-      
-      setTimeout(() => location.reload(), 2000);
-    } else {
-      notyf.error(result.message || 'Failed to update status');
-    }
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    notyf.error("An error occurred while updating the order status.");
-  }
 }
 
-function updateProgressBar(status) {
-  // Reset all stages to gray and remove ticks (✓)
-  const stages = document.querySelectorAll('.w-8');
-  stages.forEach(stage => {
-    stage.classList.remove('bg-blue-500', 'bg-yellow-500', 'bg-green-500');
-    stage.innerHTML = '•'; // Reset to dot initially
-  });
-
-  // Update the relevant stages based on the status
-  if (status === 'Pending') {
-    stages[0].classList.add('bg-blue-500'); // Pending
-    stages[0].innerHTML = '✓'; // Add tick
-  } else if (status === 'Shipped') {
-    stages[0].classList.add('bg-blue-500');
-    stages[1].classList.add('bg-blue-500'); // Shipped
-    stages[1].innerHTML = '✓'; // Add tick
-  } else if (status === 'Out for Delivery') {
-    stages[0].classList.add('bg-blue-500');
-    stages[1].classList.add('bg-blue-500');
-    stages[2].classList.add('bg-yellow-500'); // Out for Delivery
-    stages[2].innerHTML = '✓'; // Add tick
-  } else if (status === 'Delivered') {
-    stages[0].classList.add('bg-blue-500');
-    stages[1].classList.add('bg-blue-500');
-    stages[2].classList.add('bg-yellow-500');
-    stages[3].classList.add('bg-green-500'); // Delivered
-    stages[3].innerHTML = '✓'; // Add tick
-  }
-}
-
-// On page load, check if there's a stored status and update the progress bar
-window.onload = function() {
-  const orderId = '{{order._id}}';
-  const savedStatus = localStorage.getItem(`orderStatus_${orderId}`);
-  const savedShippedDate = localStorage.getItem(`shippedDate_${orderId}`);
-  const savedOutForDeliveryDate = localStorage.getItem(`outForDeliveryDate_${orderId}`);
-  const savedDeliveredDate = localStorage.getItem(`deliveredDate_${orderId}`);
-
-  if (savedStatus) {
-    updateProgressBar(savedStatus);
-  } else {
-    const initialStatus = '{{order.status}}';
-    updateProgressBar(initialStatus);
-  }
-
-  if (savedShippedDate) {
-    document.getElementById('shipped-date').textContent = formatDateToDDMMYY(savedShippedDate);
-  }
-  if (savedOutForDeliveryDate) {
-    document.getElementById('out-for-delivery-date').textContent = formatDateToDDMMYY(savedOutForDeliveryDate);
-  }
-  if (savedDeliveredDate) {
-    document.getElementById('delivered-date').textContent = formatDateToDDMMYY(savedDeliveredDate);
-  }
-    setInterval(checkOrderStatus, 2 * 60 * 1000);
-}
-  
+// Add click event listeners for status update buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const statusButtons = document.querySelectorAll('[data-status-action]');
+    
+    statusButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.dataset.orderId;
+            const newStatus = this.dataset.statusAction;
+            updateOrderStatus(orderId, newStatus);
+        });
+    });
+});
 </script>

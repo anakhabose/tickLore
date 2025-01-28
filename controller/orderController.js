@@ -58,6 +58,7 @@ loadOrders: async (req, res) => {
                 status: order.status,
                 paymentMethod: order.paymentMethod,
                 paymentStatus: order.paymentStatus,
+                orderStatus: order.status,
                 createdAt: formatDate(order.createdAt)
             };
         }));
@@ -107,27 +108,9 @@ loadViewDetail: async (req, res) => {
             });
         }
 
-        const formatDate = (date) => {
-            if (!date) return null;
-            return new Date(date).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        };
-
-        const formattedOrder = {
-            ...order.toObject(),
-            createdAt: formatDate(order.createdAt),
-            shippedAt: formatDate(order.shippedAt),
-            outForDeliveryAt: formatDate(order.outForDeliveryAt),
-            deliveredAt: formatDate(order.deliveredAt)
-        };
 
         res.render("user/viewDetail", { 
-            order: formattedOrder,
+            order,
             user,
             currentPath: '/orders'
         });

@@ -73,9 +73,9 @@ const orderSchema=new mongoose.Schema({
 })
 
 orderSchema.pre('save', async function(next) {
-  if (this.isNew) { // Only run this when creating a new order
+  if (this.isNew) { 
     try {
-      // Update salesCount for each product in the order
+     
       for (const item of this.items) {
         await productModel.findByIdAndUpdate(
           item.product,

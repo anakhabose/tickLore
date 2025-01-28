@@ -5,7 +5,7 @@
     <div class="container mx-auto px-4 h-full">
       <div class="flex justify-between items-center h-full">
         <div class="flex items-center">
-     <img src="/images/tick1.png" alt="Logo" class="w-64 h-64 ">
+     <img src="/images/logo.png" alt="Logo" class="w-64 h-64 ">
     </div>
         <nav>
           <ul class="flex items-center space-x-8 text-sm font-medium">
@@ -153,7 +153,7 @@
                 return regex.test(email);
             }
     function isValidPassword(password) {
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#$])[A-Za-z\d@$!%*?&#$]{8,}$/;
     if (!strongPasswordRegex.test(password)) {
         Swal.fire({
             title: 'Invalid Password',

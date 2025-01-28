@@ -1,105 +1,122 @@
 {{>header}}
-  <!-- Add this modal markup just after the header -->
-  <div id="addressModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Saved Addresses</h2>
-            <button onclick="closeAddressModal()" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times"></i>
-            </button>
+
+<!-- Add Address Modal -->
+<div id="addressModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
+  <div class="bg-white p-6 rounded w-full max-w-4xl mx-4 sm:mx-0">
+    <h2 id="modalTitle" class="text-xl font-semibold mb-4">Add New Address</h2>
+    <form id="addressForm" novalidate onsubmit="return false;" class="space-y-6">
+      <input type="hidden" id="addressId" />
+      
+      <!-- Name Field -->
+      <div>
+        <label class="block font-medium">Name</label>
+        <input type="text" id="name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+      </div>
+
+      <!-- Address Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">Address Line 1</label>
+          <input type="text" id="addressLine1" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="5" maxlength="100" />
         </div>
-        <div class="grid gap-4">
-            {{#if addresses.length}}
-                {{#each addresses}}
-                <div class="border p-4 rounded-lg hover:border-yellow-500 cursor-pointer"
-                    onclick="selectAddress({{json this}})">
-                    <p class="font-semibold">{{this.name}}</p>
-                    <p>{{this.addressLine1}}</p>
-                    <p>{{this.addressLine2}}</p>
-                    <p>{{this.city}}</p>
-                    <p>{{this.state}}, {{this.country}} - {{this.pincode}}</p>
-                    <p>Phone: {{this.phoneNumber}}</p>
-                </div>
-                {{/each}}
-            {{else}}
-                <p class="text-center text-gray-500">No saved addresses found.</p>
-            {{/if}}
+        <div class="flex-1">
+          <label class="block font-medium">Address Line 2 (Optional)</label>
+          <input type="text" id="addressLine2" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" maxlength="100" />
         </div>
-    </div>
+      </div>
+
+      <!-- City and State Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">City</label>
+          <input type="text" id="city" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">State</label>
+          <input type="text" id="state" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+      </div>
+
+      <!-- Country and Pincode Fields in Same Row -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block font-medium">Country</label>
+          <input type="text" id="country" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required minlength="2" maxlength="50" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium">Pincode</label>
+          <input type="text" id="pincode" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required pattern="^[1-9][0-9]{5}$" />
+        </div>
+      </div>
+
+      <!-- Phone Number Field -->
+      <div>
+        <label class="block font-medium">Phone Number</label>
+        <input type="text" id="phoneNumber" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-yellow-500" required pattern="^[6-9][0-9]{9}$" />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-2">
+        <button type="button" id="cancelBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Save</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-  <div class="flex flex-col md:flex-row min-h-screen bg-gray-50">
+<div class="flex flex-col md:flex-row min-h-screen bg-gray-50">
  
  <div class="container mx-auto p-6 md:p-12">
-       <button id="openAddressModalBtn" class="mb-6 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg flex items-center" onclick="openAddressModal()">
-    <i class="fas fa-map-marker-alt mr-2"></i>
-    Select Saved Address
-</button>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Billing Details -->
             <div>
-                <h2 class="text-2xl font-semibold mb-6">Billing Details</h2>
+                <h2 class="text-2xl font-semibold mb-6">Select Delivery Address</h2>
                 
+                <!-- Add New Address Button -->
+                <button id="addAddressBtn" class="mb-6 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add New Address
+                </button>
 
-                <form id="billing-form" class="space-y-5">
-
-                    <div>
-                        <label for="companyName" class="block font-medium mb-1">Name</label>
-                        <input id="companyName" type="text" class="w-full border rounded-lg px-4 py-2" />
-                    </div>
-
-                    <div>
-                        <label for="streetAddress" class="block font-medium mb-1">Street Address*</label>
-                        <input id="streetAddress" type="text" required class="w-full border rounded-lg px-4 py-2" />
-                    </div>
-
-                    <div>
-                        <label for="apartment" class="block font-medium mb-1">landmark</label>
-                        <input id="apartment" type="text" class="w-full border rounded-lg px-4 py-2" />
-                    </div>
-
-                    <div>
-                        <label for="townCity" class="block font-medium mb-1">City</label>
-                        <input id="townCity" type="text" required class="w-full border rounded-lg px-4 py-2" />
-                    </div>
-                       <div>
-                        <label for="state" class="block font-medium mb-1">Phone Number*</label>
-                        <input id="state" type="text" required class="w-full border rounded-lg px-4 py-2" />
-                    </div>
-                    <div>
-                        <label for="country" class="block font-medium mb-1">Country</label>
-                        <input id="country" type="text" required class="w-full border rounded-lg px-4 py-2" />
-                    </div>
-                    <div>
-                        <label for="pincode" class="block font-medium mb-1">Pin code</label>
-                        <input id="pincode" type="text" required class="w-full border rounded-lg px-4 py-2" />
-                    </div>
-
-                    <div>
-                        <label for="phone" class="block font-medium mb-1">Phone Number</label>
-                        <input id="phone" type="text" required class="w-full border rounded-lg px-4 py-2" value="{{user.phoneNumber}}"/>
-                    </div>
-
-                    <div>
-                        <label for="email" class="block font-medium mb-1">Email Address*</label>
-                        <input id="email" type="email" required 
-                            class="w-full border rounded-lg px-4 py-2"
-                            value="{{user.email}}" />
-                    </div>
-
-                    <div class="flex space-x-4">
-                        {{!-- <!-- Place Order Button moved to a flex container -->
-                        <button type="submit" class="flex-1 px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold" onclick="submitOrder(event)">
-                            Place Order
-                        </button> --}}
-                        
-                        <!-- New Save Address Button -->
-                        <button type="button" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold" onclick="saveAddress(event)">
-                            Save Address
-                        </button>
-                    </div>
-                </form>
+                <!-- Address List -->
+                <div class="space-y-4">
+                    {{#if addresses.length}}
+                        {{#each addresses}}
+                        <div class="border p-4 rounded-lg hover:border-yellow-500 relative">
+                            <div class="flex items-start">
+                                <input type="radio" name="selectedAddress" value="{{this._id}}" 
+                                       class="mt-1 mr-4" required
+                                       data-address='{{json this}}'>
+                                <div class="flex-1">
+                                    <p class="font-semibold">{{this.name}}</p>
+                                    <p>{{this.addressLine1}}</p>
+                                    {{#if this.addressLine2}}
+                                        <p>{{this.addressLine2}}</p>
+                                    {{/if}}
+                                    <p>{{this.city}}, {{this.state}}</p>
+                                    <p>{{this.country}} - {{this.pincode}}</p>
+                                    <p>Phone: {{this.phoneNumber}}</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="openEditModal({{json this}})" 
+                                            class="text-blue-500 hover:text-blue-700">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteAddress('{{this._id}}')"
+                                            class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    {{else}}
+                        <div class="text-center p-4 bg-gray-50 rounded-lg">
+                            <p class="text-gray-500">No addresses found. Please add a new address.</p>
+                        </div>
+                    {{/if}}
+                </div>
             </div>
 
             <!-- Order Summary -->
@@ -152,12 +169,7 @@
                         <div class="mt-6">
                             <h3 class="font-semibold mb-2">Available Coupons</h3>
                             {{#if hasCoupons}}
-                                {{#if hasOfferProducts}}
-                                    <div class="bg-gray-100 rounded-lg p-4 text-center text-gray-600">
-                                        <i class="fas fa-info-circle mr-2"></i>
-                                        Coupons cannot be applied as some products already have offers
-                                    </div>
-                                {{else}}
+                                
                                     <div class="flex space-x-2">
                                         <select id="couponSelect" class="flex-1 border rounded-lg px-4 py-2">
                                             <option value="">Select a Coupon</option>
@@ -176,7 +188,7 @@
                                             Apply
                                         </button>
                                     </div>
-                                {{/if}}
+                               
                             {{else}}
                                 <div class="bg-gray-100 rounded-lg p-4 text-center text-gray-600">
                                     <i class="fas fa-ticket-alt mr-2"></i>
@@ -230,45 +242,7 @@
         </div>
     </div>
 </div>
-      <footer class="bg-black text-white py-10">
-    <div class="container mx-auto grid md:grid-cols-4 gap-8">
-      <div>
-        <h3 class="font-bold text-lg mb-4">Exclusive</h3>
-        <p>Get 10% off your first order</p>
-        <input type="email" placeholder="Enter your email" class="mt-2 p-2 rounded-lg w-full">
-      </div>
-      <div>
-        <h3 class="font-bold text-lg mb-4">Support</h3>
-        <p>111 Kochi,Kerala</p>
-        <p>ticklore@gmail.com</p>
-        <p>+88015-88888-9999</p>
-      </div>
-      <div>
-        <h3 class="font-bold text-lg mb-4">Account</h3>
-        <ul>
-          <li><a href="#" class="hover:text-yellow-500">My Account</a></li>
-          <li><a href="/user/login" class="hover:text-yellow-500">Login </a></li>
-            <li><a href="/user/signup" class="hover:text-yellow-500">Signup</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Cart</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Wishlist</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Shop</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="font-bold text-lg mb-4">Quick Link</h3>
-        <ul>
-          <li><a href="#" class="hover:text-yellow-500">Privacy Policy</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Terms Of Use</a></li>
-          <li><a href="#" class="hover:text-yellow-500">FAQ</a></li>
-          <li><a href="#" class="hover:text-yellow-500">Contact</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="mt-8 text-center">
-      <img src="/images/logo.png" alt="Footer Logo" class="mx-auto h-12">
-      <p class="text-gray-600 mt-4">&copy; Copyright tickLore 2024. All rights reserved</p>
-    </div>
-  </footer>
+    {{>userFooter}}
 
  
 
@@ -595,17 +569,46 @@ async function saveAddress(event) {
     }
 }
 
-// ... existing code ...
-// Submit Order Function
+// Add this function before submitOrder
+async function validateOrderBeforeSubmit() {
+    try {
+        const response = await fetch('/user/validate-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Order Validation Failed',
+                text: data.message,
+                confirmButtonText: 'OK'
+            });
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Validation error:', error);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to validate order. Please try again.',
+            confirmButtonText: 'OK'
+        });
+        return false;
+    }
+}
+
+// Modify the submitOrder function
 async function submitOrder(event) {
     event.preventDefault();
-    const form = document.getElementById('billing-form');
 
-    // Get the selected address data
-    const addressId = form.dataset.addressId;
-    const selectedAddress = form.dataset.selectedAddress ? JSON.parse(form.dataset.selectedAddress) : null;
-
-    if (!addressId || !selectedAddress) {
+    // First check for address selection
+    const selectedAddressRadio = document.querySelector('input[name="selectedAddress"]:checked');
+    if (!selectedAddressRadio) {
         Swal.fire({
             icon: 'warning',
             title: 'Address Required',
@@ -615,6 +618,7 @@ async function submitOrder(event) {
         return;
     }
 
+    // Then check for payment method
     const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
     if (!selectedPaymentMethod) {
         Swal.fire({
@@ -626,28 +630,45 @@ async function submitOrder(event) {
         return;
     }
 
-   
+    // Only proceed with stock validation if address and payment method are selected
+    const isValid = await validateOrderBeforeSubmit();
+    if (!isValid) {
+        return;
+    }
+
+    const selectedAddress = JSON.parse(selectedAddressRadio.dataset.address);
+    const addressId = selectedAddressRadio.value;
     const paymentMethod = selectedPaymentMethod.value;
 
+    // Get coupon information if applied
+    let couponId = null;
+    if (isCouponApplied) {
+        const couponSelect = document.getElementById('couponSelect');
+        if (couponSelect && couponSelect.value) {
+            couponId = couponSelect.value;
+        }
+    }
+
     if (paymentMethod === 'razorpay') {
-        // Create an object with all necessary data
+        // Create payment data object
         const paymentData = {
             address: selectedAddress,
-            couponId: form.dataset.couponId || null,
+            couponId: couponId,
             discountAmount: currentDiscount || 0,
             finalAmount: originalTotal - (currentDiscount || 0)
         };
         initiateRazorpayPayment(originalTotal, paymentData);
         return;
     }
-        // Prepare order data
-        const orderData = {
-            addressId: addressId,
-            paymentMethod: paymentMethod,
-            couponId: form.dataset.couponId || null,
-            discountAmount: currentDiscount || 0,
-            finalAmount: originalTotal - (currentDiscount || 0)
-        };
+
+    // For COD or other payment methods
+    const orderData = {
+        addressId: addressId,
+        paymentMethod: paymentMethod,
+        couponId: couponId,  // Updated to use the local couponId variable
+        discountAmount: currentDiscount || 0,
+        finalAmount: originalTotal - (currentDiscount || 0)
+    };
 
     try {
         const response = await fetch('/user/checkout', {
@@ -658,11 +679,9 @@ async function submitOrder(event) {
             body: JSON.stringify(orderData),
         });
 
-
         const result = await response.json();
 
         if (response.ok) {
-            // Updated success alert with proper options
             await Swal.fire({
                 title: 'Order Placed!',
                 text: 'Thank you for shopping with us.',
@@ -672,7 +691,6 @@ async function submitOrder(event) {
                 allowEscapeKey: false,
                 showConfirmButton: true
             }).then((result) => {
-                // Only redirect if the user clicked the confirm button
                 if (result.isConfirmed) {
                     window.location.href = '/user/orders';
                 }
@@ -697,9 +715,37 @@ async function submitOrder(event) {
 }
 
 // Razorpay Integration
+// Make sure Razorpay is loaded before executing payment code
+function initializePayment() {
+    // Check if Razorpay is loaded
+    if (typeof Razorpay === 'undefined') {
+        console.error('Razorpay not loaded');
+        Swal.fire({
+            icon: 'error',
+            title: 'Payment Error',
+            text: 'Payment system is not properly loaded. Please refresh the page and try again.'
+        });
+        return false;
+    }
+    return true;
+}
+
 function initiateRazorpayPayment(amount, paymentData) {
-    const finalAmount = originalTotal - currentDiscount;
+    // Validate Razorpay initialization
+    if (!initializePayment()) return;
+
+    const finalAmount = originalTotal - (currentDiscount || 0);
     
+    // Validate required data
+    if (!paymentData || !paymentData.address) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Invalid payment data. Please try again.'
+        });
+        return;
+    }
+
     fetch('/user/create-razorpay-order', {
         method: 'POST',
         headers: {
@@ -710,86 +756,85 @@ function initiateRazorpayPayment(amount, paymentData) {
             discountedAmount: finalAmount
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const options = {
-                key: data.key,
-                amount: data.order.amount,
-                currency: "INR",
-                name: "tickLore",
-                description: "Order Payment",
-                order_id: data.order.id,
-                handler: function (response) {
-                    verifyPayment(response, paymentData);
-                },
-                modal: {
-                    ondismiss: async function() {
-                        console.log('Payment modal dismissed. Creating pending order with data:', paymentData);
-                        try {
-                            // Ensure paymentData has all required fields
-                            if (!paymentData || !paymentData.address) {
-                                throw new Error('Invalid payment data');
-                            }
-
-                            const response = await fetch('/user/create-pending-order', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    address: paymentData.address,
-                                    couponId: paymentData.couponId || null,
-                                    discountAmount: paymentData.discountAmount || 0,
-                                    finalAmount: paymentData.finalAmount || originalTotal
-                                })
-                            });
-
-                            if (!response.ok) {
-                                const errorData = await response.json();
-                                throw new Error(errorData.message || 'Failed to create order');
-                            }
-
-                            const result = await response.json();
-                            
-                            if (result.success) {
-                                await Swal.fire({
-                                    title: 'Payment Pending',
-                                    text: 'Your order has been created. You can complete the payment from your orders page.',
-                                    icon: 'info',
-                                    confirmButtonText: 'Go to Orders'
-                                });
-                                window.location.href = '/user/orders';
-                            } else {
-                                throw new Error(result.message);
-                            }
-                        } catch (error) {
-                            console.error('Error creating pending order:', error);
-                            await Swal.fire({
-                                title: 'Error',
-                                text: error.message || 'Failed to create order. Please try again.',
-                                icon: 'error'
-                            });
-                        }
-                    }
-                },
-                prefill: {
-                    name: document.getElementById('companyName').value,
-                    email: document.getElementById('email').value,
-                },
-                theme: {
-                    color: "#3399cc"
-                }
-            };
-            const rzp = new Razorpay(options);
-            rzp.open();
-        } else {
-            handlePaymentError(data.error);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to create payment order');
         }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to create payment order');
+        }
+
+        const options = {
+            key: data.key,
+            amount: data.order.amount,
+            currency: "INR",
+            name: "tickLore",
+            description: "Order Payment",
+            order_id: data.order.id,
+            handler: function (response) {
+                verifyPayment(response, paymentData);
+            },
+            modal: {
+                ondismiss: async function() {
+                    try {
+                        const response = await fetch('/user/create-pending-order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                address: paymentData.address,
+                                couponId: paymentData.couponId || null,
+                                discountAmount: paymentData.discountAmount || 0,
+                                finalAmount: paymentData.finalAmount || originalTotal
+                            })
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            await Swal.fire({
+                                title: 'Payment Pending',
+                                text: 'Your order has been created. You can complete the payment from your orders page.',
+                                icon: 'info',
+                                confirmButtonText: 'Go to Orders'
+                            });
+                            window.location.href = '/user/orders';
+                        } else {
+                            throw new Error(result.message || 'Failed to create pending order');
+                        }
+                    } catch (error) {
+                        console.error('Error creating pending order:', error);
+                        await Swal.fire({
+                            title: 'Error',
+                            text: error.message || 'Failed to create order. Please try again.',
+                            icon: 'error'
+                        });
+                    }
+                }
+            },
+            prefill: {
+                name: document.getElementById('name')?.value || '',
+                email: '', // Add email field if needed
+            },
+            theme: {
+                color: "#3399cc"
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
     })
     .catch(error => {
-        console.error('Error:', error);
-        handlePaymentError("Network error occurred");
+        console.error('Payment initialization error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Payment Error',
+            text: error.message || 'Failed to initialize payment. Please try again.'
+        });
     });
 }
 
@@ -860,4 +905,146 @@ function verifyPayment(response, paymentData) {
     });
 }
 
+// Add the handlePaymentError function
+function handlePaymentError(errorMessage) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Payment Failed',
+        text: errorMessage || 'Something went wrong with the payment. Please try again.',
+        confirmButtonText: 'OK'
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Get DOM elements
+  const addressModal = document.getElementById('addressModal');
+  const addAddressBtn = document.getElementById('addAddressBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const addressForm = document.getElementById('addressForm');
+
+  // Toggle modal visibility
+  const toggleModal = (show) => {
+    addressModal.classList.toggle('hidden', !show);
+  };
+
+  // Event listeners
+  addAddressBtn.addEventListener('click', () => {
+    addressForm.reset();
+    toggleModal(true);
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    toggleModal(false);
+    addressForm.reset();
+  });
+
+  // Form submission handler
+  addressForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    if (!validateForm()) return;
+
+    const formData = {
+      name: document.getElementById('name').value,
+      addressLine1: document.getElementById('addressLine1').value,
+      addressLine2: document.getElementById('addressLine2').value,
+      city: document.getElementById('city').value,
+      state: document.getElementById('state').value,
+      country: document.getElementById('country').value,
+      pincode: document.getElementById('pincode').value,
+      phoneNumber: document.getElementById('phoneNumber').value
+    };
+
+    try {
+      const response = await fetch('/user/addAddress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Address added successfully!',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          toggleModal(false);
+          location.reload(); // Refresh to show new address
+        });
+      } else {
+        throw new Error(data.message || 'Failed to add address');
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Something went wrong!'
+      });
+    }
+  });
+});
+
+// Form validation function
+function validateForm() {
+  const name = document.getElementById('name').value.trim();
+  const addressLine1 = document.getElementById('addressLine1').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const state = document.getElementById('state').value.trim();
+  const country = document.getElementById('country').value.trim();
+  const pincode = document.getElementById('pincode').value.trim();
+  const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+  // Basic validation rules
+  if (name.length < 2) {
+    showError('Name should be at least 2 characters long');
+    return false;
+  }
+
+  if (addressLine1.length < 5) {
+    showError('Please enter a valid address');
+    return false;
+  }
+
+  if (city.length < 2) {
+    showError('Please enter a valid city name');
+    return false;
+  }
+
+  if (state.length < 2) {
+    showError('Please enter a valid state name');
+    return false;
+  }
+
+  if (country.length < 2) {
+    showError('Please enter a valid country name');
+    return false;
+  }
+
+  const pincodeRegex = /^[1-9][0-9]{5}$/;
+  if (!pincodeRegex.test(pincode)) {
+    showError('Please enter a valid 6-digit pincode');
+    return false;
+  }
+
+  const phoneRegex = /^[6-9][0-9]{9}$/;
+  if (!phoneRegex.test(phoneNumber)) {
+    showError('Please enter a valid 10-digit phone number');
+    return false;
+  }
+
+  return true;
+}
+
+function showError(message) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Validation Error',
+    text: message
+  });
+}
 </script>

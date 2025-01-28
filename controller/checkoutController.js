@@ -108,19 +108,21 @@ const checkoutController = {
                 startDate: { $lte: currentDate },
                 endDate: { $gte: currentDate },
                 isBlock: false,
-                status: 'Active',
-                minPurchaseAmount: { $lte: subtotal }
+                status: 'Active'
             });
 
             console.log('Available Coupons:', availableCoupons);
 
             const validCoupons = await Promise.all(availableCoupons.map(async (coupon) => {
                 const canUse = await coupon.canUserUse(userId);
-                return canUse ? coupon : null;
+                // Only return coupons where minPurchaseAmount is less than or equal to the cart total
+                return (canUse && coupon.minPurchaseAmount <= subtotal) ? coupon : null;
             }));
 
-            const filteredCoupons = validCoupons.filter(coupon => coupon !== null);
-            console.log('Filtered Coupons:', filteredCoupons);
+            // Sort coupons by minPurchaseAmount for better display
+            const filteredCoupons = validCoupons
+                .filter(coupon => coupon !== null)
+                .sort((a, b) => a.minPurchaseAmount - b.minPurchaseAmount);
 
      
             const addresses = await Address.find({ userId });
@@ -177,14 +179,42 @@ const checkoutController = {
         if (!addressId || !paymentMethod) {
             return res.status(400).json({ message: "Missing required fields" });
         }
-        if (!paymentMethod) {
-            return res.status(400).json({ message: "Payment method is required" });
-        }
 
-        
+        // Get cart and validate items
         const cart = await Cart.findOne({ userId }).populate('items.productId');
         if (!cart || !cart.items || cart.items.length === 0) {
             return res.status(400).json({ message: "Your cart is empty. Add products before placing an order." });
+        }
+
+        // Validate each item in cart
+        for (const item of cart.items) {
+            // Check if product exists and is not deleted
+            if (!item.productId || item.productId.deleted) {
+                return res.status(400).json({ 
+                    message: `Product ${item.productId ? item.productId.productName : 'Unknown'} is no longer available` 
+                });
+            }
+
+            // Check if product is in stock
+            if (item.productId.stock === 0) {
+                return res.status(400).json({ 
+                    message: `${item.productId.productName} is out of stock` 
+                });
+            }
+
+            // Check if requested quantity is available
+            if (item.quantity > item.productId.stock) {
+                return res.status(400).json({ 
+                    message: `Only ${item.productId.stock} units available for ${item.productId.productName}` 
+                });
+            }
+
+            // Check maximum quantity limit
+            if (item.quantity > 4) {
+                return res.status(400).json({ 
+                    message: `Maximum quantity limit is 4 items for ${item.productId.productName}` 
+                });
+            }
         }
 
         const address = await Address.findById(addressId);
@@ -267,7 +297,7 @@ cancelOrder: async (req, res) => {
             return res.status(404).json({ message: "Order not found" });
         }
 
-      
+        // Restore product stock and update sales count
         for (const item of order.items) {
             await productSchema.findByIdAndUpdate(
                 item.product._id,
@@ -280,8 +310,8 @@ cancelOrder: async (req, res) => {
             );
         }
 
-        
-        if (order.paymentMethod.toLowerCase() !== 'cod') {
+        // Only process refund if payment was successful and method is not COD
+        if (order.paymentMethod.toLowerCase() !== 'cod' && order.paymentStatus === 'Success') {
             let wallet = await Wallet.findOne({ userId });
             if (!wallet) {
                 wallet = new Wallet({
@@ -683,6 +713,66 @@ createPendingOrder: async (req, res) => {
     }
 },
 
+validateOrderBeforePayment: async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const cart = await Cart.findOne({ userId }).populate('items.productId');
+
+        if (!cart || !cart.items || cart.items.length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Your cart is empty" 
+            });
+        }
+
+        const validationResults = await Promise.all(cart.items.map(async (item) => {
+            const product = await productSchema.findById(item.productId._id);
+            
+            if (!product || product.deleted) {
+                return {
+                    valid: false,
+                    message: `Product ${item.productId.productName} is no longer available`
+                };
+            }
+
+            if (product.stock === 0) {
+                return {
+                    valid: false,
+                    message: `${product.productName} is out of stock`
+                };
+            }
+
+            if (item.quantity > product.stock) {
+                return {
+                    valid: false,
+                    message: `Only ${product.stock} units available for ${product.productName}`
+                };
+            }
+
+            return { valid: true };
+        }));
+
+        const invalidItems = validationResults.filter(result => !result.valid);
+        if (invalidItems.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: invalidItems[0].message
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "All items are available"
+        });
+
+    } catch (error) {
+        console.error('Validation error:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Error validating order"
+        });
+    }
+}
 
 }
 module.exports = checkoutController;

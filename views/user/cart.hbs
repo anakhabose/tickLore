@@ -243,22 +243,39 @@ function validateAndUpdateQuantity(inputElement) {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message === 'Cart updated successfully') {
-                    
+                if (data.success) {
                     const quantityInput = document.querySelector(`input[data-product-id="${productId}"]`);
                     if (quantityInput) {
                         quantityInput.setAttribute('data-original-quantity', quantity.toString());
                     }
                     window.location.reload();
-                } else if (data.redirect) {
-                    handleAuthError(data);
-                } 
-                else {
-                    throw new Error(data.message || 'Failed to update cart');
+                } else {
+                    // Show error message using SweetAlert
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Update Failed',
+                        text: data.message,
+                        showConfirmButton: true
+                    });
+                    
+                    // Reset the quantity input to available stock if provided
+                    if (data.availableStock) {
+                        const input = document.querySelector(`input[data-product-id="${productId}"]`);
+                        if (input) {
+                            input.value = data.availableStock;
+                            validateAndUpdateQuantity(input);
+                        }
+                    }
                 }
             })
             .catch(error => {
-                console.error(error);
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to update cart. Please try again.',
+                    showConfirmButton: true
+                });
             });
         }
 

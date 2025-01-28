@@ -54,6 +54,7 @@ router.get('/viewDetail/:id',userAuth.checkSession,orderController.loadViewDetai
 
 router.get('/checkout', userAuth.checkSession, checkoutController.loadCheckout);
 router.post('/checkout',userAuth.checkSession, checkoutController.placeOrder);
+router.post('/validate-order', userAuth.checkSession, checkoutController.validateOrderBeforePayment);
 
 
 router.post('/cancelOrder/:id',userAuth.checkSession,checkoutController.cancelOrder);

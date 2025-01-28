@@ -119,8 +119,42 @@
     </div>
 </section>
 
+
 <!-- Latest Releases Section -->
 <section class="py-16 bg-gray-100">
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">latestProducts</h1>
+     
+    </div>
+   
+   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {{#each latestProducts}}
+            <div class="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-[400px]">
+                <!-- Image Container with Zoom Effect -->
+                <div class="relative h-[280px] overflow-hidden">
+                    <img 
+                        src="{{this.images.[0]}}" 
+                        alt="{{this.name}}" 
+                        class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                    >
+                    <!-- Hover Overlay with View Button -->
+                    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <a href="/user/viewProducts/{{this._id}}" class="bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transform hover:scale-105 transition-all">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                <!-- Product Info -->
+                <div class="p-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2 truncate">{{this.name}}</h3>
+                    <div class="flex justify-between items-center">
+                        <p class="text-lg font-bold text-gray-900">₹{{this.price}}</p>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
     <div class="container mx-auto px-4">
         {{!-- <h2 class="text-4xl font-bold text-center mb-12">Top Products</h2> --}}
         {{!-- <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">

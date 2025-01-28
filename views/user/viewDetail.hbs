@@ -1,164 +1,179 @@
    {{>header}}
-  <div class="w-full min-h-screen bg-gray-100 py-12">
-    
-    <div class="max-w-6xl mx-auto p-10 bg-white shadow rounded-lg">
-      <!-- Add button at the top -->
-      <div class="flex justify-end mb-8">
-        <button id="downloadInvoiceBtn" data-orderid="{{order._id}}" 
-          class="px-4 py-2 bg-blue-500 text-white text-lg font-semibold rounded-lg 
-          shadow-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-400">
-          Download Invoice
-        </button>
+  <div class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-bold text-gray-900">Order Details</h1>
+          <div class="flex items-center space-x-4">
+            <!-- Download Invoice Button -->
+            <button id="downloadInvoiceBtn" data-orderid="{{order._id}}" 
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+              Download Invoice
+            </button>
+            <!-- Status Badge -->
+            <span class="px-4 py-2 rounded-full text-sm font-semibold
+              {{#if (eq order.status 'Pending')}}bg-yellow-100 text-yellow-800
+              {{else if (eq order.status 'Shipped')}}bg-blue-100 text-blue-800
+              {{else if (eq order.status 'Out for Delivery')}}bg-purple-100 text-purple-800
+              {{else if (eq order.status 'Delivered')}}bg-green-100 text-green-800
+              {{else}}bg-red-100 text-red-800{{/if}}">
+              {{order.status}}
+            </span>
+          </div>
+        </div>
       </div>
+    </header>
 
-      <!-- Order Summary Section -->
-      
-      <div class="mb-12">
-        <h2 class="text-2xl font-semibold mb-8">Order Summary</h2>
-        
-        <div class="grid grid-cols-12 gap-8 items-start">
-          {{#each order.items}}
-            <div class="col-span-4">
-                <img src="{{product.images.[0]}}" alt="Product Name" class="w-48 h-48 object-cover rounded-lg shadow-md">
-            </div>
-            <div class="col-span-8">
-                <h3 class="text-xl font-semibold">{{product.name}}</h3>
-                <p class="text-md text-gray-700 mt-4">Price: ₹{{subtotal}}</p>
-                <p class="text-md text-gray-700">Quantity: {{quantity}}</p>
-            </div>
-         {{/each}} 
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <!-- Order Info -->
+      <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <div class="border-b pb-6 mb-6">
+          <h2 class="text-xl font-semibold">Order #{{order._id}}</h2>
+          <p class="text-sm text-gray-500 mt-1">Ordered on: {{formatDate order.createdAt}}</p>
         </div>
 
-        <!-- Add Total Amount -->
-        <div class="mt-8 text-right">
-          <p class="text-xl font-semibold">Total Amount: ₹{{order.total}}</p>
-        </div>
-      </div>
-  
-      <!-- Shipping Address Section -->
-      <div class="mb-12">
-        <h2 class="text-2xl font-semibold mb-8">Shipping Address</h2>
-        <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
-          <p class="text-lg text-gray-800 font-medium">{{order.address.name}}</p>
-          <p class="text-lg text-gray-600">{{order.address.addressLine1}}</p>
-          <p class="text-lg text-gray-600">{{order.address.addressLine2}}</p>
-          <p class="text-lg text-gray-600">{{order.address.city}}, {{order.address.state}}, {{order.address.pincode}}</p>
-          <p class="text-lg text-gray-600">{{order.address.country}}</p>
-          <p class="text-lg text-gray-600">Phone:  {{order.address.phoneNumber}}</p>
-        </div>
-      </div>
-  
-      <!-- Order Tracking Section -->
-      <div class="mb-12">
-        <h2 class="text-2xl font-semibold mb-8">Order Tracking</h2>
-        <div class="relative px-8">
-          <div class="absolute inset-0 h-1 bg-gray-300"></div>
-          <div class="flex justify-between items-center relative z-10">
-            <!-- Pending -->
+        <!-- Status Tracker -->
+        <div class="relative mb-8">
+          <!-- Progress Bar -->
+          <div class="h-1 bg-gray-200 absolute w-full top-5"></div>
+          <div class="h-1 bg-green-500 absolute transition-all duration-500
+            {{#if (eq order.status 'Delivered')}}w-full
+            {{else if (eq order.status 'Out for Delivery')}}w-3/4
+            {{else if (eq order.status 'Shipped')}}w-1/2
+            {{else}}w-1/4{{/if}}
+            top-5">
+          </div>
+
+          <!-- Status Steps -->
+          <div class="flex justify-between relative">
+            <!-- Ordered -->
             <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center 
-                {{#if (eq order.status 'Pending') }}bg-yellow-500
-                {{else}}bg-gray-400{{/if}} text-white text-xl">
-                ✓
+              <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+                {{#if order.createdAt}}
+                  bg-green-500 border-green-500 text-white
+                {{else}}
+                  border-gray-300 bg-white text-gray-300
+                {{/if}}">
+                📦
               </div>
-              <span class="mt-4 text-lg font-medium">Pending</span>
-              <span class="text-sm text-gray-500">{{formatDate order.createdAt}}</span>
+              <p class="text-sm mt-2 font-medium">Ordered</p>
+              {{#if order.createdAt}}
+                <p class="text-xs text-gray-500">{{formatDate order.createdAt}}</p>
+              {{/if}}
             </div>
 
             <!-- Shipped -->
             <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center 
-                {{#if (or (eq order.status 'Shipped') (eq order.status 'Out for Delivery') (eq order.status 'Delivered') (eq order.status 'Returned'))}}
-                  bg-blue-500
+              <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+                {{#if (or (eq order.status 'Shipped') (eq order.status 'Out for Delivery') (eq order.status 'Delivered'))}}
+                  bg-green-500 border-green-500 text-white
                 {{else}}
-                  bg-gray-400
-                {{/if}} text-white text-xl">
-                ✓
+                  border-gray-300 bg-white text-gray-300
+                {{/if}}">
+                🚚
               </div>
-              <span class="mt-4 text-lg font-medium">Shipped</span>
-              <span class="text-sm text-gray-500">
-                {{#if order.shippedAt}}
-                  {{formatDate order.shippedAt}}
-                {{else}}
-                  --
-                {{/if}}
-              </span>
+              <p class="text-sm mt-2 font-medium">Shipped</p>
+              {{#if order.shippedAt}}
+                <p class="text-xs text-gray-500">{{formatDate order.shippedAt}}</p>
+              {{/if}}
             </div>
 
             <!-- Out for Delivery -->
             <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center 
-                {{#if (or (eq order.status 'Out for Delivery') (eq order.status 'Delivered') (eq order.status 'Returned'))}}
-                  bg-yellow-500
+              <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+                {{#if (or (eq order.status 'Out for Delivery') (eq order.status 'Delivered'))}}
+                  bg-green-500 border-green-500 text-white
                 {{else}}
-                  bg-gray-400
-                {{/if}} text-white text-xl">
-                ✓
+                  border-gray-300 bg-white text-gray-300
+                {{/if}}">
+                🛵
               </div>
-              <span class="mt-4 text-lg font-medium">Out for Delivery</span>
-              <span class="text-sm text-gray-500">
-                {{#if order.outForDeliveryAt}}
-                  {{formatDate order.outForDeliveryAt}}
-                {{else}}
-                  --
-                {{/if}}
-              </span>
+              <p class="text-sm mt-2 font-medium">Out for Delivery</p>
+              {{#if order.outForDeliveryAt}}
+                <p class="text-xs text-gray-500">{{formatDate order.outForDeliveryAt}}</p>
+              {{/if}}
             </div>
 
-            <!-- Delivered/Returned -->
+            <!-- Delivered -->
             <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center 
-                {{#if (eq order.status 'Delivered') }}bg-green-500
-                {{else if (eq order.status 'Returned') }}bg-red-500
-                {{else}}bg-gray-400{{/if}} text-white text-xl">
-                {{#if (eq order.status 'Returned') }}R
-                {{else if (or (eq order.status 'Delivered') (eq order.status 'Returned')) }}✓
-                {{else}}•{{/if}}
-              </div>
-              <span class="mt-4 text-lg font-medium">
-                {{#if (eq order.status 'Returned') }}Returned{{else}}Delivered{{/if}}
-              </span>
-              <span class="text-sm text-gray-500">
-                {{#if (eq order.status 'Returned')}}
-                  {{formatDate order.returnedAt}}
-                {{else if order.deliveredAt}}
-                  {{formatDate order.deliveredAt}}
+              <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center
+                {{#if (eq order.status 'Delivered')}}
+                  bg-green-500 border-green-500 text-white
                 {{else}}
-                  --
-                {{/if}}
-              </span>
+                  border-gray-300 bg-white text-gray-300
+                {{/if}}">
+                ✅
+              </div>
+              <p class="text-sm mt-2 font-medium">Delivered</p>
+              {{#if order.deliveredAt}}
+                <p class="text-xs text-gray-500">{{formatDate order.deliveredAt}}</p>
+              {{/if}}
             </div>
           </div>
         </div>
-      </div>
-  
-      <!-- Additional Order Details Section -->
-      <div class="mb-12">
-        <h2 class="text-2xl font-semibold mb-8">Order Details</h2>
-        <div class="text-lg text-gray-700">
-          <p>Order Date: {{order.createdAt}}</p>
-          <p>Payment Method: {{order.paymentMethod}}</p>
-          <p>Order ID: {{order._id}}</p>
+
+        <!-- Action Button -->
+        <div class="flex justify-end space-x-4">
+          {{#if (eq order.status "Delivered")}}         
+            <button id="returnOrderBtn" data-orderid="{{order._id}}" 
+              class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+              Return Order
+            </button>
+          {{else}}
+            {{#unless (or (eq order.status "Cancelled") (eq order.status "Returned"))}}
+              <button id="cancelOrderBtn" data-orderid="{{order._id}}" 
+                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                Cancel Order
+              </button>
+            {{/unless}}
+          {{/if}}
         </div>
       </div>
-  
-      <div class="text-center">
-        {{#if (eq order.status "Delivered")}}         
-            <button id="returnOrderBtn" data-orderid="{{order._id}}" class="px-4 py-2 bg-red-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400">
-                Return Order
-            </button>
-        {{else if (eq order.status "Cancelled")}}
-            <span class="px-4 py-2 bg-red-100 text-red-600 text-xl font-bold rounded-lg inline-block">Order Cancelled</span>
-        {{else if (eq order.status "Returned")}}
-            <span class="px-4 py-2 bg-red-50 text-red-600 text-xl font-bold rounded-lg inline-block">Order Returned</span>
-        {{else}}
-            <button id="cancelOrderBtn" data-orderid="{{order._id}}" class="px-4 py-2 bg-red-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-400">
-                Cancel Order
-            </button>
-            
-        {{/if}}
+
+      <!-- Order Details Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Products -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+          {{#each order.items}}
+            <div class="flex items-center space-x-4 py-4 {{#unless @last}}border-b{{/unless}}">
+              <img src="{{this.product.images.[0]}}" alt="{{this.product.name}}" 
+                class="w-16 h-16 object-cover rounded">
+              <div class="flex-1">
+                <h3 class="font-medium">{{this.product.name}}</h3>
+                <p class="text-sm text-gray-500">Quantity: {{this.quantity}}</p>
+                <p class="text-sm font-medium">₹{{this.subtotal}}</p>
+              </div>
+            </div>
+          {{/each}}
+          <div class="mt-4 pt-4 border-t">
+            <p class="text-lg font-semibold text-right">Total: ₹{{order.total}}</p>
+          </div>
+        </div>
+
+        <!-- Shipping Details -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">Shipping Details</h2>
+          <div class="space-y-2">
+            <p class="font-medium">{{order.address.name}}</p>
+            <p class="text-gray-600">{{order.address.addressLine1}}</p>
+            {{#if order.address.addressLine2}}
+              <p class="text-gray-600">{{order.address.addressLine2}}</p>
+            {{/if}}
+            <p class="text-gray-600">
+              {{order.address.city}}, {{order.address.state}} {{order.address.pincode}}
+            </p>
+            <p class="text-gray-600">{{order.address.country}}</p>
+            <p class="text-gray-600 flex items-center mt-2">
+              <span class="mr-2">📞</span>
+              {{order.address.phoneNumber}}
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
   {{>userFooter}}
   <!-- Add this modal HTML before the closing body tag -->

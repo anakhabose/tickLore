@@ -187,15 +187,7 @@
 
             if (response.ok) {
                 // First remove from wishlist
-                await fetch(`/user/removeFromWishlist/${productId}`, {
-                    method: 'DELETE'
-                });
-
-                // Find and remove the product card with animation
-                const productCard = document.querySelector(`button[onclick="addToCart('${productId}')"]`).closest('.bg-white');
-                productCard.style.transition = 'opacity 0.3s ease-out';
-                productCard.style.opacity = '0';
-
+               
                 const result = await Swal.fire({
                     icon: 'success',
                     title: 'Added to Cart!',

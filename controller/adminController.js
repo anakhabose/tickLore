@@ -376,8 +376,16 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
        const userId = req.params.id;
 
         try {
-            await userModel.findByIdAndUpdate(req.params.id, { status: false });
-            res.redirect('/admin/customers');
+             const user = await userModel.findByIdAndUpdate(userId, { status: false }, { new: true });
+
+            if (!user) {
+                return res.status(404).send('User not found');
+            }
+
+            if (req.session.user && req.session.user._id === userId) {
+                req.session.user = null; 
+            }
+        res.redirect('/admin/customers');
         } catch (err) {
             console.error(err);
             res.status(500).send('Error blocking user');
@@ -418,6 +426,7 @@ loadProducts: async (req, res) => {
         
      
         const productDetails = await productModel.find(searchQuery)
+            .populate('category', 'categoryName')
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 });
@@ -912,27 +921,53 @@ loadSalesReport: async (req, res) => {
         try {
             console.log('Starting PDF generation...');
             
-           
+            // Get filter parameters
+            const { filterType, startDate, endDate } = req.query;
+            let query = {
+                status: { $nin: ['Cancelled', 'Returned'] }
+            };
+
+            // Apply filters
+            if (filterType) {
+                const now = new Date();
+                switch (filterType) {
+                    case 'day':
+                        query.createdAt = {
+                            $gte: new Date(now.setHours(0,0,0,0)),
+                            $lt: new Date(now.setHours(23,59,59,999))
+                        };
+                        break;
+                    case 'week':
+                        const weekStart = new Date(now);
+                        weekStart.setDate(now.getDate() - now.getDay());
+                        query.createdAt = {
+                            $gte: new Date(weekStart.setHours(0,0,0,0)),
+                            $lt: new Date()
+                        };
+                        break;
+                    case 'month':
+                        query.createdAt = {
+                            $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                            $lt: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+                        };
+                        break;
+                }
+            } else if (startDate && endDate) {
+                query.createdAt = {
+                    $gte: new Date(startDate),
+                    $lt: new Date(new Date(endDate).setHours(23,59,59,999))
+                };
+            }
+
             const doc = new PDFDocument();
-            console.log('PDF document created');
-            
-            
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename=sales-report-${new Date().toISOString().split('T')[0]}.pdf`);
-            
-           
             doc.pipe(res);
-            
-         
-            console.log('Fetching orders...');
-            const orders = await orderModel.find({
-                status: { $nin: ['Cancelled', 'Returned'] }
-            })
-            .populate('userId', 'name')
-            .populate('items.product', 'productName price')
-            .lean();
-            
-            console.log(`Found ${orders.length} orders`);
+
+            const orders = await orderModel.find(query)
+                .populate('userId', 'name')
+                .populate('items.product', 'productName price')
+                .lean();
 
             doc.fontSize(20)
                .text('Sales Report', { align: 'center' })
@@ -994,10 +1029,47 @@ loadSalesReport: async (req, res) => {
 
     exportSalesReportExcel: async (req, res) => {
         try {
-            const orders = await orderModel.find({
+            // Get filter parameters
+            const { filterType, startDate, endDate } = req.query;
+            let query = {
                 status: { $nin: ['Cancelled', 'Returned'] }
-            }).populate('userId', 'name')
-              .populate('items.product', 'productName price');
+            };
+
+            // Apply filters
+            if (filterType) {
+                const now = new Date();
+                switch (filterType) {
+                    case 'day':
+                        query.createdAt = {
+                            $gte: new Date(now.setHours(0,0,0,0)),
+                            $lt: new Date(now.setHours(23,59,59,999))
+                        };
+                        break;
+                    case 'week':
+                        const weekStart = new Date(now);
+                        weekStart.setDate(now.getDate() - now.getDay());
+                        query.createdAt = {
+                            $gte: new Date(weekStart.setHours(0,0,0,0)),
+                            $lt: new Date()
+                        };
+                        break;
+                    case 'month':
+                        query.createdAt = {
+                            $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                            $lt: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+                        };
+                        break;
+                }
+            } else if (startDate && endDate) {
+                query.createdAt = {
+                    $gte: new Date(startDate),
+                    $lt: new Date(new Date(endDate).setHours(23,59,59,999))
+                };
+            }
+
+            const orders = await orderModel.find(query)
+                .populate('userId', 'name')
+                .populate('items.product', 'productName price');
 
             const processedOrders = orders.map(order => {
                

@@ -285,7 +285,7 @@
       return false;
     }
 
-    const phoneRegex = /^[6-9][0-9]{9}$/;
+    const phoneRegex = /^[1-9][0-9]{9}$/;
     if (!phoneRegex.test(phoneNumber)) {
       showError('Please enter a valid 10-digit phone number');
       return false;
