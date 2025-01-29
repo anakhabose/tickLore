@@ -66,70 +66,59 @@ module.exports = {
 
             console.log("Product query:", query); 
 
-            let sortCriteria = {};
-            if (sortOption === "priceAsc") {
-                sortCriteria = { 
-                    $sort: {
-                        $cond: {
-                            if: { $eq: ["$discountedPrice", null] },
-                            then: "$price",
-                            else: "$discountedPrice"
-                        }
-                    }
-                };
-            } else if (sortOption === "priceDesc") {
-                sortCriteria = { 
-                    $sort: {
-                        $cond: {
-                            if: { $eq: ["$discountedPrice", null] },
-                            then: "$price",
-                            else: "$discountedPrice"
-                        }
-                    }
-                };
-            } else if (sortOption === "newArrivals") {
-                sortCriteria = { createdAt: -1 };
-            } else if (sortOption === "aToZ") {
-                sortCriteria = { productName: 1 };
-            } else if (sortOption === "zToA") {
-                sortCriteria = { productName: -1 };
-            }
-
-     
-           
             const products = await Product.aggregate([
                 { $match: query },
                 {
                     $addFields: {
                         effectivePrice: {
-                            $ifNull: ["$discountedPrice", "$price"]
+                            $convert: {
+                                input: {
+                                    $cond: {
+                                        if: { 
+                                            $and: [
+                                                { $ne: ["$discountedPrice", null] },
+                                                { $ne: ["$discountedPrice", 0] }
+                                            ]
+                                        },
+                                        then: "$discountedPrice",
+                                        else: "$price"
+                                    }
+                                },
+                                to: "decimal"
+                            }
                         }
                     }
                 },
                 {
-                    $sort: sortOption === "priceAsc" 
-                        ? { effectivePrice: 1 }
-                        : sortOption === "priceDesc"
-                        ? { effectivePrice: -1 }
-                        : sortOption === "newArrivals"
-                        ? { createdAt: -1 }
-                        : sortOption === "aToZ"
-                        ? { productName: 1 }
-                        : sortOption === "zToA"
-                        ? { productName: -1 }
-                        : { createdAt: -1 }
+                    $sort: (() => {
+                        switch(sortOption) {
+                            case "priceAsc":
+                                return { effectivePrice: 1 };
+                            case "priceDesc":
+                                return { effectivePrice: -1 };
+                            case "newArrivals":
+                                return { createdAt: -1 };
+                            case "aToZ":
+                                return { productName: 1 };
+                            case "zToA":
+                                return { productName: -1 };
+                            default:
+                                return { createdAt: -1 };
+                        }
+                    })()
                 },
                 { $skip: skip },
                 { $limit: limit }
             ]);
 
-            // Debug logging
+            // Add detailed debug logging
             console.log("Sort Option:", sortOption);
             console.log("Products after sort:", products.map(p => ({
                 name: p.productName,
                 price: p.price,
                 discountedPrice: p.discountedPrice,
-                effectivePrice: p.effectivePrice
+                effectivePrice: p.effectivePrice,
+                type: typeof p.effectivePrice
             })));
 
             // Since we used aggregate, we need to populate category separately

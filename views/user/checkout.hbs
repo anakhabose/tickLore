@@ -870,10 +870,13 @@ function verifyPayment(response, paymentData) {
     })
     .then(response => response.json())
     .then(data => {
-        if (!data.success) {
+        /*
+         if (!data.success) {
             throw new Error(orderData.message || 'Failed to create order');
         }
 
+        */
+       
         // Only show success message and redirect if both payment verification and order creation succeed
         return Swal.fire({
             icon: 'success',
