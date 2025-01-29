@@ -142,7 +142,7 @@ const checkoutController = {
                 totalAmount: Math.round(totalAmount).toFixed(2),
                 addresses,
                 hasOfferProducts,
-                hasCoupons: filteredCoupons.length > 0 && !hasOfferProducts,
+                hasCoupons: filteredCoupons.length > 0,
                 availableCoupons: filteredCoupons,
                 isCodAvailable,
                 cartCount,
