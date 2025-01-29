@@ -163,19 +163,8 @@
    searchInput.addEventListener('input', () => {
        clearTimeout(debounceTimer);
        debounceTimer = setTimeout(() => {
-           const query = searchInput.value;
-           // Reset to page 1 when searching
-           fetch(`/admin/products?search=${encodeURIComponent(query)}&page=1`)
-               .then(response => response.text())
-               .then(html => {
-                   // Parse the response to update the table
-                   const parser = new DOMParser();
-                   const doc = parser.parseFromString(html, 'text/html');
-                   const newTableBody = doc.querySelector('.user-table tbody');
-                   userTable.innerHTML = newTableBody.innerHTML;
-               })
-               .catch(error => console.error('Error during search:', error));
-       }, 300); // Adjust debounce delay as needed
+           document.getElementById('searchForm').submit();
+       }, 300);
    });
    
 
@@ -234,7 +223,7 @@
         });
     }
   });
-}
+
 
     function blockCoupon(couponId) {
         Swal.fire({
@@ -247,32 +236,38 @@
             confirmButtonText: 'Block'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`/admin/blockCoupon/${couponId}`, { method: 'PATCH' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: data.message
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: data.message
-                            });
-                        }
-                    })
-                    .catch(error => {
+                fetch(`/admin/blockCoupon/${couponId}`, { 
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: data.message
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Something went wrong!'
+                            text: data.message
                         });
+                    }
+                })
+                .catch(error => {
+                    console.error('Block error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong!'
                     });
+                });
             }
         });
     }
@@ -288,32 +283,38 @@
             confirmButtonText: 'Unblock'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`/admin/unblockCoupon/${couponId}`, { method: 'PATCH' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: data.message
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: data.message
-                            });
-                        }
-                    })
-                    .catch(error => {
+                fetch(`/admin/unblockCoupon/${couponId}`, { 
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: data.message
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Something went wrong!'
+                            text: data.message
                         });
+                    }
+                })
+                .catch(error => {
+                    console.error('Unblock error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong!'
                     });
+                });
             }
         });
     }

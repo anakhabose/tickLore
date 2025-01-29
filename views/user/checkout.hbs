@@ -4,7 +4,7 @@
 <div id="addressModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
   <div class="bg-white p-6 rounded w-full max-w-4xl mx-4 sm:mx-0">
     <h2 id="modalTitle" class="text-xl font-semibold mb-4">Add New Address</h2>
-    <form id="addressForm" novalidate onsubmit="return false;" class="space-y-6">
+    <form id="addressForm" class="space-y-6">
       <input type="hidden" id="addressId" />
       
       <!-- Name Field -->
@@ -58,7 +58,7 @@
       <!-- Action Buttons -->
       <div class="flex justify-end space-x-2">
         <button type="button" id="cancelBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
-        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Save</button>
+        <button type="button" id="saveAddressBtn" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Save Address</button>
       </div>
     </form>
   </div>
@@ -922,6 +922,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelBtn = document.getElementById('cancelBtn');
   const addressForm = document.getElementById('addressForm');
 
+  // Remove any existing onsubmit attribute from the form
+  addressForm.removeAttribute('onsubmit');
+
   // Toggle modal visibility
   const toggleModal = (show) => {
     addressModal.classList.toggle('hidden', !show);
@@ -930,6 +933,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event listeners
   addAddressBtn.addEventListener('click', () => {
     addressForm.reset();
+    document.getElementById('modalTitle').textContent = 'Add New Address';
+    document.getElementById('addressId').value = ''; // Clear any existing ID
     toggleModal(true);
   });
 
@@ -938,113 +943,190 @@ document.addEventListener('DOMContentLoaded', () => {
     addressForm.reset();
   });
 
-  // Form submission handler
-  addressForm.addEventListener('submit', async (event) => {
+  // Validation function
+  function validateForm() {
+    const name = document.getElementById('name').value.trim();
+    const addressLine1 = document.getElementById('addressLine1').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const pincode = document.getElementById('pincode').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+    // Name validation (2-20 characters)
+    if (!name || name.length < 2 || name.length > 20) {
+      showError('Name must be between 2 and 20 characters');
+      return false;
+    }
+
+    // Address validation (5-30 characters)
+    if (!addressLine1 || addressLine1.length < 5 || addressLine1.length > 30) {
+      showError('Address must be between 5 and 30 characters');
+      return false;
+    }
+
+    // City validation (2-15 characters)
+    if (!city || city.length < 2 || city.length > 15) {
+      showError('City must be between 2 and 15 characters');
+      return false;
+    }
+
+    // State validation (2-15 characters)
+    if (!state || state.length < 2 || state.length > 15) {
+      showError('State must be between 2 and 15 characters');
+      return false;
+    }
+
+    // Country validation (2-15 characters)
+    if (!country || country.length < 2 || country.length > 15) {
+      showError('Country must be between 2 and 15 characters');
+      return false;
+    }
+
+    // Pincode validation (6 digits, starting with non-zero)
+    const pincodeRegex = /^[1-9][0-9]{5}$/;
+    if (!pincodeRegex.test(pincode)) {
+      showError('Please enter a valid 6-digit pincode');
+      return false;
+    }
+
+    // Phone number validation (10 digits, starting with 6-9)
+    const phoneRegex = /^[1-9][0-9]{9}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      showError('Please enter a valid 10-digit phone number');
+      return false;
+    }
+
+    return true;
+  }
+
+  function showError(message) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error',
+      text: message,
+      confirmButtonColor: '#EF4444'
+    });
+  }
+
+  // Handle form submission
+  document.getElementById('saveAddressBtn').addEventListener('click', async (event) => {
     event.preventDefault();
+    event.stopPropagation();
     
     if (!validateForm()) return;
 
     const formData = {
-      name: document.getElementById('name').value,
-      addressLine1: document.getElementById('addressLine1').value,
-      addressLine2: document.getElementById('addressLine2').value,
-      city: document.getElementById('city').value,
-      state: document.getElementById('state').value,
-      country: document.getElementById('country').value,
-      pincode: document.getElementById('pincode').value,
-      phoneNumber: document.getElementById('phoneNumber').value
+        name: document.getElementById('name').value.trim(),
+        addressLine1: document.getElementById('addressLine1').value.trim(),
+        addressLine2: document.getElementById('addressLine2').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        state: document.getElementById('state').value.trim(),
+        country: document.getElementById('country').value.trim(),
+        pincode: document.getElementById('pincode').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim()
     };
 
     try {
-      const response = await fetch('/user/addAddress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Address added successfully!',
-          confirmButtonText: 'OK'
-        }).then(() => {
-          toggleModal(false);
-          location.reload(); // Refresh to show new address
+        const addressId = document.getElementById('addressId').value;
+        const isEditing = addressId ? true : false;
+        
+        const url = isEditing 
+            ? `/user/editAddress/${addressId}`
+            : '/user/addAddress';
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
         });
-      } else {
-        throw new Error(data.message || 'Failed to add address');
-      }
+
+        const data = await response.json();
+
+        if (response.ok) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: `Address ${isEditing ? 'updated' : 'added'} successfully!`,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#10B981'
+            });
+            
+            // Close modal and refresh page to show new address
+            toggleModal(false);
+            location.reload();
+        } else {
+            throw new Error(data.message || 'Failed to save address');
+        }
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.message || 'Something went wrong!'
-      });
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Something went wrong!',
+            confirmButtonColor: '#EF4444'
+        });
     }
   });
+
+  // Function to handle address editing
+  window.openEditModal = function(address) {
+    document.getElementById('modalTitle').textContent = 'Edit Address';
+    document.getElementById('addressId').value = address._id;
+    document.getElementById('name').value = address.name;
+    document.getElementById('addressLine1').value = address.addressLine1;
+    document.getElementById('addressLine2').value = address.addressLine2 || '';
+    document.getElementById('city').value = address.city;
+    document.getElementById('state').value = address.state;
+    document.getElementById('country').value = address.country;
+    document.getElementById('pincode').value = address.pincode;
+    document.getElementById('phoneNumber').value = address.phoneNumber;
+    
+    toggleModal(true);
+  };
+
+  // Function to handle address deletion
+  window.deleteAddress = async function(addressId) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#EF4444',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/user/deleteAddress/${addressId}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Your address has been deleted.',
+            confirmButtonColor: '#10B981'
+          });
+          location.reload();
+        } else {
+          throw new Error(data.message || 'Failed to delete address');
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Something went wrong!',
+          confirmButtonColor: '#EF4444'
+        });
+      }
+    }
+  };
 });
-
-// Form validation function
-function validateForm() {
-  const name = document.getElementById('name').value.trim();
-  const addressLine1 = document.getElementById('addressLine1').value.trim();
-  const city = document.getElementById('city').value.trim();
-  const state = document.getElementById('state').value.trim();
-  const country = document.getElementById('country').value.trim();
-  const pincode = document.getElementById('pincode').value.trim();
-  const phoneNumber = document.getElementById('phoneNumber').value.trim();
-
-  // Basic validation rules
-  if (name.length < 2) {
-    showError('Name should be at least 2 characters long');
-    return false;
-  }
-
-  if (addressLine1.length < 5) {
-    showError('Please enter a valid address');
-    return false;
-  }
-
-  if (city.length < 2) {
-    showError('Please enter a valid city name');
-    return false;
-  }
-
-  if (state.length < 2) {
-    showError('Please enter a valid state name');
-    return false;
-  }
-
-  if (country.length < 2) {
-    showError('Please enter a valid country name');
-    return false;
-  }
-
-  const pincodeRegex = /^[1-9][0-9]{5}$/;
-  if (!pincodeRegex.test(pincode)) {
-    showError('Please enter a valid 6-digit pincode');
-    return false;
-  }
-
-  const phoneRegex = /^[6-9][0-9]{9}$/;
-  if (!phoneRegex.test(phoneNumber)) {
-    showError('Please enter a valid 10-digit phone number');
-    return false;
-  }
-
-  return true;
-}
-
-function showError(message) {
-  Swal.fire({
-    icon: 'error',
-    title: 'Validation Error',
-    text: message
-  });
-}
 </script>

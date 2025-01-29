@@ -116,17 +116,17 @@ module.exports={
             }
 
       
-            if (discount < 1 || discount > 90) {
+            if (discount < 1 || discount > 2000) {
                 return res.status(400).json({ 
                     status: false, 
-                    message: 'Discount must be between 1 and 90' 
+                    message: 'Discount must be between 1 and 2000' 
                 });
             }
 
-            if (minPurchaseAmount < 1) {
+            if (minPurchaseAmount < 500 || minPurchaseAmount > 100000) {
                 return res.status(400).json({ 
                     status: false, 
-                    message: 'Minimum purchase amount must be at least 1' 
+                    message: 'Minimum purchase amount must be at least 500 and less than 100000' 
                 });
             }
 
@@ -230,12 +230,28 @@ module.exports={
                 usagePerUser 
             } = req.body;
 
-            
+          
             if (!couponName || !couponCode || !discount || !minPurchaseAmount || 
                 !startDate || !endDate || !usagePerUser) {
                 return res.json({ 
                     status: false, 
                     message: 'All required fields must be filled' 
+                });
+            }
+
+           
+            if (discount < 1 || discount > 2000) {
+                return res.json({ 
+                    status: false, 
+                    message: 'Discount must be between 1 and 2000' 
+                });
+            }
+
+           
+            if (minPurchaseAmount < 500 || minPurchaseAmount > 100000) {
+                return res.json({ 
+                    status: false, 
+                    message: 'Minimum purchase amount must be between 500 and 100000' 
                 });
             }
 

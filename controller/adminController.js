@@ -320,6 +320,7 @@ console.log('Top Products:', JSON.stringify(topProducts, null, 2));
                 return res.redirect('/admin/login');
             }
 
+       
             const page = parseInt(req.query.page) || 1;
             const limit = 6; 
             const skip = (page - 1) * limit;
@@ -573,25 +574,28 @@ loadOrders: async (req, res) => {
             return res.redirect('/admin/login');
         }
 
-    
         const page = parseInt(req.query.page) || 1;
         const limit = 10; 
         const skip = (page - 1) * limit;
 
-  
-        const totalOrders = await orderModel.countDocuments();
-        const totalPages = Math.ceil(totalOrders / limit);
+        // More specific query for payment status
+        const query = {
+            $or: [
+                {
+                    paymentMethod: 'Razorpay',
+                    paymentStatus: 'Success',
+                    'paymentDetails.razorpay_payment_id': { $exists: true }  // Ensure payment details exist
+                },
+                {
+                    paymentMethod: { $nin: ['Razorpay'] }  // Changed $ne to $nin for clarity
+                }
+            ]
+        };
 
+        // Add debug logging
+        console.log('Query:', JSON.stringify(query, null, 2));
 
-        const pages = [];
-        const startPage = Math.max(1, page - 2);
-        const endPage = Math.min(totalPages, page + 2);
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(i);
-        }
-
-   
-        const orders = await orderModel.find()
+        const orders = await orderModel.find(query)
             .populate({
                 path: 'userId',
                 select: 'name email'
@@ -604,7 +608,23 @@ loadOrders: async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        console.log('Orders data:', JSON.stringify(orders, null, 2));
+        // Debug log to check orders
+        console.log('Found orders:', orders.map(order => ({
+            id: order._id,
+            paymentMethod: order.paymentMethod,
+            paymentStatus: order.paymentStatus,
+            paymentDetails: order.paymentDetails
+        })));
+
+        const totalOrders = await orderModel.countDocuments(query);
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        const pages = [];
+        const startPage = Math.max(1, page - 2);
+        const endPage = Math.min(totalPages, page + 2);
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
 
         res.render('admin/orders', {
             currentPath: '/admin/orders',

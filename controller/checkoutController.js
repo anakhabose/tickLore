@@ -115,16 +115,16 @@ const checkoutController = {
 
             const validCoupons = await Promise.all(availableCoupons.map(async (coupon) => {
                 const canUse = await coupon.canUserUse(userId);
-                // Only return coupons where minPurchaseAmount is less than or equal to the cart total
+                
                 return (canUse && coupon.minPurchaseAmount <= subtotal) ? coupon : null;
             }));
 
-            // Sort coupons by minPurchaseAmount for better display
+           
             const filteredCoupons = validCoupons
                 .filter(coupon => coupon !== null)
                 .sort((a, b) => a.minPurchaseAmount - b.minPurchaseAmount);
 
-     
+       
             const addresses = await Address.find({ userId });
 
        

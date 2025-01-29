@@ -47,8 +47,8 @@
                 id="discount"
                 name="discount"
                 type="number"
-                min="1"
-                max="90"
+                min="500"
+                max="100000"
                 class="bg-gray-100 border-gray-900 w-full rounded-lg p-2 text-black"
                 
               />
@@ -190,11 +190,11 @@ document.getElementById('addCouponForm').addEventListener('submit', async (e) =>
     }
 
     const discountValue = parseInt(formData.discount);
-    if (discountValue < 1 || discountValue > 90) {
+    if (discountValue < 1 || discountValue > 2000) {
         Swal.fire({
             icon: 'error',
             title: 'Invalid Discount',
-            text: 'Discount must be between 1 and 90'
+            text: 'Discount must be between 1 and 2000'
         });
         return;
     }
@@ -209,11 +209,11 @@ document.getElementById('addCouponForm').addEventListener('submit', async (e) =>
     }
 
     const minPurchaseValue = parseInt(formData.minPurchaseAmount);
-    if (minPurchaseValue < 1) {
+    if (minPurchaseValue < 500 || minPurchaseValue > 100000) {
         Swal.fire({
             icon: 'error',
             title: 'Invalid Amount',
-            text: 'Minimum purchase amount must be at least 1'
+            text: 'Minimum purchase amount must be between 500 and 100000'
         });
         return;
     }
